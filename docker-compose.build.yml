@@ -1,0 +1,19 @@
+version: '3'
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.build
+    links:
+    - db:db
+    environment:
+    - DB_URL=jdbc:postgresql://db:5432/postgres?user=postgres&password=postgres
+    volumes:
+    - ./dist:/app/dist
+    entrypoint: "sleep infinity"
+  db:
+    image: postgres:11.0
+    environment:
+    - POSTGRES_PASSWORD=postgres
+    volumes:
+    - ./scripts/database.sql:/init/database.sql:ro

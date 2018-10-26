@@ -1,0 +1,24 @@
+version: '3'
+services:
+  backend:
+    image: hseeberger/scala-sbt:8u181_2.12.7_1.2.6
+    ports:
+    - "9000:9000"
+    volumes:
+    - .:/code
+    - ~/.sbt:/root/.sbt
+    - ~/.ivy2:/root/.ivy2
+    working_dir: /code
+    links:
+    - db:db
+    entrypoint: "sleep infinity"
+    environment:
+    - DB_URL=jdbc:postgresql://db:5432/postgres?user=postgres&password=postgres
+  db:
+    image: postgres:11.0
+    environment:
+    - POSTGRES_PASSWORD=postgres
+    volumes:
+    - ./scripts/database.sql:/init/database.sql:ro
+    ports:
+    - "5432:5432"
