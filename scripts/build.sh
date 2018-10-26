@@ -2,7 +2,6 @@
 
 docker-compose -f docker-compose.build.yml -p tutelar_build build || stopAndExit
 docker-compose -f docker-compose.build.yml -p tutelar_build up -d || stopAndExit
-docker-compose -f docker-compose.build.yml -p tutelar_build exec db bash -c "sleep 1 && psql -U postgres -f /init/database.sql" || stopAndExit
 docker-compose -f docker-compose.build.yml -p tutelar_build exec backend sbt test it:test || stopAndExit
 docker-compose -f docker-compose.build.yml -p tutelar_build exec backend cp -a /app/target/docker/stage/. /app/dist/ || stopAndExit
 docker-compose -f docker-compose.build.yml -p tutelar_build down || stopAndExit

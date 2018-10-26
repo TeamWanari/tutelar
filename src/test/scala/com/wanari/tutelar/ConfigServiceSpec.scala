@@ -11,8 +11,4 @@ class ConfigServiceSpec extends TestBase {
     val service = new ConfigServiceImpl[Id]()
     service.getHostname shouldEqual "TestHostname"
   }
-  "#getDbUrl" in {
-    val service = new ConfigServiceImpl[Id]()
-    service.getDbUrl shouldEqual "TestDbUrl"
-  }
 }

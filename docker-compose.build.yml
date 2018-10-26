@@ -4,8 +4,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.build
-    links:
-    - db:db
+    depends_on:
+    - db
     environment:
     - DB_URL=jdbc:postgresql://db:5432/postgres?user=postgres&password=postgres
     volumes:
@@ -16,4 +16,4 @@ services:
     environment:
     - POSTGRES_PASSWORD=postgres
     volumes:
-    - ./scripts/database.sql:/init/database.sql:ro
+    - ./scripts/database.sql:/docker-entrypoint-initdb.d/database.sql:ro

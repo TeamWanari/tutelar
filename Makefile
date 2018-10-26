@@ -3,9 +3,7 @@ compose=docker-compose -f docker-compose.dev.yml -p tutelar
 default: help
 
 up: ## Spin up services
-	$(compose) up -d && \
-	sleep 1 && \
-	$(compose) exec db bash -c "psql -U postgres -f /init/database.sql"
+	$(compose) up -d
 
 down: ## Destroy all services and volumes
 	$(compose) down -v

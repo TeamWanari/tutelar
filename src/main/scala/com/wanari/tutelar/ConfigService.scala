@@ -9,11 +9,9 @@ class ConfigServiceImpl[F[_]: Applicative]() extends ConfigService[F] {
 
   def getVersion: F[String]  = conf.getString("version").pure
   def getHostname: F[String] = conf.getString("hostname").pure
-  def getDbUrl: F[String]    = conf.getString("databaseUrl").pure
 }
 
 trait ConfigService[F[_]] {
   def getVersion: F[String]
   def getHostname: F[String]
-  def getDbUrl: F[String]
 }
