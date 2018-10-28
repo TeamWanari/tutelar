@@ -58,6 +58,9 @@ addCommandAlias("testAll", "; test ; it:test")
 
 enablePlugins(JavaAppPackaging)
 
+addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.6")
+addCompilerPlugin("io.tryp" % "splain" % "0.3.4" cross CrossVersion.patch)
+
 import com.typesafe.sbt.packager.docker._
 dockerExposedPorts := Seq(9000)
 dockerBaseImage := "openjdk:8"

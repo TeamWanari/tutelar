@@ -7,7 +7,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class DatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUtil with BeforeAndAfterAll {
 
-  private val services    = new ItTestServices()
+  private val services    = new ItTestServices(null)
   private val db          = DatabaseServiceImpl.getDatabase
   private val realService = new DatabaseServiceImpl(db)
 

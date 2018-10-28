@@ -2,6 +2,7 @@ package com.wanari.tutelar
 
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import com.wanari.tutelar.github.GithubApi
 
 import scala.concurrent.Future
 
@@ -22,7 +23,8 @@ object Api {
     import services._
 
     val api = Seq(
-      new HealthCheckApi()
+      new HealthCheckApi(),
+      new GithubApi()
     )
 
     createRoute(api)
