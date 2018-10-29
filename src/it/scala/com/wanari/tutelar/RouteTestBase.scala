@@ -10,8 +10,9 @@ import scala.concurrent.Future
 
 trait RouteTestBase extends WordSpecLike with Matchers with ScalatestRouteTest with MockitoSugar {
   trait BaseTestScope {
-    lazy val githubServiceMock = mock[GithubService[Future]]
-    lazy val services          = new ItTestServices(githubServiceMock)
-    lazy val route: Route      = Api.createApi(services)
+    lazy val services = new ItTestServices {
+      override implicit lazy val githubService: GithubService[Future] = mock[GithubService[Future]]
+    }
+    lazy val route: Route = Api.createApi(services)
   }
 }

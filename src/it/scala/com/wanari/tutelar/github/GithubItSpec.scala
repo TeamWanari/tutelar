@@ -10,13 +10,13 @@ class GithubItSpec extends RouteTestBase {
 
   "GET /github/login" should {
     "return forward" in new BaseTestScope {
-      when(githubServiceMock.generateIdentifierUrl) thenReturn Future.successful(Uri.Empty)
+      when(services.githubService.generateIdentifierUrl) thenReturn Future.successful(Uri.Empty)
       Get("/github/login") ~> route ~> check {
         status shouldEqual StatusCodes.Found
       }
     }
     "return with 401 on bad config" in new BaseTestScope {
-      when(githubServiceMock.generateIdentifierUrl) thenReturn Future.failed(new Exception())
+      when(services.githubService.generateIdentifierUrl) thenReturn Future.failed(new Exception())
       Get("/github/login") ~> route ~> check {
         status shouldEqual StatusCodes.Unauthorized
       }
@@ -25,13 +25,13 @@ class GithubItSpec extends RouteTestBase {
   "GET /github/callback" should {
     val map = Map("a" -> "as", "b" -> "bs")
     "return OK" in new BaseTestScope {
-      when(githubServiceMock.authenticateWithCallback(map)) thenReturn Future.successful({})
+      when(services.githubService.authenticateWithCallback(map)) thenReturn Future.successful({})
       Get("/github/callback?a=as&b=bs") ~> route ~> check {
         status shouldEqual StatusCodes.OK
       }
     }
     "return with 401 on error" in new BaseTestScope {
-      when(githubServiceMock.authenticateWithCallback(map)) thenReturn Future.failed(new Exception())
+      when(services.githubService.authenticateWithCallback(map)) thenReturn Future.failed(new Exception())
       Get("/github/callback?a=as&b=bs") ~> route ~> check {
         status shouldEqual StatusCodes.Unauthorized
       }

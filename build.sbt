@@ -48,7 +48,9 @@ lazy val root = (project in file("."))
         "org.mockito"          % "mockito-core"             % "2.23.0" % "it,test",
         "com.typesafe.slick"   %% "slick"                   % "3.2.3",
         "com.typesafe.slick"   %% "slick-hikaricp"          % "3.2.3",
-        "org.postgresql"       % "postgresql"               % "42.2.5"
+        "org.postgresql"       % "postgresql"               % "42.2.5",
+        "com.pauldijou"        %% "jwt-core"                % "0.19.0",
+        "com.pauldijou"        %% "jwt-spray-json"          % "0.19.0"
       )
     }
   )
@@ -59,7 +61,7 @@ addCommandAlias("testAll", "; test ; it:test")
 enablePlugins(JavaAppPackaging)
 
 addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.6")
-addCompilerPlugin("io.tryp" % "splain" % "0.3.4" cross CrossVersion.patch)
+addCompilerPlugin("io.tryp"        % "splain"          % "0.3.4" cross CrossVersion.patch)
 
 import com.typesafe.sbt.packager.docker._
 dockerExposedPorts := Seq(9000)
