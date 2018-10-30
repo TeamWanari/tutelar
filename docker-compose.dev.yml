@@ -3,7 +3,7 @@ services:
   backend:
     image: hseeberger/scala-sbt:8u181_2.12.7_1.2.6
     ports:
-    - "9000:9000"
+    - 9000:9000
     volumes:
     - .:/code
     - ~/.sbt:/root/.sbt
@@ -21,4 +21,12 @@ services:
     volumes:
     - ./scripts/database.sql:/docker-entrypoint-initdb.d/database.sql:ro
     ports:
-    - "5432:5432"
+    - 5432:5432
+  nginx:
+    image: nginx:stable-alpine
+    volumes:
+    - ./scripts/nginx/proxy.conf:/etc/nginx/conf.d/default.conf
+    - ./scripts/nginx/cert.key:/etc/nginx/ssl/cert.key
+    - ./scripts/nginx/cert.pem:/etc/nginx/ssl/cert.pem
+    ports:
+    - 9443:9443
