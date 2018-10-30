@@ -44,13 +44,14 @@ lazy val root = (project in file("."))
         "ch.qos.logback"       % "logback-classic"          % "1.2.3",
         "net.logstash.logback" % "logstash-logback-encoder" % "5.2",
         "org.slf4j"            % "jul-to-slf4j"             % "1.7.25",
-        "org.scalatest"        %% "scalatest"               % scalaTestV % "it,test",
-        "org.mockito"          % "mockito-core"             % "2.23.0" % "it,test",
         "com.typesafe.slick"   %% "slick"                   % "3.2.3",
         "com.typesafe.slick"   %% "slick-hikaricp"          % "3.2.3",
         "org.postgresql"       % "postgresql"               % "42.2.5",
         "com.pauldijou"        %% "jwt-core"                % "0.19.0",
-        "com.pauldijou"        %% "jwt-spray-json"          % "0.19.0"
+        "com.pauldijou"        %% "jwt-spray-json"          % "0.19.0",
+        "org.scalatest"        %% "scalatest"               % scalaTestV % "it,test",
+        "org.mockito"          % "mockito-core"             % "2.23.0" % "it,test",
+        "org.mockito"          %% "mockito-scala"           % "0.4.6" % "it,test"
       )
     }
   )

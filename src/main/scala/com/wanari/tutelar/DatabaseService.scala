@@ -1,6 +1,6 @@
 package com.wanari.tutelar
 
-import com.wanari.tutelar.DatabaseService.{Account, User}
+import com.wanari.tutelar.DatabaseService.{Account, AccountId, User}
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -31,10 +31,10 @@ class DatabaseServiceImpl(db: Database)(implicit ec: ExecutionContext) extends D
     db.run(query)
   }
 
-  override def findAccountByTypeAndExternalId(authType: String, externalId: String): Future[Option[Account]] = {
+  override def findAccountByTypeAndExternalId(accountId: AccountId): Future[Option[Account]] = {
     val query = accounts
-      .filter(_.authType === authType)
-      .filter(_.externalId === externalId)
+      .filter(_.authType === accountId._1)
+      .filter(_.externalId === accountId._2)
       .result
       .headOption
     db.run(query)
@@ -45,6 +45,15 @@ class DatabaseServiceImpl(db: Database)(implicit ec: ExecutionContext) extends D
       .filter(_.userId === userId)
       .result
     db.run(query)
+  }
+
+  override def updateCustomData(accountId: AccountId, customData: String): Future[Unit] = {
+    val query = accounts
+      .filter(_.authType === accountId._1)
+      .filter(_.externalId === accountId._2)
+      .map(_.customData)
+      .update(customData)
+    db.run(query).map(_ => {})
   }
 
   private lazy val users    = TableQuery[UsersTable]
@@ -76,11 +85,15 @@ trait DatabaseService[F[_]] {
   def saveUser(user: User): F[Unit]
   def saveAccount(account: Account): F[Unit]
   def findUserById(id: String): F[Option[User]]
-  def findAccountByTypeAndExternalId(authType: String, externalId: String): F[Option[Account]]
+  def findAccountByTypeAndExternalId(accountId: AccountId): F[Option[Account]]
   def listAccountsByUserId(userId: String): F[Seq[Account]]
+  def updateCustomData(accountId: AccountId, customData: String): F[Unit]
 }
 
 object DatabaseService {
+  type AccountId = (String, String)
   case class User(id: String, createdAt: Long)
-  case class Account(authType: String, externalId: String, userId: String, customData: String)
+  case class Account(authType: String, externalId: String, userId: String, customData: String) {
+    def getId: AccountId = (authType, externalId)
+  }
 }

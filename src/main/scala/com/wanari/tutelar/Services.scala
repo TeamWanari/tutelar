@@ -16,6 +16,7 @@ trait Services[F[_]] {
   implicit val jwtService: F[JwtService[F]]
   implicit val idGenerator: IdGenerator[F]
   implicit val dateTimeService: DateTimeService[F]
+  implicit val authService: AuthService[F]
 }
 
 class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, materializer: Materializer)
@@ -32,6 +33,8 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
   implicit lazy val githubService: GithubService[Future]           = new GithubServiceImpl[Future]
   implicit lazy val jwtConfig: JwtConfigService[Future]            = configService.getJwtConfig
   implicit lazy val jwtService: Future[JwtService[Future]]         = JwtServiceImpl.create
-  implicit val idGenerator: IdGenerator[Future]                    = new IdGeneratorImpl[Future]
-  implicit val dateTimeService: DateTimeService[Future]            = new DateTimeServiceImpl[Future]
+  implicit lazy val idGenerator: IdGenerator[Future]               = new IdGeneratorImpl[Future]
+  implicit lazy val dateTimeService: DateTimeService[Future]       = new DateTimeServiceImpl[Future]
+  implicit lazy val authConfig: AuthConfigService[Future]          = configService.getAuthConfig
+  implicit lazy val authService: AuthService[Future]               = new AuthServiceImpl[Future]
 }

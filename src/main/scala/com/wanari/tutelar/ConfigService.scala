@@ -13,6 +13,7 @@ class ConfigServiceImpl[F[_]: Monad]() extends ConfigService[F] {
   lazy val getHostname: F[String]                  = conf.getString("hostname").pure
   lazy val getGithubConfig: GithubConfigService[F] = new GithubConfigServiceImpl[F](conf.getConfig("github").pure)
   lazy val getJwtConfig: JwtConfigService[F]       = new JwtConfigServiceImpl[F](conf.getConfig("jwt").pure)
+  lazy val getAuthConfig: AuthConfigService[F]     = new AuthConfigServiceImpl[F](conf.getConfig("auth").pure)
 }
 
 trait ConfigService[F[_]] {
@@ -20,4 +21,5 @@ trait ConfigService[F[_]] {
   def getHostname: F[String]
   def getGithubConfig: GithubConfigService[F]
   def getJwtConfig: JwtConfigService[F]
+  def getAuthConfig: AuthConfigService[F]
 }

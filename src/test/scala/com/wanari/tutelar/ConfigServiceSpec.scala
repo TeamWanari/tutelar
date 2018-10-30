@@ -28,4 +28,10 @@ class ConfigServiceSpec extends TestBase {
     config.getConfig.privateKey shouldEqual "private"
     config.getConfig.publicKey shouldEqual "public"
   }
+  "#getAuthConfig" in {
+    val service = new ConfigServiceImpl[Id]()
+    val config  = service.getAuthConfig
+    config shouldBe a[AuthConfigServiceImpl[?[_]]]
+    config.getCallbackUrl shouldEqual "url?t=<<TOKEN>>"
+  }
 }

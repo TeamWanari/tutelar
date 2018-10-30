@@ -56,26 +56,20 @@ class DatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUtil wi
             val account2 = Account("type2", "ext1", "user1", "XXX2")
             val account3 = Account("type1", "ext2", "user1", "XXX3")
 
-            await(service.findAccountByTypeAndExternalId(account1.authType, account1.externalId)) shouldEqual None
-            await(service.findAccountByTypeAndExternalId(account2.authType, account2.externalId)) shouldEqual None
-            await(service.findAccountByTypeAndExternalId(account3.authType, account3.externalId)) shouldEqual None
+            await(service.findAccountByTypeAndExternalId(account1.getId)) shouldEqual None
+            await(service.findAccountByTypeAndExternalId(account2.getId)) shouldEqual None
+            await(service.findAccountByTypeAndExternalId(account3.getId)) shouldEqual None
 
             await(service.saveAccount(account1))
             await(service.saveAccount(account2))
             await(service.saveAccount(account3))
 
-            await(service.findAccountByTypeAndExternalId(account1.authType, account1.externalId)) shouldEqual Some(
-              account1
-            )
-            await(service.findAccountByTypeAndExternalId(account2.authType, account2.externalId)) shouldEqual Some(
-              account2
-            )
-            await(service.findAccountByTypeAndExternalId(account3.authType, account3.externalId)) shouldEqual Some(
-              account3
-            )
+            await(service.findAccountByTypeAndExternalId(account1.getId)) shouldEqual Some(account1)
+            await(service.findAccountByTypeAndExternalId(account2.getId)) shouldEqual Some(account2)
+            await(service.findAccountByTypeAndExternalId(account3.getId)) shouldEqual Some(account3)
           }
 
-          "save and list bt user" in {
+          "save and list by user" in {
             val account1 = Account("type3", "ext1", "user2", "XXX4")
             val account2 = Account("type4", "ext1", "user2", "XXX5")
             val account3 = Account("type3", "ext2", "user3", "XXX6")
@@ -89,6 +83,22 @@ class DatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUtil wi
 
             await(service.listAccountsByUserId(account1.userId)) shouldEqual Seq(account1, account2)
             await(service.listAccountsByUserId(account3.userId)) shouldEqual Seq(account3)
+          }
+
+          "updateCustomData" in {
+            val account1 = Account("type5", "ext1", "user2", "XXX")
+            val account2 = Account("type5", "ext2", "user2", "XXX")
+            await(service.saveAccount(account1))
+            await(service.saveAccount(account2))
+
+            await(service.updateCustomData(account1.getId, "ZZZ"))
+
+            await(service.findAccountByTypeAndExternalId(account1.getId)) shouldEqual Some(
+              account1.copy(customData = "ZZZ")
+            )
+            await(service.findAccountByTypeAndExternalId(account2.getId)) shouldEqual Some(
+              account2
+            )
           }
         }
       }
