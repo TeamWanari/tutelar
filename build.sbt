@@ -71,3 +71,5 @@ dockerCommands ++= Seq(
   Cmd("ARG", "BUILD_VERSION"),
   Cmd("ENV", "VERSION=$BUILD_VERSION")
 )
+
+cancelable in Global := true

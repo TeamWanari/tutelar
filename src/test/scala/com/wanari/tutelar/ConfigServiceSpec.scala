@@ -1,8 +1,9 @@
 package com.wanari.tutelar
 
 import cats.Id
-import com.wanari.tutelar.github.GithubConfigService
 import com.wanari.tutelar.jwt.JwtConfigService
+import com.wanari.tutelar.oauth2.OAuth2ConfigService
+
 import scala.concurrent.duration._
 
 class ConfigServiceSpec extends TestBase {
@@ -14,9 +15,20 @@ class ConfigServiceSpec extends TestBase {
     val service = new ConfigServiceImpl[Id]()
     service.getHostname shouldEqual "TestHostname"
   }
-  "#getGithubConfig" in {
-    val service = new ConfigServiceImpl[Id]()
-    service.getGithubConfig shouldBe a[GithubConfigService[?[_]]]
+
+  "oauth2 related" should {
+    "#getFacebookConfig" in {
+      val service = new ConfigServiceImpl[Id]()
+      service.getFacebookConfig shouldBe a[OAuth2ConfigService[?[_]]]
+    }
+    "#getGithubConfig" in {
+      val service = new ConfigServiceImpl[Id]()
+      service.getGithubConfig shouldBe a[OAuth2ConfigService[?[_]]]
+    }
+    "#getGoogleConfig" in {
+      val service = new ConfigServiceImpl[Id]()
+      service.getGoogleConfig shouldBe a[OAuth2ConfigService[?[_]]]
+    }
   }
   "#getJwtConfig" in {
     val service = new ConfigServiceImpl[Id]()

@@ -42,7 +42,7 @@ object JwtServiceImpl {
               }
             }
         }
-        .pureOrRaise(new Exception())
+        .pureOrRaise(new Exception()) //TODO: Error handling
 
     }
   }
