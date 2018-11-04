@@ -1,6 +1,7 @@
 package com.wanari.tutelar
 
 import com.wanari.tutelar.jwt.{JwtConfigService, JwtService, JwtServiceImpl}
+import com.wanari.tutelar.ldap.LdapService
 import com.wanari.tutelar.oauth2.{FacebookService, GithubService, GoogleService, OAuth2Service}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -30,4 +31,6 @@ class ItTestServices(implicit ec: ExecutionContext) extends Services[Future] {
       case "google"   => googleService
     }
   }
+
+  override implicit lazy val ldapService: LdapService[Future] = null
 }

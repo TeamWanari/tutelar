@@ -6,14 +6,26 @@ services:
       dockerfile: Dockerfile.build
     depends_on:
     - db
+    - ldap
     environment:
-    - DB_URL=jdbc:postgresql://db:5432/postgres?user=postgres&password=postgres
+      DB_URL: "jdbc:postgresql://db:5432/postgres?user=postgres&password=postgres"
+      LDAP_URL: "ldap://ldap:389"
     volumes:
     - ./dist:/app/dist
     entrypoint: "sleep infinity"
   db:
     image: postgres:11.0
     environment:
-    - POSTGRES_PASSWORD=postgres
+      POSTGRES_PASSWORD: "postgres"
     volumes:
     - ./scripts/database.sql:/docker-entrypoint-initdb.d/database.sql:ro
+  ldap:
+    image: osixia/openldap:1.2.2
+    environment:
+      LDAP_ORGANISATION: "Wanari"
+      LDAP_DOMAIN: "wanari.com"
+      LDAP_BASE_DN: "dc=wanari,dc=com"
+      LDAP_READONLY_USER: "true"
+    volumes:
+    - ./scripts/ldap/ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom
+    command: --copy-service

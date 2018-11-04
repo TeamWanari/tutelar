@@ -2,6 +2,7 @@ package com.wanari.tutelar
 
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import com.wanari.tutelar.ldap.LdapApi
 
 import scala.concurrent.Future
 
@@ -26,7 +27,8 @@ object Api {
       new HealthCheckApi(),
       new GithubApi(),
       new FacebookApi(),
-      new GoogleApi()
+      new GoogleApi(),
+      new LdapApi()
     )
 
     createRoute(api)

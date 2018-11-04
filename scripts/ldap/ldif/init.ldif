@@ -1,0 +1,30 @@
+# alice : alicepw
+dn: cn=alice,dc=wanari,dc=com
+cn: alice
+givenName: Alice
+objectclass: inetOrgPerson
+objectclass: top
+sn: Smith
+userpassword: {MD5}FdofeK19R0hihlurGqtNUQ==
+
+# bob : bobpw
+dn: cn=bob,dc=wanari,dc=com
+cn: bob
+givenName: Bob
+objectclass: inetOrgPerson
+objectclass: top
+sn: Dilday
+userpassword: {MD5}9k7Fj5VvIOsrlPg6k9iZkw==
+
+# dn: cn=group1,dc=wanari,dc=com
+# cn: group1
+# member: cn=alice,dc=wanari,dc=com
+# member: cn=bob,dc=wanari,dc=com
+# objectclass: groupOfNames
+# objectclass: top
+#
+# dn: cn=group2,dc=wanari,dc=com
+# cn: group2
+# member: cn=alice,dc=wanari,dc=com
+# objectclass: groupOfNames
+# objectclass: top

@@ -3,6 +3,7 @@ package com.wanari.tutelar
 import akka.actor.ActorSystem
 import akka.stream.Materializer
 import com.wanari.tutelar.jwt.{JwtConfigService, JwtService, JwtServiceImpl}
+import com.wanari.tutelar.ldap.{LdapConfigService, LdapService, LdapServiceImpl}
 import com.wanari.tutelar.oauth2.{FacebookService, GithubService, GoogleService}
 import com.wanari.tutelar.util.{AkkaHttpWrapper, HttpWrapper}
 
@@ -19,6 +20,7 @@ trait Services[F[_]] {
   implicit val idGenerator: IdGenerator[F]
   implicit val dateTimeService: DateTimeService[F]
   implicit val authService: AuthService[F]
+  implicit val ldapService: LdapService[F]
 }
 
 class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, materializer: Materializer)
@@ -41,4 +43,6 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
   implicit lazy val dateTimeService: DateTimeService[Future] = new DateTimeServiceImpl[Future]
   implicit lazy val authConfig: AuthConfigService[Future]    = configService.getAuthConfig
   implicit lazy val authService: AuthService[Future]         = new AuthServiceImpl[Future]
+  implicit lazy val ldapConfig: LdapConfigService[Future]    = configService.getLdapConfig
+  implicit lazy val ldapService: LdapService[Future]         = new LdapServiceImpl
 }

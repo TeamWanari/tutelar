@@ -3,6 +3,7 @@ package com.wanari.tutelar
 import cats.Monad
 import com.typesafe.config.{Config, ConfigFactory}
 import com.wanari.tutelar.jwt.{JwtConfigService, JwtConfigServiceImpl}
+import com.wanari.tutelar.ldap.{LdapConfigService, LdapConfigServiceImpl}
 import com.wanari.tutelar.oauth2.{OAuth2ConfigService, OAuth2ConfigServiceImpl}
 
 class ConfigServiceImpl[F[_]: Monad]() extends ConfigService[F] {
@@ -17,6 +18,7 @@ class ConfigServiceImpl[F[_]: Monad]() extends ConfigService[F] {
   lazy val getGoogleConfig: OAuth2ConfigService[F]   = getOauth2Conf("google")
   lazy val getJwtConfig: JwtConfigService[F]         = new JwtConfigServiceImpl[F](conf.getConfig("jwt").pure)
   lazy val getAuthConfig: AuthConfigService[F]       = new AuthConfigServiceImpl[F](conf.getConfig("auth").pure)
+  lazy val getLdapConfig: LdapConfigService[F]       = new LdapConfigServiceImpl[F](conf.getConfig("ldap").pure)
 
   private def getOauth2Conf(name: String) = {
     new OAuth2ConfigServiceImpl[F](getRootUrl, conf.getConfig(name).pure)
@@ -31,4 +33,5 @@ trait ConfigService[F[_]] {
   def getFacebookConfig: OAuth2ConfigService[F]
   def getGoogleConfig: OAuth2ConfigService[F]
   def getAuthConfig: AuthConfigService[F]
+  def getLdapConfig: LdapConfigService[F]
 }

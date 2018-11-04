@@ -2,8 +2,6 @@ version: '3'
 services:
   backend:
     image: hseeberger/scala-sbt:8u181_2.12.7_1.2.6
-    ports:
-    - 9000:9000
     volumes:
     - .:/code
     - ~/.sbt:/root/.sbt
@@ -11,22 +9,39 @@ services:
     working_dir: /code
     depends_on:
     - db
+    - ldap
     entrypoint: "sleep infinity"
     environment:
-    - DB_URL=jdbc:postgresql://db:5432/postgres?user=postgres&password=postgres
+      DB_URL: "jdbc:postgresql://db:5432/postgres?user=postgres&password=postgres"
+      LDAP_URL: "ldap://ldap:389"
   db:
     image: postgres:11.0
     environment:
-    - POSTGRES_PASSWORD=postgres
-    volumes:
-    - ./scripts/database.sql:/docker-entrypoint-initdb.d/database.sql:ro
+      POSTGRES_PASSWORD: "postgres"
     ports:
     - 5432:5432
+    volumes:
+    - ./scripts/database.sql:/docker-entrypoint-initdb.d/database.sql:ro
+  ldap:
+    image: osixia/openldap:1.2.2
+    environment:
+      LDAP_ORGANISATION: "Wanari"
+      LDAP_DOMAIN: "wanari.com"
+      LDAP_BASE_DN: "dc=wanari,dc=com"
+      LDAP_READONLY_USER: "true"
+    volumes:
+      - ./scripts/ldap/ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom
+    ports:
+      - 389:389
+    command: --copy-service
   nginx:
     image: nginx:stable-alpine
     volumes:
     - ./scripts/nginx/proxy.conf:/etc/nginx/conf.d/default.conf
     - ./scripts/nginx/cert.key:/etc/nginx/ssl/cert.key
     - ./scripts/nginx/cert.pem:/etc/nginx/ssl/cert.pem
+    depends_on:
+      - backend
     ports:
     - 9443:9443
+

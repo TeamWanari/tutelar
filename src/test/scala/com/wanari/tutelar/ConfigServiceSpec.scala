@@ -2,6 +2,7 @@ package com.wanari.tutelar
 
 import cats.Id
 import com.wanari.tutelar.jwt.JwtConfigService
+import com.wanari.tutelar.ldap.LdapConfigService
 import com.wanari.tutelar.oauth2.OAuth2ConfigService
 
 import scala.concurrent.duration._
@@ -45,5 +46,16 @@ class ConfigServiceSpec extends TestBase {
     val config  = service.getAuthConfig
     config shouldBe a[AuthConfigServiceImpl[?[_]]]
     config.getCallbackUrl shouldEqual "url?t=<<TOKEN>>"
+  }
+  "#getLdapConfig" in {
+    val service = new ConfigServiceImpl[Id]()
+    val config  = service.getLdapConfig
+    config shouldBe a[LdapConfigService[?[_]]]
+    config.getLdapUrl shouldEqual "ldap://1.2.3.4:389"
+    config.getReadonlyUserPassword shouldEqual "readonlypw"
+    config.getReadonlyUserWithNameSpace shouldEqual "cn=readonly,dc=example,dc=com"
+    config.getUserSearchAttribute shouldEqual "cn"
+    config.getUserSearchBaseDomain shouldEqual "ou=peaple,dc=example,dc=com"
+    config.getUserSearchReturnAttributes shouldEqual Seq("cn", "sn", "email")
   }
 }
