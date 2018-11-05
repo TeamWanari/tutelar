@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TutelarAuth</title>
+</head>
+<body>
+    <div id="loginfailed" style="display: none"><b style="color: red">Login failed!</b></div>
+    <div id="login" style="display: none">
+        Log in with...
+        <div>
+            <h4>LDAP</h4>
+            <form action="/ldap/login" method="get">
+                <label>User <input type="text" name="username"/></label><br/>
+                <label>Pass <input type="password" name="password"/></label><br/>
+                <input type="submit" value="Login"/>
+            </form>
+            <h4>GitHub</h4>
+            <a href="/github/login">Login...</a>
+            <h4>Facebook</h4>
+            <a href="/facebook/login">Login...</a>
+            <h4>Google</h4>
+            <a href="/google/login">Login...</a>
+        </div>
+    </div>
+    <div id="authenticated" style="display: none">
+        Hello <b><span id="userid"></span></b>!<br/>
+        <a href="index.html">Logout</a>
+    </div>
+    <script type="application/javascript">
+        var params = new URLSearchParams(window.location.search);
+
+        if (!!params.get('login_failed')) {
+            document.getElementById("loginfailed").style.display = "block";
+        }
+
+        var token = params.get('token');
+        if (!!token) {
+            var base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+            document.getElementById("userid").innerText = JSON.parse(window.atob(base64)).id;
+            document.getElementById("authenticated").style.display = "block";
+        } else {
+            document.getElementById("login").style.display = "block";
+        }
+    </script>
+</body>
+</html>
