@@ -3,6 +3,7 @@ package com.wanari.tutelar
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
+import com.wanari.tutelar.util.LoggerUtil
 
 import scala.util.{Failure, Success}
 

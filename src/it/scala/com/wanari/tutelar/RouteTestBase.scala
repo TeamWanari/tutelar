@@ -2,15 +2,13 @@ package com.wanari.tutelar
 
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import com.wanari.tutelar.ldap.LdapService
-import com.wanari.tutelar.oauth2.{FacebookService, GithubService, GoogleService}
+import com.wanari.tutelar.providers.ldap.LdapService
+import com.wanari.tutelar.providers.oauth2.{FacebookService, GithubService, GoogleService}
 import org.mockito.Mockito.when
-import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{Matchers, WordSpecLike}
 
 import scala.concurrent.Future
 
-trait RouteTestBase extends WordSpecLike with Matchers with ScalatestRouteTest with MockitoSugar {
+trait RouteTestBase extends TestBase with ScalatestRouteTest {
   trait BaseTestScope {
     lazy val services = new ItTestServices {
       override implicit lazy val facebookService: FacebookService[Future] = mock[FacebookService[Future]]
@@ -23,5 +21,10 @@ trait RouteTestBase extends WordSpecLike with Matchers with ScalatestRouteTest w
       when(googleService.TYPE) thenReturn "google"
     }
     lazy val route: Route = Api.createApi(services)
+  }
+
+  override def afterAll(): Unit = {
+    super.afterAll()
+    await(system.terminate())
   }
 }

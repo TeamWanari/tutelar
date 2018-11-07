@@ -13,7 +13,7 @@ trait TestBase extends WordSpecLike with Matchers with MockitoSugar with BeforeA
 
   def await[T](f: Future[T]): T = Await.result(f, timeout)
 
-  def useAS[R](block: ActorSystem => R): R = {
+  def withActorSystem[R](block: ActorSystem => R): R = {
     val as = ActorSystem()
     try {
       block(as)

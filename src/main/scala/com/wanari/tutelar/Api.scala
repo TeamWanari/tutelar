@@ -2,7 +2,8 @@ package com.wanari.tutelar
 
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import com.wanari.tutelar.ldap.LdapApi
+import com.wanari.tutelar.core.healthcheck.HealthCheckApi
+import com.wanari.tutelar.providers.ldap.LdapApi
 
 import scala.concurrent.Future
 
@@ -20,8 +21,8 @@ object Api {
   }
 
   def createApi(services: Services[Future]): Route = {
+    import com.wanari.tutelar.providers.oauth2.OAuth2Api._
     import services._
-    import com.wanari.tutelar.oauth2.OAuth2Api._
 
     val api = Seq(
       new HealthCheckApi(),

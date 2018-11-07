@@ -1,0 +1,21 @@
+package com.wanari.tutelar.core
+
+import com.wanari.tutelar.core.DatabaseService.{Account, AccountId, User}
+
+trait DatabaseService[F[_]] {
+  def checkStatus(): F[Boolean]
+  def saveUser(user: User): F[Unit]
+  def saveAccount(account: Account): F[Unit]
+  def findUserById(id: String): F[Option[User]]
+  def findAccountByTypeAndExternalId(accountId: AccountId): F[Option[Account]]
+  def listAccountsByUserId(userId: String): F[Seq[Account]]
+  def updateCustomData(accountId: AccountId, customData: String): F[Unit]
+}
+
+object DatabaseService {
+  type AccountId = (String, String)
+  case class User(id: String, createdAt: Long)
+  case class Account(authType: String, externalId: String, userId: String, customData: String) {
+    def getId: AccountId = (authType, externalId)
+  }
+}

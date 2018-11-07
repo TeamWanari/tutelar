@@ -16,7 +16,7 @@ class AkkaHttpWrapperSpec extends TestBase {
 
       val test = TestClass("asd", 5, false)
 
-      useAS { implicit as =>
+      withActorSystem { implicit as =>
         implicit val materializer = ActorMaterializer()
 
         val http = new AkkaHttpWrapper()
