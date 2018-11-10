@@ -4,9 +4,9 @@ import akka.actor.ActorSystem
 import akka.stream.Materializer
 import com.wanari.tutelar.core._
 import com.wanari.tutelar.core.healthcheck.{HealthCheckService, HealthCheckServiceImpl}
-import com.wanari.tutelar.core.impl.jwt.{JwtConfigService, JwtServiceImpl}
+import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl
 import com.wanari.tutelar.core.impl.{AuthServiceImpl, CsrfServiceNotChecked, DatabaseServiceImpl}
-import com.wanari.tutelar.providers.ldap.{LdapConfigService, LdapService, LdapServiceImpl}
+import com.wanari.tutelar.providers.ldap.{LdapService, LdapServiceImpl}
 import com.wanari.tutelar.providers.oauth2.{FacebookService, GithubService, GoogleService}
 import com.wanari.tutelar.util._
 
@@ -31,21 +31,20 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
 
   import cats.instances.future._
 
-  implicit lazy val configService: ConfigService[Future]           = new ConfigServiceImpl[Future]
+  implicit lazy val configService: ConfigService[Future] = new ConfigServiceImpl[Future]
+  import configService._
+
   implicit lazy val healthCheckService: HealthCheckService[Future] = new HealthCheckServiceImpl[Future]
   implicit lazy val databaseService: DatabaseService[Future]       = new DatabaseServiceImpl(DatabaseServiceImpl.getDatabase)
   implicit lazy val httpWrapper: HttpWrapper[Future]               = new AkkaHttpWrapper()
   implicit lazy val csrfService: CsrfService[Future]               = new CsrfServiceNotChecked[Future]
   implicit lazy val facebookService: FacebookService[Future] =
-    new FacebookService[Future](configService.getFacebookConfig)
-  implicit lazy val githubService: GithubService[Future]   = new GithubService[Future](configService.getGithubConfig)
-  implicit lazy val googleService: GoogleService[Future]   = new GoogleService[Future](configService.getGoogleConfig)
-  implicit lazy val jwtConfig: JwtConfigService[Future]    = configService.getJwtConfig
+    new FacebookService[Future](configService.facebookConfig)
+  implicit lazy val githubService: GithubService[Future]   = new GithubService[Future](configService.githubConfig)
+  implicit lazy val googleService: GoogleService[Future]   = new GoogleService[Future](configService.googleConfig)
   implicit lazy val jwtService: Future[JwtService[Future]] = JwtServiceImpl.create
   implicit lazy val idGenerator: IdGenerator[Future]       = new IdGeneratorImpl[Future]
   implicit lazy val dateTimeService: DateTimeUtil[Future]  = new DateTimeUtilImpl[Future]
-  implicit lazy val authConfig: AuthConfigService[Future]  = configService.getAuthConfig
   implicit lazy val authService: AuthService[Future]       = new AuthServiceImpl[Future]
-  implicit lazy val ldapConfig: LdapConfigService[Future]  = configService.getLdapConfig
   implicit lazy val ldapService: LdapService[Future]       = new LdapServiceImpl
 }

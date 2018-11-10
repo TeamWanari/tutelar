@@ -1,9 +1,9 @@
 package com.wanari.tutelar.core.impl
 
 import cats.Monad
-import com.wanari.tutelar.core.AuthService.CallbackUrl
-import com.wanari.tutelar.core.{AuthConfigService, AuthService, DatabaseService, JwtService}
+import com.wanari.tutelar.core.AuthService.{AuthConfig, CallbackUrl}
 import com.wanari.tutelar.core.DatabaseService.{Account, User}
+import com.wanari.tutelar.core.{AuthService, DatabaseService, JwtService}
 import com.wanari.tutelar.util.{DateTimeUtil, IdGenerator}
 import spray.json.{JsObject, JsString}
 
@@ -12,7 +12,7 @@ class AuthServiceImpl[F[_]: Monad](
     idGenerator: IdGenerator[F],
     timeService: DateTimeUtil[F],
     jwtService: F[JwtService[F]],
-    authConfigService: AuthConfigService[F]
+    authConfig: () => F[AuthConfig]
 ) extends AuthService[F] {
   import cats.syntax.applicative._
   import cats.syntax.flatMap._
@@ -74,6 +74,6 @@ class AuthServiceImpl[F[_]: Monad](
   }
 
   private def createCallbackUrl(token: String): F[CallbackUrl] = {
-    authConfigService.getCallbackUrl.map(_.replace("<<TOKEN>>", token))
+    authConfig().map(_.callback.replace("<<TOKEN>>", token))
   }
 }

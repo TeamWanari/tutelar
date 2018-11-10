@@ -4,11 +4,12 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers._
 import cats.MonadError
 import com.wanari.tutelar.core.{AuthService, CsrfService}
+import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.util.HttpWrapper
 import spray.json.RootJsonReader
 
 // https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/
-class GithubService[F[_]: MonadError[?[_], Throwable]](val config: OAuth2ConfigService[F])(
+class GithubService[F[_]: MonadError[?[_], Throwable]](val oAuth2config: () => F[OAuth2Config])(
     implicit
     val authService: AuthService[F],
     val csrfService: CsrfService[F],

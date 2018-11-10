@@ -2,19 +2,17 @@ package com.wanari.tutelar.core.impl.jwt
 
 import com.wanari.tutelar.TestBase
 import com.wanari.tutelar.core.JwtService
-import com.wanari.tutelar.core.impl.jwt.JwtConfigService.JwtConfig
+import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 import spray.json.{JsObject, JsString}
 
 import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
-import org.mockito.Mockito.when
 
 class JwtServiceSpec extends TestBase {
 
   def createServiceWithConf(config: JwtConfig): JwtService[Try] = {
     import cats.instances.try_._
-    implicit val configService = mock[JwtConfigService[Try]]
-    when(configService.getConfig).thenReturn(Success(config))
+    implicit val configService = () => Try(config)
     JwtServiceImpl.create[Try].get
   }
 

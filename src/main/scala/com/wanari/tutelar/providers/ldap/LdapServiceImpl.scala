@@ -4,6 +4,7 @@ import java.util.Properties
 
 import com.wanari.tutelar.core.AuthService
 import com.wanari.tutelar.core.AuthService.CallbackUrl
+import com.wanari.tutelar.providers.ldap.LdapServiceImpl.LdapConfig
 import javax.naming.Context
 import javax.naming.directory.{Attributes, InitialDirContext, SearchControls, SearchResult}
 import spray.json.{JsBoolean, JsNull, JsNumber, JsObject, JsString, JsValue}
@@ -12,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class LdapServiceImpl(
     implicit ec: ExecutionContext,
-    config: LdapConfigService[Future],
+    ldapConfig: () => Future[LdapConfig],
     authService: AuthService[Future]
 ) extends LdapService[Future] {
   private lazy val context  = createSearchContext()
@@ -52,11 +53,11 @@ class LdapServiceImpl(
 
   private def getUserInitialDirContext(username: String, password: String): Future[InitialDirContext] = {
     for {
-      host <- config.getLdapUrl
+      config <- ldapConfig()
       ctx <- Future {
         val props = new Properties
         props.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory")
-        props.put(Context.PROVIDER_URL, host)
+        props.put(Context.PROVIDER_URL, config.ldapUrl)
         props.put(Context.SECURITY_PRINCIPAL, username)
         props.put(Context.SECURITY_CREDENTIALS, password)
 
@@ -67,12 +68,11 @@ class LdapServiceImpl(
 
   private def findUser(username: String): Future[SearchResult] = {
     for {
-      ctx             <- context
-      ctrl            <- controls
-      baseDomain      <- config.getUserSearchBaseDomain
-      searchAttribute <- config.getUserSearchAttribute
+      config <- ldapConfig()
+      ctx    <- context
+      ctrl   <- controls
       data <- Future {
-        val ans = ctx.search(baseDomain, s"$searchAttribute=$username", ctrl)
+        val ans = ctx.search(config.userSearchBaseDomain, s"${config.userSearchAttribute}=$username", ctrl)
         ans.nextElement
       }
     } yield data
@@ -80,10 +80,10 @@ class LdapServiceImpl(
 
   private def createSearchControls(): Future[SearchControls] = {
     for {
-      attributes <- config.getUserSearchReturnAttributes
+      config <- ldapConfig()
     } yield {
       val controls: SearchControls = new SearchControls
-      controls.setReturningAttributes(attributes.toArray)
+      controls.setReturningAttributes(config.userSearchReturnAttributes.toArray)
       controls.setSearchScope(SearchControls.SUBTREE_SCOPE)
       controls
     }
@@ -91,9 +91,20 @@ class LdapServiceImpl(
 
   private def createSearchContext(): Future[InitialDirContext] = {
     for {
-      user <- config.getReadonlyUserWithNameSpace
-      pass <- config.getReadonlyUserPassword
-      ctx  <- getUserInitialDirContext(user, pass)
+      config <- ldapConfig()
+      ctx    <- getUserInitialDirContext(config.readonlyUserWithNameSpace, config.readonlyUserPassword)
     } yield ctx
   }
+}
+
+object LdapServiceImpl {
+  case class LdapConfig(
+      ldapUrl: String,
+      readonlyUserWithNameSpace: String,
+      readonlyUserPassword: String,
+      userSearchBaseDomain: String,
+      userSearchAttribute: String,
+      userSearchReturnAttributes: Seq[String]
+  )
+
 }

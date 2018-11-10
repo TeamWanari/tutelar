@@ -10,7 +10,7 @@ import scala.concurrent.Future
 class LdapServiceItSpec extends WordSpecLike with Matchers with AwaitUtil with MockitoSugar {
 
   private val services = new ItTestServices {
-    implicit lazy val ldapConfig: LdapConfigService[Future]     = configService.getLdapConfig
+    import configService._
     override implicit lazy val ldapService: LdapService[Future] = new LdapServiceImpl()
   }
 

@@ -4,11 +4,16 @@ import akka.http.scaladsl.model._
 import akka.stream.ActorMaterializer
 import com.wanari.tutelar.TestBase
 import com.wanari.tutelar.core.{AuthService, CsrfService}
-import com.wanari.tutelar.providers.oauth2.OAuth2Service.{ProfileData, TokenRequestHelper, TokenResponseHelper}
+import com.wanari.tutelar.providers.oauth2.OAuth2Service.{
+  OAuth2Config,
+  ProfileData,
+  TokenRequestHelper,
+  TokenResponseHelper
+}
 import com.wanari.tutelar.util.HttpWrapper
 import org.mockito.ArgumentMatchersSugar._
 import org.mockito.Mockito._
-import spray.json.JsString
+import spray.json.{JsObject, JsString}
 
 import scala.util.{Failure, Try}
 
@@ -81,10 +86,10 @@ class OAuth2ServiceSpec extends TestBase {
 
     trait Scope {
       val service = new OAuth2Service[Try] {
-        val config      = mock[OAuth2ConfigService[Try]]
-        val csrfService = mock[CsrfService[Try]]
-        val http        = mock[HttpWrapper[Try]]
-        val authService = mock[AuthService[Try]]
+        val oAuth2config = () => Try(OAuth2Config("https://self.com/test", "clientId", "clientSecret", Seq("a", "b")))
+        val csrfService  = mock[CsrfService[Try]]
+        val http         = mock[HttpWrapper[Try]]
+        val authService  = mock[AuthService[Try]]
 
         val TYPE: String         = "dummy"
         val redirectUriBase: Uri = Uri("https://example.com")
@@ -97,10 +102,7 @@ class OAuth2ServiceSpec extends TestBase {
     }
 
     "generateIdentifierUrl correctly" in new Scope {
-      when(service.config.getClientId) thenReturn Try("clientId")
-      when(service.config.getScopes) thenReturn Try(Seq("a", "b"))
-      when(service.config.getRootUrl) thenReturn Try("https://self.com/test")
-      when(service.csrfService.getCsrfToken("dummy")) thenReturn Try("csrf")
+      when(service.csrfService.getCsrfToken("dummy", JsObject())) thenReturn Try("csrf")
 
       service.generateIdentifierUrl.get shouldBe Uri(
         "https://example.com?client_id=clientId&scope=a+b&state=csrf&response_type=code&redirect_uri=https://self.com/test/dummy/callback"
@@ -108,9 +110,6 @@ class OAuth2ServiceSpec extends TestBase {
     }
 
     "authenticateWithCallback correctly" in new Scope {
-      when(service.config.getClientId) thenReturn Try("clientId")
-      when(service.config.getClientSecret) thenReturn Try("clientSecret")
-      when(service.config.getRootUrl) thenReturn Try("https://self.com/test")
       when(service.csrfService.checkCsrfToken("dummy", "state")) thenReturn Try({})
       when(service.authService.registerOrLogin("dummy", "id", "token")) thenReturn Try("ultimateUri")
       when(service.http.singleRequest(any[HttpRequest])) thenReturn Try(HttpResponse())

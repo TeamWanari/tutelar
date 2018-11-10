@@ -5,14 +5,25 @@ import com.wanari.tutelar.core.JwtService
 import pdi.jwt.algorithms.{JwtAsymmetricAlgorithm, JwtHmacAlgorithm}
 import pdi.jwt.{JwtAlgorithm, JwtClaim, JwtSprayJson}
 
+import scala.concurrent.duration.Duration
+
 object JwtServiceImpl {
-  def create[F[_]: MonadError[?[_], Throwable]](implicit configService: JwtConfigService[F]): F[JwtService[F]] = {
+
+  case class JwtConfig(
+      expirationTime: Duration,
+      algorithm: String,
+      secret: String,
+      privateKey: String,
+      publicKey: String
+  )
+
+  def create[F[_]: MonadError[?[_], Throwable]](implicit jwtConfig: () => F[JwtConfig]): F[JwtService[F]] = {
     import cats.syntax.applicative._
     import cats.syntax.flatMap._
     import com.wanari.tutelar.util.ApplicativeErrorSyntax._
     import spray.json._
 
-    configService.getConfig.flatMap { config =>
+    jwtConfig().flatMap { config =>
       JwtAlgorithm
         .optionFromString(config.algorithm)
         .collect {

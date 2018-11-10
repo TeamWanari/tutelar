@@ -8,4 +8,6 @@ trait AuthService[F[_]] {
 
 object AuthService {
   type CallbackUrl = String
+
+  case class AuthConfig(callback: CallbackUrl)
 }

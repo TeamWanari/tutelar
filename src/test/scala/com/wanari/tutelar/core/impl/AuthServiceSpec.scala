@@ -2,8 +2,9 @@ package com.wanari.tutelar.core.impl
 
 import cats.Id
 import com.wanari.tutelar.TestBase
+import com.wanari.tutelar.core.AuthService.AuthConfig
 import com.wanari.tutelar.core.DatabaseService.{Account, User}
-import com.wanari.tutelar.core.{AuthConfigService, JwtService}
+import com.wanari.tutelar.core.JwtService
 import com.wanari.tutelar.util.{DateTimeUtilCounterImpl, IdGeneratorCounterImpl}
 import org.mockito.ArgumentMatchersSugar._
 import org.mockito.Mockito.{verify, when}
@@ -23,13 +24,12 @@ class AuthServiceSpec extends TestBase {
     implicit val idGenerator       = new IdGeneratorCounterImpl[Id]
     implicit val timeService       = new DateTimeUtilCounterImpl[Id]
     implicit val jwtService        = mock[JwtService[Id]]
-    implicit val authConfigService = mock[AuthConfigService[Id]]
+    implicit val authConfigService = () => AuthConfig("http://url/?token=<<TOKEN>>")
 
     databaseService.saveUser(savedUser)
     databaseService.saveAccount(savedAccount)
 
     when(jwtService.encode(any[JsObject])).thenReturn("JWT")
-    when(authConfigService.getCallbackUrl).thenReturn("http://url/?token=<<TOKEN>>")
 
     val service = new AuthServiceImpl[Id]()
   }

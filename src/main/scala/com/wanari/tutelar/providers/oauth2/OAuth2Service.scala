@@ -3,12 +3,17 @@ package com.wanari.tutelar.providers.oauth2
 import akka.http.scaladsl.model._
 import cats.{Applicative, MonadError}
 import com.wanari.tutelar.core.{AuthService, CsrfService}
-import com.wanari.tutelar.providers.oauth2.OAuth2Service.{ProfileData, TokenRequestHelper, TokenResponseHelper}
+import com.wanari.tutelar.providers.oauth2.OAuth2Service.{
+  OAuth2Config,
+  ProfileData,
+  TokenRequestHelper,
+  TokenResponseHelper
+}
 import com.wanari.tutelar.util.HttpWrapper
 import spray.json.{JsObject, JsString, JsValue, RootJsonFormat, RootJsonReader}
 
 trait OAuth2Service[F[_]] {
-  val config: OAuth2ConfigService[F]
+  val oAuth2config: () => F[OAuth2Config]
   val csrfService: CsrfService[F]
   val http: HttpWrapper[F]
   val authService: AuthService[F]
@@ -23,15 +28,14 @@ trait OAuth2Service[F[_]] {
     import cats.syntax.flatMap._
     import cats.syntax.functor._
     for {
-      state           <- csrfService.getCsrfToken(TYPE)
-      clientId        <- config.getClientId
-      scopes          <- config.getScopes
+      config          <- oAuth2config()
+      state           <- csrfService.getCsrfToken(TYPE, JsObject.empty)
       selfRedirectUri <- getSelfRedirectUri
     } yield
       redirectUriBase.withQuery(
         Uri.Query(
-          "client_id"     -> clientId,
-          "scope"         -> scopes.mkString(" "),
+          "client_id"     -> config.clientId,
+          "scope"         -> config.scopes.mkString(" "),
           "state"         -> state,
           "response_type" -> "code",
           "redirect_uri"  -> selfRedirectUri.toString
@@ -54,10 +58,9 @@ trait OAuth2Service[F[_]] {
 
     for {
       _               <- csrfService.checkCsrfToken(TYPE, state)
-      clientId        <- config.getClientId
-      clientSecret    <- config.getClientSecret
+      config          <- oAuth2config()
       selfRedirectUri <- getSelfRedirectUri
-      response        <- getToken(clientId, clientSecret, selfRedirectUri)
+      response        <- getToken(config.clientId, config.clientSecret, selfRedirectUri)
       tokenResponse   <- http.unmarshalEntityTo[TokenResponseHelper](response)
       profile         <- getProfile(tokenResponse)
       url             <- authService.registerOrLogin(TYPE, profile.id, tokenResponse.access_token)
@@ -66,8 +69,8 @@ trait OAuth2Service[F[_]] {
 
   protected def getSelfRedirectUri(implicit applicative: Applicative[F]): F[Uri] = {
     import cats.syntax.functor._
-    config.getRootUrl.map { selfRedirectUriBase =>
-      val uri = Uri(selfRedirectUriBase)
+    oAuth2config().map { config =>
+      val uri = Uri(config.rootUrl)
       uri.withPath(uri.path ?/ TYPE.toLowerCase / "callback")
     }
   }
@@ -116,4 +119,11 @@ object OAuth2Service {
         throw new Exception()
     }
   }
+
+  case class OAuth2Config(
+      rootUrl: String,
+      clientId: String,
+      clientSecret: String,
+      scopes: Seq[String]
+  )
 }

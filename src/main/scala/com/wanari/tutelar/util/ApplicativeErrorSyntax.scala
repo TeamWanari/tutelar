@@ -18,6 +18,15 @@ object ApplicativeErrorSyntax {
       tri.fold(_.raise[F, A], Applicative[F].pure(_))
     }
   }
+  implicit class BoolErrorOps(b: Boolean) {
+    def pureUnitOrRise[F[_]: ApplicativeError[?[_], Throwable]](t: => Throwable): F[Unit] = {
+      if (b) {
+        Applicative[F].pure({})
+      } else {
+        t.raise[F, Unit]
+      }
+    }
+  }
 
   implicit class JsonConvertToOps(private val jsval: JsValue) extends AnyVal {
     def convertToF[F[_]: ApplicativeError[?[_], Throwable], A: JsonReader]: F[A] = {
