@@ -2,6 +2,7 @@ package com.wanari.tutelar.core
 
 import cats.Id
 import com.wanari.tutelar.TestBase
+import com.wanari.tutelar.core.HookService.{BasicAuthConfig, HookConfig}
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.providers.ldap.LdapServiceImpl.LdapConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
@@ -57,6 +58,14 @@ class ConfigServiceSpec extends TestBase {
     val service = new ConfigServiceImpl[Id]()
     val config  = service.authConfig()
     config.callback shouldEqual "url?t=<<TOKEN>>"
+  }
+  "#getHookConfig" in {
+    val service = new ConfigServiceImpl[Id]()
+    val config  = service.hookConfig()
+    config shouldEqual HookConfig(
+      "https://backend/hook",
+      BasicAuthConfig("user", "pass")
+    )
   }
   "#getLdapConfig" in {
     val service = new ConfigServiceImpl[Id]()

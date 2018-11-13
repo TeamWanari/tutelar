@@ -5,7 +5,7 @@ import akka.stream.Materializer
 import com.wanari.tutelar.core._
 import com.wanari.tutelar.core.healthcheck.{HealthCheckService, HealthCheckServiceImpl}
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl
-import com.wanari.tutelar.core.impl.{AuthServiceImpl, CsrfServiceNotChecked, DatabaseServiceImpl}
+import com.wanari.tutelar.core.impl.{AuthServiceImpl, CsrfServiceNotChecked, DatabaseServiceImpl, HookServiceImpl}
 import com.wanari.tutelar.providers.ldap.{LdapService, LdapServiceImpl}
 import com.wanari.tutelar.providers.oauth2.{FacebookService, GithubService, GoogleService}
 import com.wanari.tutelar.util._
@@ -22,6 +22,7 @@ trait Services[F[_]] {
   implicit val jwtService: F[JwtService[F]]
   implicit val idGenerator: IdGenerator[F]
   implicit val dateTimeService: DateTimeUtil[F]
+  implicit val hookService: HookService[F]
   implicit val authService: AuthService[F]
   implicit val ldapService: LdapService[F]
 }
@@ -45,6 +46,7 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
   implicit lazy val jwtService: Future[JwtService[Future]] = JwtServiceImpl.create
   implicit lazy val idGenerator: IdGenerator[Future]       = new IdGeneratorImpl[Future]
   implicit lazy val dateTimeService: DateTimeUtil[Future]  = new DateTimeUtilImpl[Future]
+  implicit lazy val hookService: HookService[Future]       = new HookServiceImpl[Future]
   implicit lazy val authService: AuthService[Future]       = new AuthServiceImpl[Future]
   implicit lazy val ldapService: LdapService[Future]       = new LdapServiceImpl
 }

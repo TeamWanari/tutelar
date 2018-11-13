@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit
 import cats.Monad
 import com.typesafe.config.{Config, ConfigFactory}
 import com.wanari.tutelar.core.AuthService.AuthConfig
+import com.wanari.tutelar.core.HookService.{BasicAuthConfig, HookConfig}
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.providers.ldap.LdapServiceImpl.LdapConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
@@ -21,6 +22,7 @@ class ConfigServiceImpl[F[_]: Monad]() extends ConfigService[F] {
 
   implicit val jwtConfig: () => F[JwtConfig]   = readJwtConfig _
   implicit val authConfig: () => F[AuthConfig] = readAuthConfig _
+  implicit val hookConfig: () => F[HookConfig] = readHookConfig _
 
   val facebookConfig: () => F[OAuth2Config]    = () => readOauth2Config("oauth2.facebook")
   val githubConfig: () => F[OAuth2Config]      = () => readOauth2Config("oauth2.github")
@@ -57,6 +59,21 @@ class ConfigServiceImpl[F[_]: Monad]() extends ConfigService[F] {
     )
   }.pure
 
+  private def readHookConfig = {
+    val config = conf.getConfig("hook")
+    val authConfig = config.getString("authType") match {
+      case "basic" =>
+        BasicAuthConfig(
+          config.getString("basicAuth.username"),
+          config.getString("basicAuth.password")
+        )
+    }
+    HookConfig(
+      config.getString("baseUrl"),
+      authConfig
+    )
+  }.pure
+
   private def readOauth2Config(name: String) = {
     val config = conf.getConfig(name)
     OAuth2Config(
@@ -74,6 +91,7 @@ trait ConfigService[F[_]] {
 
   implicit val authConfig: () => F[AuthConfig]
   implicit val jwtConfig: () => F[JwtConfig]
+  implicit val hookConfig: () => F[HookConfig]
 
   val facebookConfig: () => F[OAuth2Config]
   val githubConfig: () => F[OAuth2Config]
