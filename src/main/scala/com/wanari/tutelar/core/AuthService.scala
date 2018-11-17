@@ -1,9 +1,10 @@
 package com.wanari.tutelar.core
 
 import com.wanari.tutelar.core.AuthService.CallbackUrl
+import spray.json.JsObject
 
 trait AuthService[F[_]] {
-  def registerOrLogin(authType: String, externalId: String, customData: String): F[CallbackUrl]
+  def registerOrLogin(authType: String, externalId: String, customData: String, providedData: JsObject): F[CallbackUrl]
 }
 
 object AuthService {

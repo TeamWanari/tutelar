@@ -63,7 +63,7 @@ trait OAuth2Service[F[_]] {
       response        <- getToken(config.clientId, config.clientSecret, selfRedirectUri)
       tokenResponse   <- http.unmarshalEntityTo[TokenResponseHelper](response)
       profile         <- getProfile(tokenResponse)
-      url             <- authService.registerOrLogin(TYPE, profile.id, tokenResponse.access_token)
+      url             <- authService.registerOrLogin(TYPE, profile.id, tokenResponse.access_token, profile.data)
     } yield url
   }
 
@@ -99,7 +99,7 @@ object OAuth2Service {
 
   case class TokenResponseHelper(access_token: String)
 
-  case class ProfileData(id: String, data: JsValue)
+  case class ProfileData(id: String, data: JsObject)
 
   import spray.json.DefaultJsonProtocol._
 

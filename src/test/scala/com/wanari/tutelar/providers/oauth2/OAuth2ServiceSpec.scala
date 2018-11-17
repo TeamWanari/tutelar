@@ -13,7 +13,7 @@ import com.wanari.tutelar.providers.oauth2.OAuth2Service.{
 import com.wanari.tutelar.util.HttpWrapper
 import org.mockito.ArgumentMatchersSugar._
 import org.mockito.Mockito._
-import spray.json.{JsObject, JsString}
+import spray.json.{JsObject, JsTrue}
 
 import scala.util.{Failure, Try}
 
@@ -97,7 +97,7 @@ class OAuth2ServiceSpec extends TestBase {
           HttpRequest()
         }
         override def getProfile(token: TokenResponseHelper) =
-          if (token.access_token == "token") Try(ProfileData("id", JsString("raw"))) else ???
+          if (token.access_token == "token") Try(ProfileData("id", JsObject("raw" -> JsTrue))) else ???
       }
     }
 
@@ -111,7 +111,9 @@ class OAuth2ServiceSpec extends TestBase {
 
     "authenticateWithCallback correctly" in new Scope {
       when(service.csrfService.checkCsrfToken("dummy", "state")) thenReturn Try({})
-      when(service.authService.registerOrLogin("dummy", "id", "token")) thenReturn Try("ultimateUri")
+      when(service.authService.registerOrLogin("dummy", "id", "token", JsObject("raw" -> JsTrue))) thenReturn Try(
+        "ultimateUri"
+      )
       when(service.http.singleRequest(any[HttpRequest])) thenReturn Try(HttpResponse())
       when(service.http.unmarshalEntityTo[TokenResponseHelper](HttpResponse())) thenReturn Try(
         TokenResponseHelper("token")

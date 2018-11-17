@@ -21,11 +21,11 @@ class LdapServiceImpl(
 
   override def login(username: String, password: String): Future[CallbackUrl] = {
     for {
-      user     <- findUser(username)
-      _        <- getUserInitialDirContext(user.getNameInNamespace, password)
-      callback <- authService.registerOrLogin("LDAP", username, "")
+      user <- findUser(username)
+      _    <- getUserInitialDirContext(user.getNameInNamespace, password)
+      attributes = JsObject(attributesConvertToMap(user.getAttributes))
+      callback <- authService.registerOrLogin("LDAP", username, "", attributes)
     } yield {
-      val attributes = JsObject(attributesConvertToMap(user.getAttributes))
       callback
     }
   }
