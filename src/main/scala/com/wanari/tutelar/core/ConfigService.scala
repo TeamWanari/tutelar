@@ -55,7 +55,8 @@ class ConfigServiceImpl[F[_]: Monad]() extends ConfigService[F] {
       config.getString("readonlyUserPassword"),
       config.getString("userSearchBaseDomain"),
       config.getString("userSearchAttribute"),
-      config.getString("userSearchReturnAttributes").split(",").toSeq
+      config.getString("userSearchReturnAttributes").split(",").toSeq,
+      config.getString("userSearchReturnArrayAttributes").split(",").toSeq
     )
   }.pure
 

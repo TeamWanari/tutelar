@@ -76,7 +76,8 @@ class ConfigServiceSpec extends TestBase {
       "readonlypw",
       "ou=peaple,dc=example,dc=com",
       "cn",
-      Seq("cn", "sn", "email")
+      Seq("cn", "sn", "email"),
+      Seq("memberof")
     )
   }
 }

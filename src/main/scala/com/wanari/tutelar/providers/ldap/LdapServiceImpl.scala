@@ -7,7 +7,7 @@ import com.wanari.tutelar.core.AuthService.CallbackUrl
 import com.wanari.tutelar.providers.ldap.LdapServiceImpl.LdapConfig
 import javax.naming.Context
 import javax.naming.directory.{Attributes, InitialDirContext, SearchControls, SearchResult}
-import spray.json.{JsBoolean, JsNull, JsNumber, JsObject, JsString, JsValue}
+import spray.json.{JsArray, JsBoolean, JsNull, JsNumber, JsObject, JsString, JsValue}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -21,23 +21,32 @@ class LdapServiceImpl(
 
   override def login(username: String, password: String): Future[CallbackUrl] = {
     for {
-      user <- findUser(username)
-      _    <- getUserInitialDirContext(user.getNameInNamespace, password)
-      attributes = JsObject(attributesConvertToMap(user.getAttributes))
-      callback <- authService.registerOrLogin("LDAP", username, "", attributes)
+      user       <- findUser(username)
+      _          <- getUserInitialDirContext(user.getNameInNamespace, password)
+      attributes <- attributesConvertToMap(user.getAttributes)
+      callback <- authService.registerOrLogin("LDAP", username, "", JsObject(attributes))
     } yield {
       callback
     }
   }
 
-  private def attributesConvertToMap(attr: Attributes): Map[String, JsValue] = {
-    import collection.JavaConverters._
-    attr.getAll.asScala
-      .map(e => e.getID -> convertToJsValue(e.get()))
-      .toMap
+  private def attributesConvertToMap(attributes: Attributes): Future[Map[String, JsValue]] = {
+    ldapConfig().map { config =>
+      import collection.JavaConverters._
+      val arrayAttributes = config.userSearchReturnArrayAttributes.map(_.toLowerCase)
+      attributes.getAll.asScala.map { attribute =>
+        val jsValue = if (arrayAttributes.contains(attribute.getID.toLowerCase)) {
+          JsArray(attribute.getAll.asScala.map(convertToJsValue).toVector)
+        } else {
+          convertToJsValue(attribute.get())
+        }
+        attribute.getID -> jsValue
+      }.toMap
+    }
+
   }
 
-  private def convertToJsValue(value: Object): JsValue = {
+  private def convertToJsValue(value: Any): JsValue = {
     value match {
       case x: java.lang.String  => JsString(x)
       case x: java.lang.Integer => JsNumber(x)
@@ -82,8 +91,9 @@ class LdapServiceImpl(
     for {
       config <- ldapConfig()
     } yield {
+      val returningAttributes      = config.userSearchReturnAttributes ++ config.userSearchReturnArrayAttributes
       val controls: SearchControls = new SearchControls
-      controls.setReturningAttributes(config.userSearchReturnAttributes.toArray)
+      controls.setReturningAttributes(returningAttributes.toArray)
       controls.setSearchScope(SearchControls.SUBTREE_SCOPE)
       controls
     }
@@ -104,7 +114,8 @@ object LdapServiceImpl {
       readonlyUserPassword: String,
       userSearchBaseDomain: String,
       userSearchAttribute: String,
-      userSearchReturnAttributes: Seq[String]
+      userSearchReturnAttributes: Seq[String],
+      userSearchReturnArrayAttributes: Seq[String]
   )
 
 }
