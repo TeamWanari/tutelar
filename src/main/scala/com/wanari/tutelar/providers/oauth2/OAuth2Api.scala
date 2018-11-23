@@ -3,13 +3,14 @@ package com.wanari.tutelar.providers.oauth2
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import com.wanari.tutelar.Api
+import com.wanari.tutelar.core.ProviderApi
+import com.wanari.tutelar.core.ProviderApi.CallbackConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Api.CodeAndState
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
+import scala.util.Success
 
-trait OAuth2Api extends Api {
+trait OAuth2Api extends ProviderApi {
   import cats.instances.future._
   val service: OAuth2Service[Future]
 
@@ -24,10 +25,7 @@ trait OAuth2Api extends Api {
         } ~
           path("callback") {
             parameters(('code.as[String], 'state.as[String])).as(CodeAndState) { codeAndState =>
-              onComplete(service.authenticateWithCallback(codeAndState.code, codeAndState.state)) {
-                case Success(value) => redirect(value, StatusCodes.Found)
-                case Failure(ex)    => complete(StatusCodes.Unauthorized)
-              }
+              completeLoginFlow(service.authenticateWithCallback(codeAndState.code, codeAndState.state))
             }
           }
       }
@@ -36,9 +34,12 @@ trait OAuth2Api extends Api {
 }
 
 object OAuth2Api {
-  class FacebookApi(implicit val service: FacebookService[Future]) extends OAuth2Api {}
-  class GithubApi(implicit val service: GithubService[Future])     extends OAuth2Api {}
-  class GoogleApi(implicit val service: GoogleService[Future])     extends OAuth2Api {}
+  class FacebookApi(implicit val service: FacebookService[Future], val callbackConfig: () => Future[CallbackConfig])
+      extends OAuth2Api {}
+  class GithubApi(implicit val service: GithubService[Future], val callbackConfig: () => Future[CallbackConfig])
+      extends OAuth2Api {}
+  class GoogleApi(implicit val service: GoogleService[Future], val callbackConfig: () => Future[CallbackConfig])
+      extends OAuth2Api {}
 
   case class CodeAndState(code: String, state: String)
 }

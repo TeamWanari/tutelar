@@ -1,5 +1,6 @@
 package com.wanari.tutelar.providers.oauth2
 
+import akka.http.scaladsl.model.headers.Location
 import akka.http.scaladsl.model.{StatusCodes, Uri}
 import akka.http.scaladsl.server.MissingQueryParamRejection
 import cats.MonadError
@@ -29,7 +30,7 @@ class Oauth2ApiItSpec extends RouteTestBase {
       }
     }
     s"GET /$provider/callback" should {
-      "return OK" in new BaseTestScope {
+      "return redirect with callback" in new BaseTestScope {
         when(
           services
             .getOauthServiceByName(provider)
@@ -37,16 +38,18 @@ class Oauth2ApiItSpec extends RouteTestBase {
         ) thenReturn Future.successful("asd")
         Get(s"/$provider/callback?code=a&state=b") ~> route ~> check {
           status shouldEqual StatusCodes.Found
+          headers should contain(Location(Uri("https://lvh.me:9443/index.html?token=asd")))
         }
       }
-      "return with 401 on error" in new BaseTestScope {
+      "return redirect with error" in new BaseTestScope {
         when(
           services
             .getOauthServiceByName(provider)
             .authenticateWithCallback(eqTo("a"), eqTo("b"))(any[MonadError[Future, Throwable]])
         ) thenReturn Future.failed(new Exception())
         Get(s"/$provider/callback?code=a&state=b") ~> route ~> check {
-          status shouldEqual StatusCodes.Unauthorized
+          status shouldEqual StatusCodes.Found
+          headers should contain(Location(Uri("https://lvh.me:9443/index.html?access_denied")))
         }
       }
       "rejects on bad/missing query parameters" in new BaseTestScope {

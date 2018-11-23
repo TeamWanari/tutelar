@@ -3,7 +3,7 @@ package com.wanari.tutelar.providers.ldap
 import java.util.Properties
 
 import com.wanari.tutelar.core.AuthService
-import com.wanari.tutelar.core.AuthService.CallbackUrl
+import com.wanari.tutelar.core.AuthService.Token
 import com.wanari.tutelar.providers.ldap.LdapServiceImpl.LdapConfig
 import javax.naming.Context
 import javax.naming.directory.{Attributes, InitialDirContext, SearchControls, SearchResult}
@@ -19,15 +19,13 @@ class LdapServiceImpl(
   private lazy val context  = createSearchContext()
   private lazy val controls = createSearchControls()
 
-  override def login(username: String, password: String): Future[CallbackUrl] = {
+  override def login(username: String, password: String): Future[Token] = {
     for {
       user       <- findUser(username)
       _          <- getUserInitialDirContext(user.getNameInNamespace, password)
       attributes <- attributesConvertToMap(user.getAttributes)
-      callback <- authService.registerOrLogin("LDAP", username, "", JsObject(attributes))
-    } yield {
-      callback
-    }
+      token      <- authService.registerOrLogin("LDAP", username, "", JsObject(attributes))
+    } yield token
   }
 
   private def attributesConvertToMap(attributes: Attributes): Future[Map[String, JsValue]] = {

@@ -4,8 +4,8 @@ import java.util.concurrent.TimeUnit
 
 import cats.Monad
 import com.typesafe.config.{Config, ConfigFactory}
-import com.wanari.tutelar.core.AuthService.AuthConfig
 import com.wanari.tutelar.core.HookService.{BasicAuthConfig, HookConfig}
+import com.wanari.tutelar.core.ProviderApi.CallbackConfig
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.providers.ldap.LdapServiceImpl.LdapConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
@@ -20,9 +20,9 @@ class ConfigServiceImpl[F[_]: Monad]() extends ConfigService[F] {
   lazy val getHostname: F[String] = conf.getString("hostname").pure
   lazy val getRootUrl: F[String]  = conf.getString("rootUrl").pure
 
-  implicit val jwtConfig: () => F[JwtConfig]   = readJwtConfig _
-  implicit val authConfig: () => F[AuthConfig] = readAuthConfig _
-  implicit val hookConfig: () => F[HookConfig] = readHookConfig _
+  implicit val jwtConfig: () => F[JwtConfig]           = readJwtConfig _
+  implicit val callbackConfig: () => F[CallbackConfig] = readCallbackConfig _
+  implicit val hookConfig: () => F[HookConfig]         = readHookConfig _
 
   val facebookConfig: () => F[OAuth2Config]    = () => readOauth2Config("oauth2.facebook")
   val githubConfig: () => F[OAuth2Config]      = () => readOauth2Config("oauth2.github")
@@ -40,10 +40,11 @@ class ConfigServiceImpl[F[_]: Monad]() extends ConfigService[F] {
     )
   }.pure
 
-  private def readAuthConfig = {
-    val config = conf.getConfig("auth")
-    AuthConfig(
-      config.getString("callbackUrl")
+  private def readCallbackConfig = {
+    val config = conf.getConfig("callback")
+    CallbackConfig(
+      config.getString("success"),
+      config.getString("accessDenied")
     )
   }.pure
 
@@ -90,7 +91,7 @@ trait ConfigService[F[_]] {
   def getVersion: F[String]
   def getHostname: F[String]
 
-  implicit val authConfig: () => F[AuthConfig]
+  implicit val callbackConfig: () => F[CallbackConfig]
   implicit val jwtConfig: () => F[JwtConfig]
   implicit val hookConfig: () => F[HookConfig]
 

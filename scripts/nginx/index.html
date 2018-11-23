@@ -30,7 +30,7 @@
     <script type="application/javascript">
         var params = new URLSearchParams(window.location.search);
 
-        if (!!params.get('login_failed')) {
+        if (params.has('access_denied')) {
             document.getElementById("loginfailed").style.display = "block";
         }
 

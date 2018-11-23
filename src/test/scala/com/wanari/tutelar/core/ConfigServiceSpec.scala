@@ -54,10 +54,11 @@ class ConfigServiceSpec extends TestBase {
       "public"
     )
   }
-  "#getAuthConfig" in {
+  "#getCallbackConfig" in {
     val service = new ConfigServiceImpl[Id]()
-    val config  = service.authConfig()
-    config.callback shouldEqual "url?t=<<TOKEN>>"
+    val config  = service.callbackConfig()
+    config.success shouldEqual "url?t=<<TOKEN>>"
+    config.accessDenied shouldEqual "accessDeniedUrl"
   }
   "#getHookConfig" in {
     val service = new ConfigServiceImpl[Id]()

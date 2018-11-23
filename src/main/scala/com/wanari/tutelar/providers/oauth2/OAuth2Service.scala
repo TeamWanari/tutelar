@@ -2,6 +2,7 @@ package com.wanari.tutelar.providers.oauth2
 
 import akka.http.scaladsl.model._
 import cats.{Applicative, MonadError}
+import com.wanari.tutelar.core.AuthService.Token
 import com.wanari.tutelar.core.{AuthService, CsrfService}
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.{
   OAuth2Config,
@@ -43,7 +44,7 @@ trait OAuth2Service[F[_]] {
       )
   }
 
-  def authenticateWithCallback(code: String, state: String)(implicit me: MonadError[F, Throwable]): F[String] = {
+  def authenticateWithCallback(code: String, state: String)(implicit me: MonadError[F, Throwable]): F[Token] = {
     import cats.syntax.flatMap._
     import cats.syntax.functor._
 
@@ -63,8 +64,8 @@ trait OAuth2Service[F[_]] {
       response        <- getToken(config.clientId, config.clientSecret, selfRedirectUri)
       tokenResponse   <- http.unmarshalEntityTo[TokenResponseHelper](response)
       profile         <- getProfile(tokenResponse)
-      url             <- authService.registerOrLogin(TYPE, profile.id, tokenResponse.access_token, profile.data)
-    } yield url
+      token           <- authService.registerOrLogin(TYPE, profile.id, tokenResponse.access_token, profile.data)
+    } yield token
   }
 
   protected def getSelfRedirectUri(implicit applicative: Applicative[F]): F[Uri] = {

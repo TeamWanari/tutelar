@@ -2,7 +2,6 @@ package com.wanari.tutelar.core.impl
 
 import cats.Id
 import com.wanari.tutelar.TestBase
-import com.wanari.tutelar.core.AuthService.AuthConfig
 import com.wanari.tutelar.core.DatabaseService.{Account, User}
 import com.wanari.tutelar.core.{HookService, JwtService}
 import com.wanari.tutelar.util.{DateTimeUtilCounterImpl, IdGeneratorCounterImpl}
@@ -23,12 +22,11 @@ class AuthServiceSpec extends TestBase {
 
   trait TestScope {
 
-    implicit val databaseService   = new DatabaseServiceMemImpl[Id]
-    implicit val idGenerator       = new IdGeneratorCounterImpl[Id]
-    implicit val timeService       = new DateTimeUtilCounterImpl[Id]
-    implicit val jwtService        = mock[JwtService[Id]]
-    implicit val hookService       = mock[HookService[Id]]
-    implicit val authConfigService = () => AuthConfig("http://url/?token=<<TOKEN>>")
+    implicit val databaseService = new DatabaseServiceMemImpl[Id]
+    implicit val idGenerator     = new IdGeneratorCounterImpl[Id]
+    implicit val timeService     = new DateTimeUtilCounterImpl[Id]
+    implicit val jwtService      = mock[JwtService[Id]]
+    implicit val hookService     = mock[HookService[Id]]
 
     databaseService.saveUser(savedUser)
     databaseService.saveAccount(savedAccount)
@@ -42,8 +40,8 @@ class AuthServiceSpec extends TestBase {
 
   "#registerOrLogin" when {
     "register" should {
-      "return the callback url" in new TestScope {
-        service.registerOrLogin(authType, externalId, customData, providedData) shouldEqual "http://url/?token=JWT"
+      "return the token" in new TestScope {
+        service.registerOrLogin(authType, externalId, customData, providedData) shouldEqual "JWT"
       }
       "create token with the userid and hook response" in new TestScope {
         service.registerOrLogin(authType, externalId, customData, providedData)
@@ -63,8 +61,8 @@ class AuthServiceSpec extends TestBase {
       }
     }
     "login" should {
-      "return the callback url" in new TestScope {
-        service.registerOrLogin(savedAccount.authType, savedAccount.externalId, customData, providedData) shouldEqual "http://url/?token=JWT"
+      "return the token" in new TestScope {
+        service.registerOrLogin(savedAccount.authType, savedAccount.externalId, customData, providedData) shouldEqual "JWT"
       }
       "create token with the userid and hook response" in new TestScope {
         service.registerOrLogin(savedAccount.authType, savedAccount.externalId, customData, providedData)

@@ -17,17 +17,18 @@ class LdapApiSpec extends RouteTestBase {
         verify(services.ldapService).login("user", "pw")
       }
     }
-    "return forward" in new BaseTestScope {
+    "return redirect with callback" in new BaseTestScope {
       when(services.ldapService.login(any[String], any[String])) thenReturn Future.successful("CALLBACK")
       Get(s"/ldap/login?username=user&password=pw") ~> route ~> check {
         status shouldEqual StatusCodes.Found
-        headers should contain(Location(Uri("CALLBACK")))
+        headers should contain(Location(Uri("https://lvh.me:9443/index.html?token=CALLBACK")))
       }
     }
-    "return with 401" in new BaseTestScope {
+    "return redirect with error" in new BaseTestScope {
       when(services.ldapService.login(any[String], any[String])) thenReturn Future.failed(new Exception())
       Get(s"/ldap/login?username=user&password=pw") ~> route ~> check {
-        status shouldEqual StatusCodes.Unauthorized
+        status shouldEqual StatusCodes.Found
+        headers should contain(Location(Uri("https://lvh.me:9443/index.html?access_denied")))
       }
     }
   }

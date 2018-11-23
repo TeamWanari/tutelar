@@ -1,7 +1,7 @@
 package com.wanari.tutelar.core.impl
 
 import cats.Monad
-import com.wanari.tutelar.core.AuthService.{AuthConfig, CallbackUrl}
+import com.wanari.tutelar.core.AuthService.Token
 import com.wanari.tutelar.core.DatabaseService.{Account, User}
 import com.wanari.tutelar.core.{AuthService, DatabaseService, HookService, JwtService}
 import com.wanari.tutelar.util.{DateTimeUtil, IdGenerator}
@@ -12,8 +12,7 @@ class AuthServiceImpl[F[_]: Monad](
     hookService: HookService[F],
     idGenerator: IdGenerator[F],
     timeService: DateTimeUtil[F],
-    jwtService: F[JwtService[F]],
-    authConfig: () => F[AuthConfig]
+    jwtService: F[JwtService[F]]
 ) extends AuthService[F] {
   import cats.syntax.applicative._
   import cats.syntax.flatMap._
@@ -24,15 +23,12 @@ class AuthServiceImpl[F[_]: Monad](
       externalId: String,
       customData: String,
       providedData: JsObject
-  ): F[CallbackUrl] = {
+  ): F[Token] = {
     for {
       account_hookresponse <- createOrUpdateAccount(authType, externalId, customData, providedData)
       (account, hookResponse) = account_hookresponse
       token <- createJwt(account, hookResponse)
-      url   <- createCallbackUrl(token)
-    } yield {
-      url
-    }
+    } yield token
   }
 
   private def createOrUpdateAccount(
@@ -81,17 +77,11 @@ class AuthServiceImpl[F[_]: Monad](
       data    <- createJwtData(account, extraData)
       service <- jwtService
       jwt     <- service.encode(data)
-    } yield {
-      jwt
-    }
+    } yield jwt
   }
 
   private def createJwtData(account: Account, extraData: JsObject): F[JsObject] = {
     import com.wanari.tutelar.util.SpraySyntax._
     (extraData + ("id" -> JsString(account.userId))).pure
-  }
-
-  private def createCallbackUrl(token: String): F[CallbackUrl] = {
-    authConfig().map(_.callback.replace("<<TOKEN>>", token))
   }
 }
