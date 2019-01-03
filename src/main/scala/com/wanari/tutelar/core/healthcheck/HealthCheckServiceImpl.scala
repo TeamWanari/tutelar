@@ -1,12 +1,13 @@
 package com.wanari.tutelar.core.healthcheck
 
 import cats.MonadError
-import com.wanari.tutelar.core.{ConfigService, DatabaseService}
+import com.wanari.tutelar.core.config.ServerConfig
+import com.wanari.tutelar.core.DatabaseService
 import com.wanari.tutelar.core.healthcheck.HealthCheckService.HealthCheckResult
 
 class HealthCheckServiceImpl[F[_]](
     implicit F: MonadError[F, Throwable],
-    config: ConfigService[F],
+    config: ServerConfig[F],
     databaseService: DatabaseService[F]
 ) extends HealthCheckService[F] {
   import cats.syntax.applicativeError._

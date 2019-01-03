@@ -78,5 +78,6 @@ class DatabaseServiceImpl(db: Database)(implicit ec: ExecutionContext) extends D
 }
 
 object DatabaseServiceImpl {
+  //TODO this is an uncontrolled read from the config
   def getDatabase: Database = Database.forConfig("database")
 }

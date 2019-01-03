@@ -23,7 +23,7 @@ object Api {
   def createApi(services: Services[Future]): Route = {
     import com.wanari.tutelar.providers.oauth2.OAuth2Api._
     import services._
-    import services.configService._
+    import services.configService.runtimeConfig._
 
     val api = Seq(
       new HealthCheckApi(),

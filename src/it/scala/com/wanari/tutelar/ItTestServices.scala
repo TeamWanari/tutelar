@@ -1,6 +1,7 @@
 package com.wanari.tutelar
 
 import com.wanari.tutelar.core._
+import com.wanari.tutelar.core.config.{ServerConfig, ServerConfigImpl}
 import com.wanari.tutelar.core.healthcheck.{HealthCheckService, HealthCheckServiceImpl}
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl
 import com.wanari.tutelar.core.impl.{AuthServiceImpl, DatabaseServiceMemImpl, HookServiceImpl}
@@ -12,8 +13,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class ItTestServices(implicit ec: ExecutionContext) extends Services[Future] {
   import cats.instances.future._
-  override implicit lazy val configService: ConfigService[Future] = new ConfigServiceImpl[Future]
-  import configService._
+  override implicit lazy val configService: ServerConfig[Future] = new ServerConfigImpl[Future]
+  import configService.runtimeConfig._
   override implicit lazy val healthCheckService: HealthCheckService[Future] = new HealthCheckServiceImpl[Future]
   override implicit lazy val databaseService: DatabaseService[Future]       = new DatabaseServiceMemImpl[Future]
 

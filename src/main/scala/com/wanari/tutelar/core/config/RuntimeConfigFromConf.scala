@@ -1,5 +1,4 @@
-package com.wanari.tutelar.core
-
+package com.wanari.tutelar.core.config
 import java.util.concurrent.TimeUnit
 
 import cats.Monad
@@ -12,13 +11,11 @@ import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 
 import scala.concurrent.duration.FiniteDuration
 
-class ConfigServiceImpl[F[_]: Monad]() extends ConfigService[F] {
+class RuntimeConfigFromConf[F[_]: Monad](filepath: String) extends RuntimeConfig[F] {
   import cats.syntax.applicative._
-  private lazy val conf: Config = ConfigFactory.load
+  private lazy val conf: Config = ConfigFactory.load(filepath)
 
-  lazy val getVersion: F[String]  = conf.getString("version").pure
-  lazy val getHostname: F[String] = conf.getString("hostname").pure
-  lazy val getRootUrl: F[String]  = conf.getString("rootUrl").pure
+  lazy val getRootUrl: F[String] = conf.getString("rootUrl").pure
 
   implicit val jwtConfig: () => F[JwtConfig]           = readJwtConfig _
   implicit val callbackConfig: () => F[CallbackConfig] = readCallbackConfig _
@@ -85,18 +82,4 @@ class ConfigServiceImpl[F[_]: Monad]() extends ConfigService[F] {
       config.getString("scopes").split(",").toSeq
     )
   }.pure
-}
-
-trait ConfigService[F[_]] {
-  def getVersion: F[String]
-  def getHostname: F[String]
-
-  implicit val callbackConfig: () => F[CallbackConfig]
-  implicit val jwtConfig: () => F[JwtConfig]
-  implicit val hookConfig: () => F[HookConfig]
-
-  val facebookConfig: () => F[OAuth2Config]
-  val githubConfig: () => F[OAuth2Config]
-  val googleConfig: () => F[OAuth2Config]
-  implicit val ldapConfig: () => F[LdapConfig]
 }

@@ -3,6 +3,7 @@ package com.wanari.tutelar
 import akka.actor.ActorSystem
 import akka.stream.Materializer
 import com.wanari.tutelar.core._
+import com.wanari.tutelar.core.config.{ServerConfig, ServerConfigImpl}
 import com.wanari.tutelar.core.healthcheck.{HealthCheckService, HealthCheckServiceImpl}
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl
 import com.wanari.tutelar.core.impl.{AuthServiceImpl, CsrfServiceNotChecked, DatabaseServiceImpl, HookServiceImpl}
@@ -13,7 +14,7 @@ import com.wanari.tutelar.util._
 import scala.concurrent.{ExecutionContext, Future}
 
 trait Services[F[_]] {
-  implicit val configService: ConfigService[F]
+  implicit val configService: ServerConfig[F]
   implicit val healthCheckService: HealthCheckService[F]
   implicit val facebookService: FacebookService[F]
   implicit val githubService: GithubService[F]
@@ -32,17 +33,19 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
 
   import cats.instances.future._
 
-  implicit lazy val configService: ConfigService[Future] = new ConfigServiceImpl[Future]
-  import configService._
+  implicit lazy val configService: ServerConfig[Future] = new ServerConfigImpl[Future]
+  import configService.runtimeConfig._
 
   implicit lazy val healthCheckService: HealthCheckService[Future] = new HealthCheckServiceImpl[Future]
   implicit lazy val databaseService: DatabaseService[Future]       = new DatabaseServiceImpl(DatabaseServiceImpl.getDatabase)
   implicit lazy val httpWrapper: HttpWrapper[Future]               = new AkkaHttpWrapper()
   implicit lazy val csrfService: CsrfService[Future]               = new CsrfServiceNotChecked[Future]
   implicit lazy val facebookService: FacebookService[Future] =
-    new FacebookService[Future](configService.facebookConfig)
-  implicit lazy val githubService: GithubService[Future]   = new GithubService[Future](configService.githubConfig)
-  implicit lazy val googleService: GoogleService[Future]   = new GoogleService[Future](configService.googleConfig)
+    new FacebookService[Future](configService.runtimeConfig.facebookConfig)
+  implicit lazy val githubService: GithubService[Future] =
+    new GithubService[Future](configService.runtimeConfig.githubConfig)
+  implicit lazy val googleService: GoogleService[Future] =
+    new GoogleService[Future](configService.runtimeConfig.googleConfig)
   implicit lazy val jwtService: Future[JwtService[Future]] = JwtServiceImpl.create
   implicit lazy val idGenerator: IdGenerator[Future]       = new IdGeneratorImpl[Future]
   implicit lazy val dateTimeService: DateTimeUtil[Future]  = new DateTimeUtilImpl[Future]

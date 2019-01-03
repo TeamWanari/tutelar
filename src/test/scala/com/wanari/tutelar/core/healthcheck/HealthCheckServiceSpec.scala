@@ -1,8 +1,9 @@
 package com.wanari.tutelar.core.healthcheck
 
 import com.wanari.tutelar.TestBase
+import com.wanari.tutelar.core.config.ServerConfig
 import com.wanari.tutelar.core.healthcheck.HealthCheckService.HealthCheckResult
-import com.wanari.tutelar.core.{ConfigService, DatabaseService}
+import com.wanari.tutelar.core.DatabaseService
 import org.mockito.Mockito.when
 
 import scala.util.{Failure, Success, Try}
@@ -11,7 +12,7 @@ class HealthCheckServiceSpec extends TestBase {
 
   trait TestScope {
     import cats.instances.try_._
-    implicit val configService: ConfigService[Try]         = mock[ConfigService[Try]]
+    implicit val configService: ServerConfig[Try]          = mock[ServerConfig[Try]]
     implicit val databaseServiceMock: DatabaseService[Try] = mock[DatabaseService[Try]]
     val service                                            = new HealthCheckServiceImpl[Try]()
   }
