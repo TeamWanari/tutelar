@@ -25,7 +25,7 @@ trait OAuth2Api extends ProviderApi {
         } ~
           path("callback") {
             parameters(('code.as[String], 'state.as[String])).as(CodeAndState) { codeAndState =>
-              completeLoginFlow(service.authenticateWithCallback(codeAndState.code, codeAndState.state))
+              completeLoginFlowWithRedirect(service.authenticateWithCallback(codeAndState.code, codeAndState.state))
             }
           }
       }
