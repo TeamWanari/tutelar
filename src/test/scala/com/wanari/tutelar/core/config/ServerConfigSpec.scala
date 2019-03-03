@@ -14,7 +14,7 @@ class ServerConfigSpec extends TestBase {
 
   "can create RuntimeConf from conf" in {
     val service = new ServerConfigImpl[Id]()
-    service.runtimeConfig.callbackConfig().accessDenied shouldEqual "accessDeniedUrl"
+    service.runtimeConfig.callbackConfig().failure shouldEqual "url?e=<<ERROR>>"
   }
 
 }

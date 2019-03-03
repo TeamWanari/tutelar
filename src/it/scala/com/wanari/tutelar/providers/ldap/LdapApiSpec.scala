@@ -28,7 +28,7 @@ class LdapApiSpec extends RouteTestBase {
       when(services.ldapService.login(any[String], any[String])) thenReturn Future.failed(new Exception())
       Get(s"/ldap/login?username=user&password=pw") ~> route ~> check {
         status shouldEqual StatusCodes.Found
-        headers should contain(Location(Uri("https://lvh.me:9443/index.html?access_denied")))
+        headers should contain(Location(Uri("https://lvh.me:9443/index.html?error=AUTHENTICATION_FAILED")))
       }
     }
   }

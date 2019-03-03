@@ -41,7 +41,7 @@ class RuntimeConfigFromConf[F[_]: Monad](filepath: String) extends RuntimeConfig
     val config = conf.getConfig("callback")
     CallbackConfig(
       config.getString("success"),
-      config.getString("accessDenied")
+      config.getString("failure")
     )
   }.pure
 

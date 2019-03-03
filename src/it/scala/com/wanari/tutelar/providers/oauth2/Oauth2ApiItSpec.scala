@@ -49,7 +49,7 @@ class Oauth2ApiItSpec extends RouteTestBase {
         ) thenReturn Future.failed(new Exception())
         Get(s"/$provider/callback?code=a&state=b") ~> route ~> check {
           status shouldEqual StatusCodes.Found
-          headers should contain(Location(Uri("https://lvh.me:9443/index.html?access_denied")))
+          headers should contain(Location(Uri("https://lvh.me:9443/index.html?error=AUTHENTICATION_FAILED")))
         }
       }
       "rejects on bad/missing query parameters" in new BaseTestScope {

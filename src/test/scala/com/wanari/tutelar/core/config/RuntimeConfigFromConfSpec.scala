@@ -13,8 +13,8 @@ class RuntimeConfigFromConfSpec extends TestBase {
   "reads the input file" in {
     val origin = new RuntimeConfigFromConf[Id](confFile)
     val dummy  = new RuntimeConfigFromConf[Id]("dummyconf.conf")
-    origin.callbackConfig().accessDenied shouldEqual "accessDeniedUrl"
-    dummy.callbackConfig().accessDenied shouldEqual "denied"
+    origin.callbackConfig().failure shouldEqual "url?e=<<ERROR>>"
+    dummy.callbackConfig().failure shouldEqual "denied"
   }
 
   "oauth2 related" should {
@@ -56,7 +56,7 @@ class RuntimeConfigFromConfSpec extends TestBase {
     val service = new RuntimeConfigFromConf[Id](confFile)
     val config  = service.callbackConfig()
     config.success shouldEqual "url?t=<<TOKEN>>"
-    config.accessDenied shouldEqual "accessDeniedUrl"
+    config.failure shouldEqual "url?e=<<ERROR>>"
   }
   "#getHookConfig" in {
     val service = new RuntimeConfigFromConf[Id](confFile)
