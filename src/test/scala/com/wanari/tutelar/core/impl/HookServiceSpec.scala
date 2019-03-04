@@ -11,7 +11,7 @@ import com.wanari.tutelar.core.HookService.{BasicAuthConfig, HookConfig}
 import com.wanari.tutelar.util.{AkkaHttpWrapper, HttpWrapper}
 import org.mockito.ArgumentMatchersSugar.any
 import org.mockito.Mockito.{verify, when}
-import org.mockito.captor.Captor
+import org.mockito.ArgumentCaptor
 import spray.json.{JsObject, JsString, JsTrue}
 
 import scala.concurrent.Future
@@ -138,21 +138,21 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
   }
 
   def validateBasicAuth(httpMock: HttpWrapper[Future]): Unit = {
-    val request = Captor[HttpRequest]
-    verify(httpMock).singleRequest(request)
-    request.value.getHeader("Authorization").get().value() shouldEqual "Basic dXNlcjpwYXNz"
+    val captor: ArgumentCaptor[HttpRequest] = ArgumentCaptor.forClass(classOf[HttpRequest])
+    verify(httpMock).singleRequest(captor.capture())
+    captor.getValue.getHeader("Authorization").get().value() shouldEqual "Basic dXNlcjpwYXNz"
   }
 
   def validateRequest(httpMock: HttpWrapper[Future])(expectedUrl: String, expectedRequest: Any): Unit = {
-    val request = Captor[HttpRequest]
-    verify(httpMock).singleRequest(request)
+    val captor: ArgumentCaptor[HttpRequest] = ArgumentCaptor.forClass(classOf[HttpRequest])
+    verify(httpMock).singleRequest(captor.capture())
 
-    request.value.uri.toString() shouldEqual expectedUrl
-    request.value.method shouldEqual HttpMethods.POST
+    captor.getValue.uri.toString() shouldEqual expectedUrl
+    captor.getValue.method shouldEqual HttpMethods.POST
 
     import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
     import spray.json.DefaultJsonProtocol._
-    await(Unmarshal(request.value.entity).to[JsObject]) shouldEqual expectedRequest
+    await(Unmarshal(captor.getValue.entity).to[JsObject]) shouldEqual expectedRequest
   }
 
 }

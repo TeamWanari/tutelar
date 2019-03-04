@@ -1,4 +1,4 @@
-FROM hseeberger/scala-sbt:8u181_2.12.7_1.2.6
+FROM hseeberger/scala-sbt:8u181_2.12.8_1.2.8
 
 # resolve dependencies first (cache)
 COPY build.sbt /app/build.sbt

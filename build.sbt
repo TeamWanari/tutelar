@@ -1,7 +1,7 @@
 import org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings
 
 lazy val commonSettings = Seq(
-  scalaVersion := "2.12.7",
+  scalaVersion := "2.12.8",
   organization := "com.wanari",
   scalafmtOnCompile := true
 )
@@ -30,28 +30,29 @@ lazy val root = (project in file("."))
       "-Xlint"
     ),
     libraryDependencies ++= {
-      val akkaHttpV  = "10.1.5"
-      val akkaV      = "2.5.12"
+      val akkaHttpV  = "10.1.7"
+      val akkaV      = "2.5.21"
       val scalaTestV = "3.0.5"
       Seq(
-        "org.typelevel"        %% "cats-core"               % "1.4.0",
+        "org.typelevel"        %% "cats-core"               % "1.6.0",
         "com.typesafe.akka"    %% "akka-http"               % akkaHttpV,
         "com.typesafe.akka"    %% "akka-http-spray-json"    % akkaHttpV,
         "com.typesafe.akka"    %% "akka-http-testkit"       % akkaHttpV % "it,test",
         "com.typesafe.akka"    %% "akka-actor"              % akkaV,
         "com.typesafe.akka"    %% "akka-stream"             % akkaV,
         "com.typesafe.akka"    %% "akka-slf4j"              % akkaV,
+        "com.typesafe.akka"    %% "akka-testkit"            % akkaV % "it,test",
         "ch.qos.logback"       % "logback-classic"          % "1.2.3",
-        "net.logstash.logback" % "logstash-logback-encoder" % "5.2",
-        "org.slf4j"            % "jul-to-slf4j"             % "1.7.25",
-        "com.typesafe.slick"   %% "slick"                   % "3.2.3",
-        "com.typesafe.slick"   %% "slick-hikaricp"          % "3.2.3",
+        "net.logstash.logback" % "logstash-logback-encoder" % "5.3",
+        "org.slf4j"            % "jul-to-slf4j"             % "1.7.26",
+        "com.typesafe.slick"   %% "slick"                   % "3.3.0",
+        "com.typesafe.slick"   %% "slick-hikaricp"          % "3.3.0",
         "org.postgresql"       % "postgresql"               % "42.2.5",
-        "com.pauldijou"        %% "jwt-core"                % "0.19.0",
-        "com.pauldijou"        %% "jwt-spray-json"          % "0.19.0",
+        "com.pauldijou"        %% "jwt-core"                % "2.1.0",
+        "com.pauldijou"        %% "jwt-spray-json"          % "2.1.0",
         "org.scalatest"        %% "scalatest"               % scalaTestV % "it,test",
-        "org.mockito"          % "mockito-core"             % "2.23.0" % "it,test",
-        "org.mockito"          %% "mockito-scala"           % "0.4.6" % "it,test"
+        "org.mockito"          % "mockito-core"             % "2.24.5" % "it,test",
+        "org.mockito"          %% "mockito-scala"           % "1.2.0" % "it,test"
       )
     }
   )
@@ -61,8 +62,8 @@ addCommandAlias("testAll", "; test ; it:test")
 
 enablePlugins(JavaAppPackaging)
 
-addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.6")
-addCompilerPlugin("io.tryp"        % "splain"          % "0.3.4" cross CrossVersion.patch)
+addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.9")
+addCompilerPlugin("io.tryp"        % "splain"          % "0.4.0" cross CrossVersion.patch)
 
 import com.typesafe.sbt.packager.docker._
 dockerExposedPorts := Seq(9000)
