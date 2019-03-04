@@ -68,6 +68,16 @@ trait OAuth2Service[F[_]] {
     } yield token
   }
 
+  def authenticateWithAccessToken(accessToken: String)(implicit me: MonadError[F, Throwable]): F[Token] = {
+    import cats.syntax.flatMap._
+    import cats.syntax.functor._
+
+    for {
+      profile <- getProfile(TokenResponseHelper(accessToken))
+      token   <- authService.registerOrLogin(TYPE, profile.id, accessToken, profile.data)
+    } yield token
+  }
+
   protected def getSelfRedirectUri(implicit applicative: Applicative[F]): F[Uri] = {
     import cats.syntax.functor._
     oAuth2config().map { config =>

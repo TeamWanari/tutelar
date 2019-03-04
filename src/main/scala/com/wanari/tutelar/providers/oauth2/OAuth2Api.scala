@@ -5,7 +5,9 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import com.wanari.tutelar.core.ProviderApi
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
-import com.wanari.tutelar.providers.oauth2.OAuth2Api.CodeAndState
+import com.wanari.tutelar.providers.oauth2.OAuth2Api.{AccessToken, CodeAndState}
+import spray.json._
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 
 import scala.concurrent.Future
 import scala.util.Success
@@ -18,10 +20,15 @@ trait OAuth2Api extends ProviderApi {
     pathPrefix(service.TYPE.toLowerCase) {
       extractExecutionContext { implicit executor =>
         path("login") {
-          onComplete(service.generateIdentifierUrl) {
-            case Success(value) => redirect(value, StatusCodes.Found)
-            case _              => complete(StatusCodes.Unauthorized)
-          }
+          post {
+            entity(as[AccessToken]) { data =>
+              completeLoginFlowWithJson(service.authenticateWithAccessToken(data.accessToken))
+            }
+          } ~
+            onComplete(service.generateIdentifierUrl) {
+              case Success(value) => redirect(value, StatusCodes.Found)
+              case _              => complete(StatusCodes.Unauthorized)
+            }
         } ~
           path("callback") {
             parameters(('code.as[String], 'state.as[String])).as(CodeAndState) { codeAndState =>
@@ -42,4 +49,8 @@ object OAuth2Api {
       extends OAuth2Api {}
 
   case class CodeAndState(code: String, state: String)
+  case class AccessToken(accessToken: String)
+
+  import DefaultJsonProtocol._
+  implicit val accessTokenFormat: RootJsonFormat[AccessToken] = jsonFormat1(AccessToken)
 }

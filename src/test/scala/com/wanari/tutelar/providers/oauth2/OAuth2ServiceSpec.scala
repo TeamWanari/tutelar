@@ -121,6 +121,13 @@ class OAuth2ServiceSpec extends TestBase {
 
       service.authenticateWithCallback("code", "state").get shouldBe "ultimateUri"
     }
+
+    "authenticateWithAccessToken correctly" in new Scope {
+      when(service.authService.registerOrLogin("dummy", "id", "token", JsObject("raw" -> JsTrue))) thenReturn Try(
+        "ultimateUri"
+      )
+      service.authenticateWithAccessToken("token").get shouldBe "ultimateUri"
+    }
   }
 
 }
