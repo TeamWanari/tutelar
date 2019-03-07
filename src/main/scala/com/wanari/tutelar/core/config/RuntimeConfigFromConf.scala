@@ -6,8 +6,8 @@ import com.typesafe.config.{Config, ConfigFactory}
 import com.wanari.tutelar.core.HookService.{BasicAuthConfig, HookConfig}
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
-import com.wanari.tutelar.providers.ldap.LdapServiceImpl.LdapConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
+import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
 
 import scala.concurrent.duration.FiniteDuration
 

@@ -2,8 +2,8 @@ package com.wanari.tutelar
 
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import com.wanari.tutelar.providers.ldap.LdapService
 import com.wanari.tutelar.providers.oauth2.{FacebookService, GithubService, GoogleService}
+import com.wanari.tutelar.providers.userpass.ldap.LdapService
 import org.mockito.Mockito.when
 
 import scala.concurrent.Future

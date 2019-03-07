@@ -1,4 +1,5 @@
-package com.wanari.tutelar.providers.ldap
+package com.wanari.tutelar.providers.userpass
+
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import com.wanari.tutelar.core.ProviderApi
@@ -7,11 +8,12 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 
 import scala.concurrent.Future
 
-class LdapApi(implicit val service: LdapService[Future], val callbackConfig: () => Future[CallbackConfig])
-    extends ProviderApi {
+trait UserPassApi extends ProviderApi {
+  protected val service: UserPassService[Future]
+  protected val servicePath: String
 
   override def route(): Route = {
-    pathPrefix("ldap") {
+    pathPrefix(servicePath) {
       path("login") {
         post {
           entity(as[LoginData]) { data =>

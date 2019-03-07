@@ -1,4 +1,4 @@
-package com.wanari.tutelar.providers.ldap
+package com.wanari.tutelar.providers.userpass.ldap
 
 import com.wanari.tutelar.{AwaitUtil, ItTestServices}
 import org.mockito.MockitoSugar
@@ -7,7 +7,7 @@ import org.scalatest.{Matchers, WordSpecLike}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class LdapServiceItSpec extends WordSpecLike with Matchers with AwaitUtil with MockitoSugar {
+class LdapServiceImplItSpec extends WordSpecLike with Matchers with AwaitUtil with MockitoSugar {
 
   private val services = new ItTestServices {
     import configService.runtimeConfig._

@@ -4,8 +4,8 @@ import com.typesafe.config.Config
 import com.wanari.tutelar.core.HookService.HookConfig
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
-import com.wanari.tutelar.providers.ldap.LdapServiceImpl.LdapConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
+import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
 
 trait RuntimeConfig[F[_]] {
   implicit val callbackConfig: () => F[CallbackConfig]

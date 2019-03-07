@@ -1,6 +1,6 @@
-package com.wanari.tutelar.providers.ldap
+package com.wanari.tutelar.providers.userpass
 import com.wanari.tutelar.core.AuthService.Token
 
-trait LdapService[F[_]] {
+trait UserPassService[F[_]] {
   def login(username: String, password: String): F[Token]
 }

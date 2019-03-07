@@ -1,10 +1,10 @@
-package com.wanari.tutelar.providers.ldap
+package com.wanari.tutelar.providers.userpass.ldap
 
 import java.util.Properties
 
 import com.wanari.tutelar.core.AuthService
 import com.wanari.tutelar.core.AuthService.Token
-import com.wanari.tutelar.providers.ldap.LdapServiceImpl.LdapConfig
+import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
 import javax.naming.Context
 import javax.naming.directory.{Attributes, InitialDirContext, SearchControls, SearchResult}
 import spray.json.{JsArray, JsBoolean, JsNull, JsNumber, JsObject, JsString, JsValue}
