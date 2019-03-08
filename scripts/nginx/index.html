@@ -7,21 +7,32 @@
 <body>
     <div id="loginfailed" style="display: none"><b style="color: red">Login failed!</b></div>
     <div id="login" style="display: none">
-        Log in with...
-        <div>
-            <h4>LDAP</h4>
-            <form action="/ldap/login" method="get">
-                <label>User <input type="text" name="username"/></label><br/>
-                <label>Pass <input type="password" name="password"/></label><br/>
-                <input type="submit" value="Login"/>
-            </form>
-            <h4>GitHub</h4>
-            <a href="/github/login">Login...</a>
-            <h4>Facebook</h4>
-            <a href="/facebook/login">Login...</a>
-            <h4>Google</h4>
-            <a href="/google/login">Login...</a>
-        </div>
+        <h2>Register with...</h2>
+        <h4>Basic</h4>
+        <form action="/basic/register" method="get">
+            <label>User <input type="text" name="username"/></label><br/>
+            <label>Pass <input type="password" name="password"/></label><br/>
+            <input type="submit" value="Register"/>
+        </form>
+        <h2>Log in with...</h2>
+        <h4>Basic</h4>
+        <form action="/basic/login" method="get">
+            <label>User <input type="text" name="username"/></label><br/>
+            <label>Pass <input type="password" name="password"/></label><br/>
+            <input type="submit" value="Login"/>
+        </form>
+        <h4>LDAP</h4>
+        <form action="/ldap/login" method="get">
+            <label>User <input type="text" name="username"/></label><br/>
+            <label>Pass <input type="password" name="password"/></label><br/>
+            <input type="submit" value="Login"/>
+        </form>
+        <h4>GitHub</h4>
+        <a href="/github/login">Login...</a>
+        <h4>Facebook</h4>
+        <a href="/facebook/login">Login...</a>
+        <h4>Google</h4>
+        <a href="/google/login">Login...</a>
     </div>
     <div id="authenticated" style="display: none">
         Hello <b><span id="userid"></span></b>!<br/>

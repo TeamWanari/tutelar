@@ -8,6 +8,7 @@ import com.wanari.tutelar.core.healthcheck.{HealthCheckService, HealthCheckServi
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl
 import com.wanari.tutelar.core.impl.{AuthServiceImpl, CsrfServiceNotChecked, DatabaseServiceImpl, HookServiceImpl}
 import com.wanari.tutelar.providers.oauth2.{FacebookService, GithubService, GoogleService}
+import com.wanari.tutelar.providers.userpass.basic.{BasicProviderService, BasicProviderServiceImpl}
 import com.wanari.tutelar.providers.userpass.ldap.{LdapService, LdapServiceImpl}
 import com.wanari.tutelar.util._
 
@@ -26,6 +27,7 @@ trait Services[F[_]] {
   implicit val hookService: HookService[F]
   implicit val authService: AuthService[F]
   implicit val ldapService: LdapService[F]
+  implicit val basicLoginService: BasicProviderService[F]
 }
 
 class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, materializer: Materializer)
@@ -46,10 +48,11 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
     new GithubService[Future](configService.runtimeConfig.githubConfig)
   implicit lazy val googleService: GoogleService[Future] =
     new GoogleService[Future](configService.runtimeConfig.googleConfig)
-  implicit lazy val jwtService: Future[JwtService[Future]] = JwtServiceImpl.create
-  implicit lazy val idGenerator: IdGenerator[Future]       = new IdGeneratorImpl[Future]
-  implicit lazy val dateTimeService: DateTimeUtil[Future]  = new DateTimeUtilImpl[Future]
-  implicit lazy val hookService: HookService[Future]       = new HookServiceImpl[Future]
-  implicit lazy val authService: AuthService[Future]       = new AuthServiceImpl[Future]
-  implicit lazy val ldapService: LdapService[Future]       = new LdapServiceImpl
+  implicit lazy val jwtService: Future[JwtService[Future]]          = JwtServiceImpl.create
+  implicit lazy val idGenerator: IdGenerator[Future]                = new IdGeneratorImpl[Future]
+  implicit lazy val dateTimeService: DateTimeUtil[Future]           = new DateTimeUtilImpl[Future]
+  implicit lazy val hookService: HookService[Future]                = new HookServiceImpl[Future]
+  implicit lazy val authService: AuthService[Future]                = new AuthServiceImpl[Future]
+  implicit lazy val ldapService: LdapService[Future]                = new LdapServiceImpl
+  implicit lazy val basicLoginService: BasicProviderService[Future] = new BasicProviderServiceImpl[Future]()
 }

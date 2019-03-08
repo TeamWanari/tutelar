@@ -6,6 +6,7 @@ import com.wanari.tutelar.core.healthcheck.{HealthCheckService, HealthCheckServi
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl
 import com.wanari.tutelar.core.impl.{AuthServiceImpl, DatabaseServiceMemImpl, HookServiceImpl}
 import com.wanari.tutelar.providers.oauth2.{FacebookService, GithubService, GoogleService, OAuth2Service}
+import com.wanari.tutelar.providers.userpass.basic.{BasicProviderService, BasicProviderServiceImpl}
 import com.wanari.tutelar.providers.userpass.ldap.LdapService
 import com.wanari.tutelar.util._
 
@@ -40,4 +41,6 @@ class ItTestServices(implicit ec: ExecutionContext) extends Services[Future] {
   }
 
   override implicit lazy val ldapService: LdapService[Future] = null
+
+  override implicit lazy val basicLoginService: BasicProviderService[Future] = new BasicProviderServiceImpl[Future]()
 }

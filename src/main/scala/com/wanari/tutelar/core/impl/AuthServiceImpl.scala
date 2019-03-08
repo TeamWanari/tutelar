@@ -1,6 +1,7 @@
 package com.wanari.tutelar.core.impl
 
 import cats.Monad
+import cats.data.OptionT
 import com.wanari.tutelar.core.AuthService.Token
 import com.wanari.tutelar.core.DatabaseService.{Account, User}
 import com.wanari.tutelar.core.{AuthService, DatabaseService, HookService, JwtService}
@@ -29,6 +30,10 @@ class AuthServiceImpl[F[_]: Monad](
       (account, hookResponse) = account_hookresponse
       token <- createJwt(account, hookResponse)
     } yield token
+  }
+
+  override def findCustomData(authType: String, externalId: String): OptionT[F, String] = {
+    OptionT(databaseService.findAccountByTypeAndExternalId((authType, externalId))).map(_.customData)
   }
 
   private def createOrUpdateAccount(

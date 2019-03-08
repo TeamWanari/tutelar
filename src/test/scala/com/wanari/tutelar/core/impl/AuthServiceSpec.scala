@@ -84,4 +84,15 @@ class AuthServiceSpec extends TestBase {
     }
   }
 
+  "#findCustomData" when {
+    "user found" in new TestScope {
+      service.findCustomData(savedAccount.authType, savedAccount.externalId).value shouldEqual Some(
+        savedAccount.customData
+      )
+    }
+    "user not found" in new TestScope {
+      service.findCustomData(authType, externalId).value shouldEqual None
+    }
+  }
+
 }

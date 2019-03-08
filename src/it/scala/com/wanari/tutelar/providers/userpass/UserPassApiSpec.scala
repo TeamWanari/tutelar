@@ -74,4 +74,56 @@ class UserPassApiSpec extends RouteTestBase {
     }
   }
 
+  "GET /testPath/register" should {
+    "forward the username and password to service" in new TestScope {
+      when(serviceMock.register(any[String], any[String])) thenReturn Future.successful("TOKEN")
+      Get("/testPath/register?username=user&password=pw") ~> route ~> check {
+        verify(serviceMock).register("user", "pw")
+      }
+    }
+    "return redirect with callback" in new TestScope {
+      when(serviceMock.register(any[String], any[String])) thenReturn Future.successful("TOKEN")
+      Get("/testPath/register?username=user&password=pw") ~> route ~> check {
+        status shouldEqual StatusCodes.Found
+        headers should contain(Location(Uri("https://lvh.me:9443/index.html?token=TOKEN")))
+      }
+    }
+    "return redirect with error" in new TestScope {
+      when(serviceMock.register(any[String], any[String])) thenReturn Future.failed(new Exception())
+      Get("/testPath/register?username=user&password=pw") ~> route ~> check {
+        status shouldEqual StatusCodes.Found
+        headers should contain(Location(Uri("https://lvh.me:9443/index.html?error=AUTHENTICATION_FAILED")))
+      }
+    }
+  }
+
+  "POST /testPath/register" should {
+    val postregisterRequest = {
+      val jsonRequest = LoginData("user", "pw").toJson.compactPrint
+      val entity      = HttpEntity(MediaTypes.`application/json`, jsonRequest)
+      Post("/testPath/register").withEntity(entity)
+    }
+
+    "forward the username and password to service" in new TestScope {
+      when(serviceMock.register(any[String], any[String])) thenReturn Future.successful("TOKEN")
+      postregisterRequest ~> route ~> check {
+        verify(serviceMock).register("user", "pw")
+      }
+    }
+    "return redirect with callback" in new TestScope {
+      when(serviceMock.register(any[String], any[String])) thenReturn Future.successful("TOKEN")
+      postregisterRequest ~> route ~> check {
+        status shouldEqual StatusCodes.OK
+        responseAs[TokenData] shouldEqual TokenData("TOKEN")
+      }
+    }
+    "return redirect with error" in new TestScope {
+      when(serviceMock.register(any[String], any[String])) thenReturn Future.failed(new Exception())
+      postregisterRequest ~> route ~> check {
+        status shouldEqual StatusCodes.Unauthorized
+        responseAs[ErrorData] shouldEqual ErrorData("AUTHENTICATION_FAILED")
+      }
+    }
+  }
+
 }
