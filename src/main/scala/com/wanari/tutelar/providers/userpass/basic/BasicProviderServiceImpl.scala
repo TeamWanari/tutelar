@@ -31,6 +31,6 @@ class BasicProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit authS
       token        <- OptionT.liftF(authService.registerOrLogin(authType, username, passwordHash, JsObject()))
     } yield token
 
-    result.value.flatMap(_.pureOrRaise(new Exception()))
+    result.pureOrRaise(new Exception())
   }
 }

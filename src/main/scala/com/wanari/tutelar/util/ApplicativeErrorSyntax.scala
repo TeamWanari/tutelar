@@ -1,6 +1,7 @@
 package com.wanari.tutelar.util
 
-import cats.{Applicative, ApplicativeError}
+import cats.data.OptionT
+import cats.{Applicative, ApplicativeError, MonadError}
 import spray.json.{JsValue, JsonReader}
 
 import scala.util.Try
@@ -12,6 +13,11 @@ object ApplicativeErrorSyntax {
   implicit class OptionErrorOps[A](private val option: Option[A]) extends AnyVal {
     def pureOrRaise[F[_]: ApplicativeError[?[_], Throwable]](t: => Throwable) =
       option.fold(t.raise[F, A])(Applicative[F].pure(_))
+  }
+  implicit class OptionTErrorOps[F[_], A](private val opt: OptionT[F, A]) extends AnyVal {
+    import cats.syntax.flatMap._
+    def pureOrRaise(t: => Throwable)(implicit ev: MonadError[F, Throwable]) =
+      opt.value.flatMap(_.pureOrRaise(t))
   }
   implicit class TryErrorOps[A](private val tri: Try[A]) extends AnyVal {
     def pureOrRise[F[_]: ApplicativeError[?[_], Throwable]] = {
