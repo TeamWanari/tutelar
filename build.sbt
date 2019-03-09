@@ -9,7 +9,21 @@ lazy val commonSettings = Seq(
 lazy val ItTest         = config("it") extend Test
 lazy val itTestSettings = Defaults.itSettings ++ scalafmtConfigSettings
 
-lazy val root = (project in file("."))
+lazy val root = project
+  .in(file("."))
+  .aggregate(core)
+
+lazy val docs = (project in file("docs"))
+  .settings(
+    name := "paradox-docs",
+    paradoxTheme := Some(builtinParadoxTheme("generic")),
+    sourceDirectory in Paradox := sourceDirectory.value / "main" / "paradox"
+  )
+  .enablePlugins(ParadoxPlugin)
+  .enablePlugins(ParadoxSitePlugin)
+  
+
+lazy val core = (project in file("."))
   .configs(ItTest)
   .settings(inConfig(ItTest)(itTestSettings): _*)
   .settings(commonSettings: _*)
