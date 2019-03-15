@@ -17,23 +17,23 @@ trait UserPassApi extends ProviderApi {
       path("login") {
         post {
           entity(as[LoginData]) { data =>
-            completeLoginFlowWithJson(service.login(data.username, data.password))
+            completeLoginFlowWithJson(service.login(data.username, data.password, data.data))
           }
         } ~
           parameters(('username.as[String], 'password.as[String])) {
             case (username, password) =>
-              completeLoginFlowWithRedirect(service.login(username, password))
+              completeLoginFlowWithRedirect(service.login(username, password, None))
           }
       } ~
         path("register") {
           post {
             entity(as[LoginData]) { data =>
-              completeLoginFlowWithJson(service.register(data.username, data.password))
+              completeLoginFlowWithJson(service.register(data.username, data.password, data.data))
             }
           } ~
             parameters(('username.as[String], 'password.as[String])) {
               case (username, password) =>
-                completeLoginFlowWithRedirect(service.register(username, password))
+                completeLoginFlowWithRedirect(service.register(username, password, None))
             }
         }
     }

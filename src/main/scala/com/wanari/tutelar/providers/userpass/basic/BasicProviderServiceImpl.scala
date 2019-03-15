@@ -16,19 +16,19 @@ class BasicProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit authS
   protected def encryptPassword(password: String): String              = BCrypt.hashpw(password, BCrypt.gensalt())
   protected def checkPassword(password: String, hash: String): Boolean = BCrypt.checkpw(password, hash)
 
-  override def register(username: String, password: String): F[Token] = {
+  override def register(username: String, password: String, data: Option[JsObject]): F[Token] = {
     val usernameIsUsed = authService.findCustomData(authType, username).isDefined
     usernameIsUsed.flatMap(if (_) {
       new Exception().raise[F, String]
     } else {
-      authService.registerOrLogin(authType, username, encryptPassword(password), JsObject())
+      authService.registerOrLogin(authType, username, encryptPassword(password), data.getOrElse(JsObject()))
     })
   }
 
-  override def login(username: String, password: String): F[Token] = {
+  override def login(username: String, password: String, data: Option[JsObject]): F[Token] = {
     val result: OptionT[F, Token] = for {
       passwordHash <- authService.findCustomData(authType, username) if checkPassword(password, passwordHash)
-      token        <- OptionT.liftF(authService.registerOrLogin(authType, username, passwordHash, JsObject()))
+      token        <- OptionT.liftF(authService.registerOrLogin(authType, username, passwordHash, data.getOrElse(JsObject())))
     } yield token
 
     result.pureOrRaise(new Exception())

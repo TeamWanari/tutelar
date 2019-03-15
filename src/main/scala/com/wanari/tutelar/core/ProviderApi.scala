@@ -45,12 +45,12 @@ trait ProviderApi extends Api {
 object ProviderApi {
   case class CallbackConfig(success: String, failure: String)
 
-  case class LoginData(username: String, password: String)
+  case class LoginData(username: String, password: String, data: Option[JsObject])
   case class TokenData(token: Token)
   case class ErrorData(error: AuthError)
 
   import DefaultJsonProtocol._
-  implicit val loginDataFormat: RootJsonFormat[LoginData] = jsonFormat2(LoginData)
+  implicit val loginDataFormat: RootJsonFormat[LoginData] = jsonFormat3(LoginData)
   implicit val tokenDataFormat: RootJsonFormat[TokenData] = jsonFormat1(TokenData)
   implicit val errorDataFormat: RootJsonFormat[ErrorData] = jsonFormat1(ErrorData)
 

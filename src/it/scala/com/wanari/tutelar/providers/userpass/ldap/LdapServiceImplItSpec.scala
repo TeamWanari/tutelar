@@ -16,14 +16,14 @@ class LdapServiceImplItSpec extends WordSpecLike with Matchers with AwaitUtil wi
 
   "LdapService" should {
     "alice login" in {
-      await(services.ldapService.login("alice", "alicepw"))
+      await(services.ldapService.login("alice", "alicepw", None))
     }
     "bob login" in {
-      await(services.ldapService.login("bob", "bobpw"))
+      await(services.ldapService.login("bob", "bobpw", None))
     }
     "alice login failed" in {
       assertThrows[Exception] {
-        await(services.ldapService.login("alice", "bobpw"))
+        await(services.ldapService.login("alice", "bobpw", None))
       }
     }
   }
