@@ -1,6 +1,5 @@
 package com.wanari.tutelar.providers.userpass
 
-import akka.http.scaladsl.model.headers.Location
 import akka.http.scaladsl.model._
 import com.wanari.tutelar.RouteTestBase
 import com.wanari.tutelar.core.ProviderApi._
@@ -22,33 +21,11 @@ class UserPassApiSpec extends RouteTestBase {
     }.route()
   }
 
-  "GET /testPath/login" should {
-    "forward the username and password to service" in new TestScope {
-      when(serviceMock.login(any[String], any[String], any[Option[JsObject]])) thenReturn Future.successful("TOKEN")
-      Get("/testPath/login?username=user&password=pw") ~> route ~> check {
-        verify(serviceMock).login("user", "pw", None)
-      }
-    }
-    "return redirect with callback" in new TestScope {
-      when(serviceMock.login(any[String], any[String], any[Option[JsObject]])) thenReturn Future.successful("TOKEN")
-      Get("/testPath/login?username=user&password=pw") ~> route ~> check {
-        status shouldEqual StatusCodes.Found
-        headers should contain(Location(Uri("https://lvh.me:9443/index.html?token=TOKEN")))
-      }
-    }
-    "return redirect with error" in new TestScope {
-      when(serviceMock.login(any[String], any[String], any[Option[JsObject]])) thenReturn Future.failed(new Exception())
-      Get("/testPath/login?username=user&password=pw") ~> route ~> check {
-        status shouldEqual StatusCodes.Found
-        headers should contain(Location(Uri("https://lvh.me:9443/index.html?error=AUTHENTICATION_FAILED")))
-      }
-    }
-  }
+  val jsonRequest = LoginData("user", "pw", Some(JsObject("hello" -> JsTrue))).toJson.compactPrint
+  val entity      = HttpEntity(MediaTypes.`application/json`, jsonRequest)
 
   "POST /testPath/login" should {
     val postLoginRequest = {
-      val jsonRequest = LoginData("user", "pw", Some(JsObject("hello" -> JsTrue))).toJson.compactPrint
-      val entity      = HttpEntity(MediaTypes.`application/json`, jsonRequest)
       Post("/testPath/login").withEntity(entity)
     }
 
@@ -74,35 +51,8 @@ class UserPassApiSpec extends RouteTestBase {
     }
   }
 
-  "GET /testPath/register" should {
-    "forward the username and password to service" in new TestScope {
-      when(serviceMock.register(any[String], any[String], any[Option[JsObject]])) thenReturn Future.successful("TOKEN")
-      Get("/testPath/register?username=user&password=pw") ~> route ~> check {
-        verify(serviceMock).register("user", "pw", None)
-      }
-    }
-    "return redirect with callback" in new TestScope {
-      when(serviceMock.register(any[String], any[String], any[Option[JsObject]])) thenReturn Future.successful("TOKEN")
-      Get("/testPath/register?username=user&password=pw") ~> route ~> check {
-        status shouldEqual StatusCodes.Found
-        headers should contain(Location(Uri("https://lvh.me:9443/index.html?token=TOKEN")))
-      }
-    }
-    "return redirect with error" in new TestScope {
-      when(serviceMock.register(any[String], any[String], any[Option[JsObject]])) thenReturn Future.failed(
-        new Exception()
-      )
-      Get("/testPath/register?username=user&password=pw") ~> route ~> check {
-        status shouldEqual StatusCodes.Found
-        headers should contain(Location(Uri("https://lvh.me:9443/index.html?error=AUTHENTICATION_FAILED")))
-      }
-    }
-  }
-
   "POST /testPath/register" should {
     val postregisterRequest = {
-      val jsonRequest = LoginData("user", "pw", Some(JsObject("hello" -> JsTrue))).toJson.compactPrint
-      val entity      = HttpEntity(MediaTypes.`application/json`, jsonRequest)
       Post("/testPath/register").withEntity(entity)
     }
 
