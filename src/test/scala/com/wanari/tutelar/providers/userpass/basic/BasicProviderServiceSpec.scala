@@ -50,7 +50,8 @@ class BasicProviderServiceSpec extends TestBase {
       BCrypt.checkpw("pw", newUserData.get.customData) shouldBe true
     }
     "send extra data via hook" in new TestScope {
-      service.register("newUser", "pw", Some(JsObject("hello"                        -> JsTrue)))
+      service.register("newUser", "pw", Some(JsObject("hello" -> JsTrue)))
+
       verify(hookService).register(any[String], eqTo("BASIC"), eqTo(JsObject("hello" -> JsTrue)))
     }
     "failure" when {

@@ -21,7 +21,6 @@ lazy val docs = (project in file("docs"))
   )
   .enablePlugins(ParadoxPlugin)
   .enablePlugins(ParadoxSitePlugin)
-  
 
 lazy val core = (project in file("."))
   .configs(ItTest)
