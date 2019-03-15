@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TutelarAuth</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script>
+        function errorNotification(message) {
+            var error = $('#error');
+            error.text(message);
+            error.fadeIn(200, function () {
+                error.fadeOut(3500);
+            });
+        }
+
+        function login(token) {
+            try {
+                var base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+                localStorage.userid = JSON.parse(window.atob(base64)).id;
+            } catch (e) {
+                errorNotification('WRONG TOKEN');
+            } finally {
+                window.location.replace('https://lvh.me:9443/index.html');
+            }
+        }
+
+        function sendForm(url) {
+            var extraData;
+            try {
+                extraData = JSON.parse($('#extra').val());
+            } catch (e) {
+            }
+
+            var formData = {
+                username: $('#username').val(),
+                password: $('#password').val(),
+                data: extraData
+            };
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: JSON.stringify(formData),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                success: function (data) {
+                    login(data.token);
+                }
+            }).fail(function (data) {
+                try {
+                    errorNotification(data.responseJSON.error);
+                } catch (e) {
+                    errorNotification('Unknown error');
+                }
+            });
+        }
+
+        function initButtons() {
+            $('#logout').click(function () {
+                localStorage.removeItem('userid');
+                window.location.replace('https://lvh.me:9443/index.html');
+            });
+
+            $('#register_user_pass').click(function () {
+                sendForm('/basic/register')
+            });
+            $('#login_user_pass').click(function () {
+                sendForm('/basic/login')
+            });
+            $('#login_ldap').click(function () {
+                sendForm('/ldap/login')
+            });
+            $('#login_github').click(function () {
+                window.location.replace('/github/login');
+            });
+            $('#login_facebook').click(function () {
+                window.location.replace('/facebook/login');
+            });
+            $('#login_google').click(function () {
+                window.location.replace('/google/login');
+            });
+        }
+
+        function handleCallbackLogin() {
+            var params = new URLSearchParams(window.location.search);
+            if (params.has('error')) {
+                errorNotification(params.get('error'));
+            }
+            if (params.has('token')) {
+                login(params.get('token'));
+            }
+        }
+
+        $(window).on('load', function () {
+            handleCallbackLogin();
+            initButtons();
+
+            if (!!localStorage.userid) {
+                $('#userid').text(localStorage.userid);
+                $('#authenticated').show();
+            } else {
+                $('#login').show();
+            }
+
+        });
+    </script>
+    <style>
+        label {
+            width: 45px;
+            display: inline-block;
+        }
+
+        div {
+            margin-bottom: 5px;
+        }
+
+        #error {
+            border: 1px solid red;
+            background: lightpink;
+            padding: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div id="login" style="display: none">
+    <p>
+    <div>
+        <label>User:</label><input type="text" id="username"/>
+    </div>
+    <div>
+        <label>Pass:</label><input type="password" id="password"/>
+    </div>
+    <div>
+        <label>Extra Json:</label><textarea id="extra"></textarea>
+    </div>
+    <div>
+        <button id="register_user_pass">Register</button>
+        <button id="login_user_pass">Login</button>
+        <button id="login_ldap">Login with LDAP</button>
+    </div>
+    </p>
+    <p>
+        <button id="login_github">Login with GitHub</button>
+        <button id="login_facebook">Login with Facebook</button>
+        <button id="login_google">Login with Google</button>
+    </p>
+</div>
+
+<div id="authenticated" style="display: none">
+    Hello <b><span id="userid"></span></b>!<br/>
+    <button id="logout">Logout</button>
+</div>
+
+<div id="error" style="display: none"></div>
+</body>
+</html>

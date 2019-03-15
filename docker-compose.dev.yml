@@ -40,7 +40,7 @@ services:
     - ./scripts/nginx/proxy.conf:/etc/nginx/conf.d/default.conf
     - ./scripts/nginx/cert.key:/etc/nginx/ssl/cert.key
     - ./scripts/nginx/cert.pem:/etc/nginx/ssl/cert.pem
-    - ./scripts/nginx/index.html:/var/www/index.html
+    - ./scripts/nginx/www:/var/www
     depends_on:
       - backend
     ports:
