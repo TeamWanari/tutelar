@@ -5,6 +5,7 @@
 * [Flows](flows.md)
 * [Vocabulary](vocabulary.md)
 * [Install](install/index.md)
+* [Use-cases](use-cases/index.md)
 
 @@@
 
