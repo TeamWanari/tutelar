@@ -60,3 +60,10 @@ If you want to go with minimal HTML:
 
 You should add a `href="https://auth.example.com/github/login"` to the `<a>` tag too.
  
+### Mobile implementation
+
+@@@ warning
+
+The correct mobile implementation is not yet designed. (Maybe not even possible/needed.)
+
+@@@

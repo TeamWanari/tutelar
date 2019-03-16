@@ -70,3 +70,10 @@ You should add a `href="https://auth.example.com/facebook/login"` to the `<a>` t
 Or if you want to go with the [official](https://developers.facebook.com/docs/facebook-login/web/login-button/) just use that.
 
  
+### Mobile implementation
+
+@@@ warning
+
+The correct mobile implementation is not yet designed.
+
+@@@

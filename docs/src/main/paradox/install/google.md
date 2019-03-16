@@ -60,3 +60,11 @@ If you want to go with minimal HTML:
 You should add a `href="https://auth.example.com/google/login"` to the `<a>` tag too.
  
 Or if you want to go with the [official](https://developers.google.com/identity/branding-guidelines) just use that.
+
+### Mobile implementation
+
+@@@ warning
+
+The correct mobile implementation is not yet designed.
+
+@@@
