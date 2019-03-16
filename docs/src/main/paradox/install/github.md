@@ -7,7 +7,7 @@ We integrated [the original flow](https://developer.github.com/apps/building-oau
 Before you start, you need to [register/create your application](https://developer.github.com/apps/building-oauth-apps/creating-an-oauth-app/) in your github settings.
 The only nontrivial part is the "callback url".
 For local tests you can use `https://lvh.me:9443/` or `https://localtest.me:9443` (these domains pointed to 127.0.0.1 which will be your local machine).
-For production, you want to use your own domain.
+For production, you want to use your own (tutelar) domain.
 
 @@@ note
 
@@ -21,8 +21,8 @@ Try to make your local tests-env to work over https too!
 After you created your new OAuth app on github, you will need the clientId and clientSecret from their site.
 
 ### Configuration
-You should set the `oauth2.github.clientId`, `oauth2.github.clientSecret` and `oauth2.github.scope` variables.
-The first two cames from the pre-config step. The last one is `read:user` by default, but you use anything from the [official list](https://developer.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/#available-scopes).
+You should set the `oauth2.github.clientId`, `oauth2.github.clientSecret` and `oauth2.github.scopes` variables.
+The first two cames from the pre-config step. The last one is `read:user` by default, but you can use anything from the [official list](https://developer.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/#available-scopes).
 (If you use multiple scopes, you need to separate them with `,` like `a,b,c`.)
 
 Also you should set the `rootUrl` correctly (it is needed for the callbacks). And the `callback.success` and `callback.failure` to handle redirects correctly.

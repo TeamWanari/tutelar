@@ -3,6 +3,8 @@
 @@@ index
 
 * [Github](github.md)
+* [Facebook](facebook.md)
+* [Google](google.md)
 
 @@@
 
@@ -14,7 +16,6 @@ TODO:
  - ldap
  - google
  - facebook
- - github
  - registration callback
  - login callback
  - get an authenticated JWT
