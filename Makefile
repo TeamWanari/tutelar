@@ -26,9 +26,6 @@ test: ## Run tests
 compile: ## Compile
 	$(compose) exec backend bash -c "sbt clean compile"
 
-build: ## Build
-	./scripts/build.sh
-
 rundocs: ## Start docs localhost:4000
 	sbt "project docs" previewAuto
 

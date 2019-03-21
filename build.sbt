@@ -80,12 +80,4 @@ enablePlugins(JavaAppPackaging)
 addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.9")
 addCompilerPlugin("io.tryp"        % "splain"          % "0.4.0" cross CrossVersion.patch)
 
-import com.typesafe.sbt.packager.docker._
-dockerExposedPorts := Seq(9000)
-dockerBaseImage := "openjdk:8"
-dockerCommands ++= Seq(
-  Cmd("ARG", "BUILD_VERSION"),
-  Cmd("ENV", "VERSION=$BUILD_VERSION")
-)
-
 cancelable in Global := true
