@@ -9,6 +9,7 @@ import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl
 import com.wanari.tutelar.core.impl.{AuthServiceImpl, CsrfServiceNotChecked, DatabaseServiceImpl, HookServiceImpl}
 import com.wanari.tutelar.providers.oauth2.{FacebookService, GithubService, GoogleService}
 import com.wanari.tutelar.providers.userpass.basic.{BasicProviderService, BasicProviderServiceImpl}
+import com.wanari.tutelar.providers.userpass.email._
 import com.wanari.tutelar.providers.userpass.ldap.{LdapService, LdapServiceImpl}
 import com.wanari.tutelar.util._
 
@@ -28,6 +29,8 @@ trait Services[F[_]] {
   implicit val authService: AuthService[F]
   implicit val ldapService: LdapService[F]
   implicit val basicLoginService: BasicProviderService[F]
+  implicit val emailService: EmailService[F]
+  implicit val emailLoginService: EmailProviderService[F]
 }
 
 class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, materializer: Materializer)
@@ -55,4 +58,6 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
   implicit lazy val authService: AuthService[Future]                = new AuthServiceImpl[Future]
   implicit lazy val ldapService: LdapService[Future]                = new LdapServiceImpl
   implicit lazy val basicLoginService: BasicProviderService[Future] = new BasicProviderServiceImpl[Future]()
+  implicit lazy val emailService: EmailService[Future]              = new EmailServiceImpl[Future]()
+  implicit lazy val emailLoginService: EmailProviderService[Future] = new EmailProviderServiceImpl[Future]()
 }

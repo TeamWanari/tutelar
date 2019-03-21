@@ -57,7 +57,7 @@ class BasicProviderServiceSpec extends TestBase {
     "failure" when {
       "username is already used" in new TestScope {
         initDb()
-        service.register(savedAccount.externalId, "asd", None)
+        service.register(savedAccount.externalId, "asd", None) shouldBe a[Failure[_]]
       }
     }
   }

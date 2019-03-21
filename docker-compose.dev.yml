@@ -10,10 +10,13 @@ services:
     depends_on:
     - db
     - ldap
+    - emailservice
     entrypoint: "sleep infinity"
     environment:
       DB_URL: "jdbc:postgresql://db:5432/postgres?user=postgres&password=postgres"
       LDAP_URL: "ldap://ldap:389"
+      EMAIL_SERVICE_URL: "http://emailservice:9000"
+      EMAIL_SERVICE_PASSWORD: "super_secret_123"
   db:
     image: postgres:11.0
     environment:
@@ -45,4 +48,20 @@ services:
       - backend
     ports:
     - 9443:9443
+  emailservice:
+    image: ksisu/emailservice
+    volumes:
+    - ./scripts/emailservice/templates:/templates
+    environment:
+      SMTP_HOST: smtp
+      TEMPLATES_DIR: /templates
+      SECRET: super_secret_123
+    ports:
+    - 9010:9000
+    depends_on:
+      - smtp
+  smtp:
+    image: mailhog/mailhog:v1.0.0
+    ports:
+      - 8025:8025/tcp
 

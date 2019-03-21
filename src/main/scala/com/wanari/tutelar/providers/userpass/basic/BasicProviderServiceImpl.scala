@@ -3,18 +3,16 @@ import cats.MonadError
 import cats.data.OptionT
 import com.wanari.tutelar.core.AuthService
 import com.wanari.tutelar.core.AuthService.Token
-import org.mindrot.jbcrypt.BCrypt
+import com.wanari.tutelar.util.PasswordCryptor
 import spray.json.JsObject
 
 class BasicProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit authService: AuthService[F])
-    extends BasicProviderService[F] {
+    extends BasicProviderService[F]
+    with PasswordCryptor {
   import cats.syntax.flatMap._
   import com.wanari.tutelar.util.ApplicativeErrorSyntax._
 
-  private val authType = "BASIC"
-
-  protected def encryptPassword(password: String): String              = BCrypt.hashpw(password, BCrypt.gensalt())
-  protected def checkPassword(password: String, hash: String): Boolean = BCrypt.checkpw(password, hash)
+  protected val authType = "BASIC"
 
   override def register(username: String, password: String, data: Option[JsObject]): F[Token] = {
     val usernameIsUsed = authService.findCustomData(authType, username).isDefined

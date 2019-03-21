@@ -51,33 +51,4 @@ class UserPassApiSpec extends RouteTestBase {
     }
   }
 
-  "POST /testPath/register" should {
-    val postregisterRequest = {
-      Post("/testPath/register").withEntity(entity)
-    }
-
-    "forward the username, password and extra data to service" in new TestScope {
-      when(serviceMock.register(any[String], any[String], any[Option[JsObject]])) thenReturn Future.successful("TOKEN")
-      postregisterRequest ~> route ~> check {
-        verify(serviceMock).register("user", "pw", Some(JsObject("hello" -> JsTrue)))
-      }
-    }
-    "return redirect with callback" in new TestScope {
-      when(serviceMock.register(any[String], any[String], any[Option[JsObject]])) thenReturn Future.successful("TOKEN")
-      postregisterRequest ~> route ~> check {
-        status shouldEqual StatusCodes.OK
-        responseAs[TokenData] shouldEqual TokenData("TOKEN")
-      }
-    }
-    "return redirect with error" in new TestScope {
-      when(serviceMock.register(any[String], any[String], any[Option[JsObject]])) thenReturn Future.failed(
-        new Exception()
-      )
-      postregisterRequest ~> route ~> check {
-        status shouldEqual StatusCodes.Unauthorized
-        responseAs[ErrorData] shouldEqual ErrorData("AUTHENTICATION_FAILED")
-      }
-    }
-  }
-
 }

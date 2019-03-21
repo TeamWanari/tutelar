@@ -20,14 +20,7 @@ trait UserPassApi extends ProviderApi {
             completeLoginFlowWithJson(service.login(data.username, data.password, data.data))
           }
         }
-      } ~
-        path("register") {
-          post {
-            entity(as[LoginData]) { data =>
-              completeLoginFlowWithJson(service.register(data.username, data.password, data.data))
-            }
-          }
-        }
+      }
     }
   }
 }

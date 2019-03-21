@@ -4,6 +4,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import com.wanari.tutelar.core.healthcheck.HealthCheckApi
 import com.wanari.tutelar.providers.userpass.basic.BasicProviderApi
+import com.wanari.tutelar.providers.userpass.email.EmailProviderApi
 import com.wanari.tutelar.providers.userpass.ldap.LdapApi
 
 import scala.concurrent.Future
@@ -32,7 +33,8 @@ object Api {
       new FacebookApi(),
       new GoogleApi(),
       new LdapApi(),
-      new BasicProviderApi()
+      new BasicProviderApi(),
+      new EmailProviderApi()
     )
 
     createRoute(api)

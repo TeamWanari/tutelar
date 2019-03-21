@@ -5,11 +5,20 @@
     <title>TutelarAuth</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script>
+        var params = new URLSearchParams(window.location.search);
+
         function errorNotification(message) {
             var error = $('#error');
             error.text(message);
             error.fadeIn(200, function () {
                 error.fadeOut(3500);
+            });
+        }
+        function infoNotification(message) {
+            var info = $('#info');
+            info.text(message);
+            info.fadeIn(200, function () {
+                info.fadeOut(3500);
             });
         }
 
@@ -54,6 +63,61 @@
             });
         }
 
+        function sendEmailRegisterRequest() {
+            var formData = {
+                email: $('#username').val()
+            };
+            $.ajax({
+                type: 'POST',
+                url: "/email/send-register",
+                data: JSON.stringify(formData),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    infoNotification('Registration email sent')
+                }
+            }).fail(function (data) {
+                try {
+                    errorNotification(data.responseJSON.error);
+                } catch (e) {
+                    errorNotification('Unknown error');
+                }
+            });
+        }
+
+        function getRegistrationToken() {
+            return params.get('registerToken')
+        }
+
+        function registerWithEmail() {
+            var extraData;
+            try {
+                extraData = JSON.parse($('#extra').val());
+            } catch (e) {
+            }
+
+            var formData = {
+                token: getRegistrationToken(),
+                password: $('#password').val(),
+                data: extraData
+            };
+            $.ajax({
+                type: 'POST',
+                url: "/email/register",
+                data: JSON.stringify(formData),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                success: function (data) {
+                    login(data.token);
+                }
+            }).fail(function (data) {
+                try {
+                    errorNotification(data.responseJSON.error);
+                } catch (e) {
+                    errorNotification('Unknown error');
+                }
+            });
+        }
+
         function initButtons() {
             $('#logout').click(function () {
                 localStorage.removeItem('userid');
@@ -78,15 +142,29 @@
             $('#login_google').click(function () {
                 window.location.replace('/google/login');
             });
+
+            $('#send_register_email').click(sendEmailRegisterRequest);
+            $('#register_email').click(registerWithEmail);
+            $('#login_email').click(function () {
+                sendForm('/email/login')
+            });
         }
 
         function handleCallbackLogin() {
-            var params = new URLSearchParams(window.location.search);
             if (params.has('error')) {
                 errorNotification(params.get('error'));
             }
             if (params.has('token')) {
                 login(params.get('token'));
+            }
+            if (params.has('registerToken')) {
+                var base64 = params.get('registerToken').split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+                var email = JSON.parse(window.atob(base64)).email;
+                var username = $('#username');
+                username.prop('disabled', true);
+                username.val(email);
+                $('#send_register_email').prop('disabled', true);
+                $('#register_email').prop('disabled', false);
             }
         }
 
@@ -119,6 +197,29 @@
             padding: 5px;
             text-align: center;
         }
+
+        #info {
+            border: 1px solid blue;
+            background: lightblue;
+            padding: 5px;
+            text-align: center;
+        }
+
+        .user_pass {
+            background-color: lightblue;
+        }
+
+        .ldap {
+            background-color: lightyellow;
+        }
+
+        .email {
+            background-color: lightgreen;
+        }
+
+        .oauth {
+            background-color: lightsalmon;
+        }
     </style>
 </head>
 <body>
@@ -134,15 +235,18 @@
         <label>Extra Json:</label><textarea id="extra"></textarea>
     </div>
     <div>
-        <button id="register_user_pass">Register</button>
-        <button id="login_user_pass">Login</button>
-        <button id="login_ldap">Login with LDAP</button>
+        <button id="register_user_pass" class="user_pass">Register</button>
+        <button id="login_user_pass" class="user_pass">Login</button>
+        <button id="login_ldap" class="ldap">Login with LDAP</button>
+        <button id="send_register_email" class="email">Send register email</button>
+        <button id="register_email" class="email" disabled>Register with email</button>
+        <button id="login_email" class="email">Login with email</button>
     </div>
     </p>
     <p>
-        <button id="login_github">Login with GitHub</button>
-        <button id="login_facebook">Login with Facebook</button>
-        <button id="login_google">Login with Google</button>
+        <button id="login_github" class="oauth">Login with GitHub</button>
+        <button id="login_facebook" class="oauth">Login with Facebook</button>
+        <button id="login_google" class="oauth">Login with Google</button>
     </p>
 </div>
 
@@ -152,5 +256,6 @@
 </div>
 
 <div id="error" style="display: none"></div>
+<div id="info" style="display: none"></div>
 </body>
 </html>
