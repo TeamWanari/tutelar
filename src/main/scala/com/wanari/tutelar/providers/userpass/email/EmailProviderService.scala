@@ -7,8 +7,16 @@ import spray.json.JsObject
 trait EmailProviderService[F[_]] extends UserPassService[F] {
   def register(registerToken: String, password: String, data: Option[JsObject]): F[Token]
   def sendRegister(email: String): F[Unit]
+  def resetPassword(resetPasswordToken: String, password: String, data: Option[JsObject]): F[Token]
+  def sendResetPassword(email: String): F[Unit]
 }
 
 object EmailProviderService {
-  case class EmailProviderConfig(url: String, username: String, password: String, registerUrl: String)
+  case class EmailProviderConfig(
+      url: String,
+      username: String,
+      password: String,
+      registerUrl: String,
+      resetPasswordUrl: String
+  )
 }

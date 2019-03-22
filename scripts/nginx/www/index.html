@@ -63,17 +63,17 @@
             });
         }
 
-        function sendEmailRegisterRequest() {
+        function sendEmailRequest(path) {
             var formData = {
                 email: $('#username').val()
             };
             $.ajax({
                 type: 'POST',
-                url: "/email/send-register",
+                url: path,
                 data: JSON.stringify(formData),
                 contentType: 'application/json; charset=utf-8',
                 success: function (data) {
-                    infoNotification('Registration email sent')
+                    infoNotification('Email sent')
                 }
             }).fail(function (data) {
                 try {
@@ -84,11 +84,24 @@
             });
         }
 
+
+        function sendEmailRegisterRequest() {
+            sendEmailRequest("/email/send-register");
+        }
+
+
+        function sendEmailResetPAsswordRequest() {
+            sendEmailRequest("/email/send-reset-password");
+        }
+
         function getRegistrationToken() {
             return params.get('registerToken')
         }
+        function getResetPasswordToken() {
+            return params.get('resetPasswordToken')
+        }
 
-        function registerWithEmail() {
+        function sendTokenEmail(url, token) {
             var extraData;
             try {
                 extraData = JSON.parse($('#extra').val());
@@ -96,13 +109,13 @@
             }
 
             var formData = {
-                token: getRegistrationToken(),
+                token: token,
                 password: $('#password').val(),
                 data: extraData
             };
             $.ajax({
                 type: 'POST',
-                url: "/email/register",
+                url: url,
                 data: JSON.stringify(formData),
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
@@ -116,6 +129,14 @@
                     errorNotification('Unknown error');
                 }
             });
+        }
+
+        function registerWithEmail() {
+            sendTokenEmail("/email/register", getRegistrationToken());
+        }
+
+        function resetPasswordWithEmail() {
+            sendTokenEmail("/email/reset-password", getResetPasswordToken());
         }
 
         function initButtons() {
@@ -148,6 +169,8 @@
             $('#login_email').click(function () {
                 sendForm('/email/login')
             });
+            $('#send_reset_password_email').click(sendEmailResetPAsswordRequest);
+            $('#reset_password_email').click(resetPasswordWithEmail);
         }
 
         function handleCallbackLogin() {
@@ -165,6 +188,15 @@
                 username.val(email);
                 $('#send_register_email').prop('disabled', true);
                 $('#register_email').prop('disabled', false);
+            }
+            if (params.has('resetPasswordToken')) {
+                var base64 = params.get('resetPasswordToken').split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+                var email = JSON.parse(window.atob(base64)).email;
+                var username = $('#username');
+                username.prop('disabled', true);
+                username.val(email);
+                $('#send_reset_password_email').prop('disabled', true);
+                $('#reset_password_email').prop('disabled', false);
             }
         }
 
@@ -217,6 +249,10 @@
             background-color: lightgreen;
         }
 
+        .email_reset {
+            background-color: lightseagreen;
+        }
+
         .oauth {
             background-color: lightsalmon;
         }
@@ -241,6 +277,8 @@
         <button id="send_register_email" class="email">Send register email</button>
         <button id="register_email" class="email" disabled>Register with email</button>
         <button id="login_email" class="email">Login with email</button>
+        <button id="send_reset_password_email" class="email_reset">Send reset password email</button>
+        <button id="reset_password_email" class="email_reset" disabled>Change password</button>
     </div>
     </p>
     <p>

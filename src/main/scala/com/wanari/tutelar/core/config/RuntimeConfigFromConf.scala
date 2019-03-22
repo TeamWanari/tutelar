@@ -81,7 +81,8 @@ class RuntimeConfigFromConf[F[_]: Monad](filepath: String) extends RuntimeConfig
       config.getString("serviceUrl"),
       config.getString("serviceUsername"),
       config.getString("servicePassword"),
-      config.getString("registerUrl")
+      config.getString("registerUrl"),
+      config.getString("resetPasswordUrl")
     )
   }.pure
 

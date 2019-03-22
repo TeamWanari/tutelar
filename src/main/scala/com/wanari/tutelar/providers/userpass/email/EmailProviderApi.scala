@@ -36,6 +36,21 @@ class EmailProviderApi(
               }
             }
           }
+        } ~ path("reset-password") {
+          post {
+            entity(as[RegisterData]) { data =>
+              completeLoginFlowWithJson(service.resetPassword(data.token, data.password, data.data))
+            }
+          }
+        } ~ path("send-reset-password") {
+          post {
+            entity(as[EmailData]) { data =>
+              onComplete(service.sendResetPassword(data.email)) {
+                case Success(_) => complete(StatusCodes.OK)
+                case _          => complete(StatusCodes.InternalServerError)
+              }
+            }
+          }
         }
       }
   }

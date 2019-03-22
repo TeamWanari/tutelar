@@ -18,6 +18,10 @@ class EmailServiceImpl[F[_]: MonadError[?[_], Throwable]](
     send(EmailRequestData(email, "register", JsObject(), JsObject("registrationUrl" -> JsString(url))))
   }
 
+  override def sendResetPasswordUrl(email: String, url: String): F[Unit] = {
+    send(EmailRequestData(email, "reset-password", JsObject(), JsObject("resetPasswordUrl" -> JsString(url))))
+  }
+
   private def send(data: EmailRequestData): F[Unit] = {
     import cats.syntax.flatMap._
     import cats.syntax.functor._
