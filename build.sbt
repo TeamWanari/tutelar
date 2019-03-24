@@ -65,6 +65,7 @@ lazy val core = (project in file("."))
         "com.pauldijou"        %% "jwt-spray-json"          % "2.1.0",
         "org.mindrot"          % "jbcrypt"                  % "0.4",
         "commons-codec"        % "commons-codec"            % "1.12",
+        "ch.megard"            %% "akka-http-cors"          % "0.4.0",
         "org.scalatest"        %% "scalatest"               % scalaTestV % "it,test",
         "org.mockito"          % "mockito-core"             % "2.24.5" % "it,test",
         "org.mockito"          %% "mockito-scala"           % "1.2.0" % "it,test"

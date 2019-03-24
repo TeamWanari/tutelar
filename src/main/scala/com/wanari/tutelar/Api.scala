@@ -6,6 +6,7 @@ import com.wanari.tutelar.core.healthcheck.HealthCheckApi
 import com.wanari.tutelar.providers.userpass.basic.BasicProviderApi
 import com.wanari.tutelar.providers.userpass.email.EmailProviderApi
 import com.wanari.tutelar.providers.userpass.ldap.LdapApi
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 
 import scala.concurrent.Future
 
@@ -37,6 +38,8 @@ object Api {
       new EmailProviderApi()
     )
 
-    createRoute(api)
+    cors() {
+      createRoute(api)
+    }
   }
 }
