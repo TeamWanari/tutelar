@@ -1,0 +1,328 @@
+openapi: 3.0.1
+info:
+  title: Tutelar
+  description: Auth microservice
+  version: '0.1'
+servers:
+  - url: 'https://lvh.me:9443'
+paths:
+  /basic/register:
+    post:
+      description: Simple user-pass register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                data:
+                  type: object
+                username:
+                  type: string
+            examples:
+              '0':
+                value: >-
+                  {"username":"bob","password":"pw","data":{"fullname":"Bob
+                  Name"}}
+      responses:
+        '200':
+          description: User token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+              examples:
+                '0':
+                  value: >-
+                    {"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTM1Mjk3MTcsImlkIjoiZjg2ZWQyNjktODNjYi00NWYxLWI5ODctYjkzOTEyYTQyMWY2In0.PjDhREKneBmGzAWRR0bwz9m9bqcg4DJLAihIyzMJ1AQ"}
+  /basic/login:
+    post:
+      description: Simple user-pass login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                data:
+                  type: object
+                username:
+                  type: string
+            examples:
+              '0':
+                value: >-
+                  {"username":"bob","password":"pw","data":{"fullname":"Bob
+                  Name"}}
+      responses:
+        '200':
+          description: User token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+              examples:
+                '0':
+                  value: >-
+                    {"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTM1Mjk3NTAsImlkIjoiZjg2ZWQyNjktODNjYi00NWYxLWI5ODctYjkzOTEyYTQyMWY2In0.IIq1p79F08SYhUgQanqkBKQfjiKsLB-Hw32wsfVALc8"}
+  /email/send-register:
+    post:
+      description: Email-pass send register email
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+            examples:
+              '0':
+                value: '{"email": "bob@bobemail.com"}'
+      responses:
+        '200':
+          description: Email sent
+  /email/register:
+    post:
+      description: Email-pass register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                data:
+                  type: object
+                token:
+                  type: string
+            examples:
+              '0':
+                value: >-
+                  {"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTM1Mjk4ODQsImVtYWlsIjoiYm9iQGJvYmVtYWlsLmNvbSIsInR5cGUiOiJyZWdpc3RlciJ9.ERObZTjxTxJk9XtttWobylBFI4nbm3dZymoT6jy5iMk",
+                  "password": "pw", "data": {"fullname": "Bob Name"}}
+      responses:
+        '200':
+          description: User token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+              examples:
+                '0':
+                  value: >-
+                    {"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTM1MzAwMDUsImlkIjoiN2I5MzYxMDYtZmIwYy00N2IxLWFlOTMtZjhjZjA0ODcxZDU0In0.w1urqr14EfxxaUbmw7JROScwM8b2Rgw5ei-jOJh5730"}
+  /email/login:
+    post:
+      description: Email-pass login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                data:
+                  type: object
+                username:
+                  type: string
+            examples:
+              '0':
+                value: >-
+                  {"username":"bob@bobemail.com", "password": "pw", "data":
+                  {"fullname": "Bob Name"}}
+      responses:
+        '200':
+          description: User token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+              examples:
+                '0':
+                  value: >-
+                    {"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTM1MzAxMjQsImlkIjoiN2I5MzYxMDYtZmIwYy00N2IxLWFlOTMtZjhjZjA0ODcxZDU0In0.-vUJxaYUnz0FJZQ15rjCZ3WF4tMCLXBnxEzue5LHmRs"}
+  /email/send-reset-password:
+    post:
+      description: Email-pass send reset password email
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+            examples:
+              '0':
+                value: '{"email":"bob@bobemail.com"}'
+      responses:
+        '200':
+          description: Email sent
+  /email/reset-password:
+    post:
+      description: Email-pass change the password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                data:
+                  type: object
+                token:
+                  type: string
+            examples:
+              '0':
+                value: >-
+                  {"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTM1MzAxOTMsImVtYWlsIjoiYm9iQGJvYmVtYWlsLmNvbSIsInR5cGUiOiJyZXNldCJ9.Z-Y-S27wfTDJyuSC0QiD0ST9W-FjfTg5phoQO9Wgy10",
+                  "password": "newpw", "data": {"fullname": "Bob Name"}}
+      responses:
+        '200':
+          description: User token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+              examples:
+                '0':
+                  value: >-
+                    {"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTM1MzAzMzEsImlkIjoiN2I5MzYxMDYtZmIwYy00N2IxLWFlOTMtZjhjZjA0ODcxZDU0In0.a5LRx6kMDjdnm4GxAW-Jvf2Lk6oniMZIBDZPo69mpEI"}
+  /ldap/login:
+    post:
+      description: LDAP login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                username:
+                  type: string
+            examples:
+              '0':
+                value: '{"username":"bob","password":"bobpw"}'
+      responses:
+        '200':
+          description: User token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+              examples:
+                '0':
+                  value: >-
+                    {"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTM1Mjk4MjcsImlkIjoiODVhYjE4MjEtODVjYy00NTc5LTg2OWQtZDdkNjU1ODM5ZjhhIn0.TMwADN7addtQPo39KcbF9yVrk-CHv4eSsiA8wNJxfsk"}
+  /github/login:
+    get:
+      description: Login with GitHub
+      responses:
+        default:
+          description: Redirect to GitHub login page
+  /github/callback:
+    get:
+      description: GitHub login callback
+      parameters:
+        - name: code
+          in: query
+          schema:
+            type: string
+        - name: state
+          in: query
+          schema:
+            type: string
+      responses:
+        default:
+          description: Redirect to frontend with user token
+  /facebook/login:
+    get:
+      description: Login with Facebook
+      responses:
+        default:
+          description: Redirect to GitHub login page
+  /facebook/callback:
+    get:
+      description: Facebook login callback
+      parameters:
+        - name: code
+          in: query
+          schema:
+            type: string
+        - name: state
+          in: query
+          schema:
+            type: string
+      responses:
+        default:
+          description: Redirect to frontend with user token
+  /google/login:
+    get:
+      description: Login with Google
+      responses:
+        default:
+          description: Redirect to Google login page
+  /google/callback:
+    get:
+      description: Google login callback
+      parameters:
+        - name: code
+          in: query
+          schema:
+            type: string
+        - name: state
+          in: query
+          schema:
+            type: string
+      responses:
+        default:
+          description: Redirect to frontend with user token
+  /healthCheck:
+    get:
+      description: Service status page
+      responses:
+        '200':
+          description: Service status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  database:
+                    type: boolean
+                  hostname:
+                    type: string
+                  success:
+                    type: boolean
+                  version:
+                    type: string
+              examples:
+                '0':
+                  value: >-
+                    {"database":true,"hostname":"0b8a30b854b1","success":true,"version":"development"}
