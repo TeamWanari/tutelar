@@ -33,7 +33,7 @@ class EmailProviderServiceSpec extends TestBase {
       "send extra data via hook" in new TestScope {
         initDb()
         service.login(savedAccount.externalId, "secretpw", Some(JsObject("hello" -> JsTrue)))
-        verify(hookService).login(savedAccount.userId, "EMAIL", JsObject("hello" -> JsTrue))
+        verify(hookService).login(savedAccount.userId, savedAccount.externalId, "EMAIL", JsObject("hello" -> JsTrue))
       }
       "failure" when {
         "user not found" in new TestScope {
@@ -74,7 +74,7 @@ class EmailProviderServiceSpec extends TestBase {
         )
         service.register("", "", Some(JsObject("hello" -> JsTrue)))
 
-        verify(hookService).register(any[String], eqTo("EMAIL"), eqTo(JsObject("hello" -> JsTrue)))
+        verify(hookService).register(any[String], eqTo("new@user"), eqTo("EMAIL"), eqTo(JsObject("hello" -> JsTrue)))
       }
       "failure" when {
         "username is already used" in new TestScope {
@@ -150,7 +150,7 @@ class EmailProviderServiceSpec extends TestBase {
     "send extra data via hook" in new ResetPasswordScope {
       initDb()
       service.resetPassword("", "", Some(JsObject("hello" -> JsTrue)))
-      verify(hookService).login(savedAccount.userId, "EMAIL", JsObject("hello" -> JsTrue))
+      verify(hookService).login(savedAccount.userId, savedAccount.externalId, "EMAIL", JsObject("hello" -> JsTrue))
     }
     "failure" when {
       "user not found" in new ResetPasswordScope {

@@ -56,7 +56,7 @@ class AuthServiceImpl[F[_]: Monad](
   private def login(account: Account, customData: String, providedData: JsObject): F[(Account, JsObject)] = {
     for {
       _    <- databaseService.updateCustomData(account.getId, customData)
-      data <- hookService.login(account.userId, account.authType, providedData)
+      data <- hookService.login(account.userId, account.externalId, account.authType, providedData)
     } yield (account, data)
   }
 
@@ -73,7 +73,7 @@ class AuthServiceImpl[F[_]: Monad](
       account = Account(authType, externalId, user.id, customData)
       _    <- databaseService.saveUser(user)
       _    <- databaseService.saveAccount(account)
-      data <- hookService.register(id, authType, providedData)
+      data <- hookService.register(id, externalId, authType, providedData)
     } yield (account, data)
   }
 

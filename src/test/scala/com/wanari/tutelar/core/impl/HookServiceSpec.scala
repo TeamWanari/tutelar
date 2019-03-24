@@ -24,9 +24,10 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
 
   implicit val mat = ActorMaterializer()
 
-  val userId   = "IDID"
-  val authType = "AUTHTYPE"
-  val userInfo = JsObject("info" -> JsTrue)
+  val userId     = "IDID"
+  val externalId = "EXTID"
+  val authType   = "AUTHTYPE"
+  val userInfo   = JsObject("info" -> JsTrue)
 
   val responseData = JsObject("responseinfo" -> JsTrue)
   val response = HttpResponse(
@@ -50,7 +51,7 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
 
   }
 
-  type ServiceFunc = HookService[Future] => (String, String, JsObject) => Future[JsObject]
+  type ServiceFunc = HookService[Future] => (String, String, String, JsObject) => Future[JsObject]
   Seq[(String, ServiceFunc)](
     "register" -> ((s: HookService[Future]) => s.register),
     "login"    -> ((s: HookService[Future]) => s.login),
@@ -60,18 +61,19 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
       s"#$name" when {
         "call the backend" should {
           "add auth header - basic" in new TestScope {
-            await(getFunc(service)(userId, authType, userInfo))
+            await(getFunc(service)(userId, externalId, authType, userInfo))
             validateBasicAuth(httpMock)
           }
 
           "send the user data and return the response" in new TestScope {
-            await(getFunc(service)(userId, authType, userInfo)) shouldEqual responseData
+            await(getFunc(service)(userId, externalId, authType, userInfo)) shouldEqual responseData
             validateRequest(httpMock)(
               expectedUrl = s"$baseUrl/$name",
               expectedRequest = JsObject(
-                "id"       -> JsString(userId),
-                "authType" -> JsString(authType),
-                "data"     -> userInfo
+                "id"         -> JsString(userId),
+                "externalId" -> JsString(externalId),
+                "authType"   -> JsString(authType),
+                "data"       -> userInfo
               )
             )
           }
@@ -82,18 +84,19 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
   "#modify" when {
     "call the backend" should {
       "add auth header - basic" in new TestScope {
-        await(service.modify(userId, authType, userInfo))
+        await(service.modify(userId, externalId, authType, userInfo))
         validateBasicAuth(httpMock)
       }
 
       "send the user data" in new TestScope {
-        await(service.modify(userId, authType, userInfo))
+        await(service.modify(userId, externalId, authType, userInfo))
         validateRequest(httpMock)(
           expectedUrl = s"$baseUrl/modify",
           expectedRequest = JsObject(
-            "id"       -> JsString(userId),
-            "authType" -> JsString(authType),
-            "data"     -> userInfo
+            "id"         -> JsString(userId),
+            "externalId" -> JsString(externalId),
+            "authType"   -> JsString(authType),
+            "data"       -> userInfo
           )
         )
       }
@@ -103,17 +106,18 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
   "#unlink" when {
     "call the backend" should {
       "add auth header - basic" in new TestScope {
-        await(service.unlink(userId, authType))
+        await(service.unlink(userId, externalId, authType))
         validateBasicAuth(httpMock)
       }
 
       "send the user id and auth type" in new TestScope {
-        await(service.unlink(userId, authType))
+        await(service.unlink(userId, externalId, authType))
         validateRequest(httpMock)(
           expectedUrl = s"$baseUrl/unlink",
           expectedRequest = JsObject(
-            "id"       -> JsString(userId),
-            "authType" -> JsString(authType)
+            "id"         -> JsString(userId),
+            "externalId" -> JsString(externalId),
+            "authType"   -> JsString(authType)
           )
         )
       }

@@ -32,8 +32,8 @@ class AuthServiceSpec extends TestBase {
     databaseService.saveAccount(savedAccount)
 
     when(jwtService.encode(any[JsObject])).thenReturn("JWT")
-    when(hookService.register(any[String], any[String], any[JsObject])).thenReturn(hookResponseRegister)
-    when(hookService.login(any[String], any[String], any[JsObject])).thenReturn(hookResponseLogin)
+    when(hookService.register(any[String], any[String], any[String], any[JsObject])).thenReturn(hookResponseRegister)
+    when(hookService.login(any[String], any[String], any[String], any[JsObject])).thenReturn(hookResponseLogin)
 
     val service = new AuthServiceImpl[Id]()
   }
@@ -57,7 +57,7 @@ class AuthServiceSpec extends TestBase {
       }
       "call hook service" in new TestScope {
         service.registerOrLogin(authType, externalId, customData, providedData)
-        verify(hookService).register("1", authType, providedData)
+        verify(hookService).register("1", externalId, authType, providedData)
       }
     }
     "login" should {
@@ -79,7 +79,7 @@ class AuthServiceSpec extends TestBase {
       }
       "call hook service" in new TestScope {
         service.registerOrLogin(savedAccount.authType, savedAccount.externalId, customData, providedData)
-        verify(hookService).login(savedAccount.userId, authType, providedData)
+        verify(hookService).login(savedAccount.userId, savedAccount.externalId, authType, providedData)
       }
     }
   }

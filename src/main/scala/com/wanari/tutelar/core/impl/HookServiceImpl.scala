@@ -18,28 +18,28 @@ class HookServiceImpl[F[_]: MonadError[?[_], Throwable]](
   import spray.json.DefaultJsonProtocol._
   import spray.json._
 
-  override def register(id: String, authType: String, data: JsObject): F[JsObject] = {
-    val dto = HookUserData(id, authType, Option(data)).toJson
+  override def register(id: String, externalId: String, authType: String, data: JsObject): F[JsObject] = {
+    val dto = HookUserData(id, externalId, authType, Option(data)).toJson
     sendHookAndParse("/register", dto)
   }
 
-  override def login(id: String, authType: String, data: JsObject): F[JsObject] = {
-    val dto = HookUserData(id, authType, Option(data)).toJson
+  override def login(id: String, externalId: String, authType: String, data: JsObject): F[JsObject] = {
+    val dto = HookUserData(id, externalId, authType, Option(data)).toJson
     sendHookAndParse("/login", dto)
   }
 
-  override def modify(id: String, authType: String, data: JsObject): F[Unit] = {
-    val dto = HookUserData(id, authType, Option(data)).toJson
+  override def modify(id: String, externalId: String, authType: String, data: JsObject): F[Unit] = {
+    val dto = HookUserData(id, externalId, authType, Option(data)).toJson
     sendHookWithoutResponse("/modify", dto)
   }
 
-  override def link(id: String, authType: String, data: JsObject): F[JsObject] = {
-    val dto = HookUserData(id, authType, Option(data)).toJson
+  override def link(id: String, externalId: String, authType: String, data: JsObject): F[JsObject] = {
+    val dto = HookUserData(id, externalId, authType, Option(data)).toJson
     sendHookAndParse("/link", dto)
   }
 
-  override def unlink(id: String, authType: String): F[Unit] = {
-    val dto = HookUserData(id, authType, None).toJson
+  override def unlink(id: String, externalId: String, authType: String): F[Unit] = {
+    val dto = HookUserData(id, externalId, authType, None).toJson
     sendHookWithoutResponse("/unlink", dto)
   }
 
