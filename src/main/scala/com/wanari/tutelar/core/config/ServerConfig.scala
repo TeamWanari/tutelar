@@ -1,5 +1,5 @@
 package com.wanari.tutelar.core.config
-import cats.Monad
+import cats.MonadError
 import com.typesafe.config.{Config, ConfigFactory}
 
 trait ServerConfig[F[_]] {
@@ -9,7 +9,7 @@ trait ServerConfig[F[_]] {
   val runtimeConfig: RuntimeConfig[F]
 }
 
-class ServerConfigImpl[F[_]: Monad]() extends ServerConfig[F] {
+class ServerConfigImpl[F[_]: MonadError[?[_], Throwable]]() extends ServerConfig[F] {
   import cats.syntax.applicative._
   private lazy val conf: Config = ConfigFactory.load
 

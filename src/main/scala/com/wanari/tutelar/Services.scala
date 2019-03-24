@@ -11,6 +11,7 @@ import com.wanari.tutelar.providers.oauth2.{FacebookService, GithubService, Goog
 import com.wanari.tutelar.providers.userpass.basic.{BasicProviderService, BasicProviderServiceImpl}
 import com.wanari.tutelar.providers.userpass.email._
 import com.wanari.tutelar.providers.userpass.ldap.{LdapService, LdapServiceImpl}
+import com.wanari.tutelar.providers.userpass.token.{TotpService, TotpServiceImpl}
 import com.wanari.tutelar.util._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -31,6 +32,7 @@ trait Services[F[_]] {
   implicit val basicLoginService: BasicProviderService[F]
   implicit val emailService: EmailService[F]
   implicit val emailLoginService: EmailProviderService[F]
+  implicit val totpService: TotpService[F]
 }
 
 class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, materializer: Materializer)
@@ -60,4 +62,5 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
   implicit lazy val basicLoginService: BasicProviderService[Future] = new BasicProviderServiceImpl[Future]()
   implicit lazy val emailService: EmailService[Future]              = new EmailServiceImpl[Future]()
   implicit lazy val emailLoginService: EmailProviderService[Future] = new EmailProviderServiceImpl[Future]()
+  implicit lazy val totpService: TotpService[Future]                = new TotpServiceImpl[Future]()
 }

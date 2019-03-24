@@ -110,7 +110,7 @@ object OTP {
     def apply(base32: String): OTPKey =
       OTPKey(new javax.crypto.spec.SecretKeySpec((new Base32).decode(base32), "RAW"))
 
-    private def defaultPRNG: SecureRandom =
+    def defaultPRNG: SecureRandom =
       SecureRandom.getInstance("NativePRNGNonBlocking", "SUN")
 
     def randomStrong(algorithm: OTPAlgorithm, prng: SecureRandom = defaultPRNG): OTPKey = {
@@ -131,6 +131,8 @@ object OTP {
     val SHA1   = OTPAlgorithm("SHA1", "HmacSHA1", 200)
     val SHA256 = OTPAlgorithm("SHA256", "HmacSHA256", 280)
     val SHA512 = OTPAlgorithm("SHA512", "HmacSHA512", 520)
+
+    val algos = Seq(MD5, SHA1, SHA256, SHA512)
   }
 
   private object Calculations {
@@ -205,7 +207,7 @@ object OTP {
       issuer: Option[String],
       params: Map[String, String]
   ): String = {
-    val label            = issuer.map(i => s"/$i:$account").getOrElse(s"/$account")
+    val label            = issuer.map(i => s"$i:$account").getOrElse(s"$account")
     val parameters       = params + ("secret" -> otpkey.toBase32) ++ issuer.map(i => Set("issuer" -> i)).getOrElse(Set())
     val parametersString = parameters.map(p => p._1 + "=" + p._2).mkString("&")
     s"otpauth://$protocol/$label?$parametersString"

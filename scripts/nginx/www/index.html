@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <title>TutelarAuth</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="//cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
     <script>
         var params = new URLSearchParams(window.location.search);
+        var qrCode = null;
+        var qrUri = "";
 
         function showAndHide(elem, message) {
             elem.text(message);
@@ -23,6 +26,15 @@
         function getJwtData(token) {
             var base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
             return JSON.parse(window.atob(base64));
+        }
+
+        function reRenderQr(usrname) {
+            if(qrCode != null) {
+                var splittedqrUri = qrUri.split("/");
+                splittedqrUri[3] = usrname + splittedqrUri[3];
+                qrCode.clear();
+                qrCode.makeCode(splittedqrUri.join("/"));
+            }
         }
 
         function login(token) {
@@ -47,6 +59,7 @@
            var formData = {
                 username: $('#username').val(),
                 password: $('#password').val(),
+                token: $('#token').val(),
                 data: getExtraData()
             };
             $.ajax({
@@ -152,6 +165,28 @@
             });
         }
 
+        function getTOTPData() {
+            $.ajax({
+                type: 'GET',
+                url: "/totp/qrCode",
+                success: function (data) {
+                    if(qrCode == null) {
+                        qrCode = new QRCode(document.getElementById("qrcode"), data.uri);
+                    }
+                    qrUri = data.uri;
+                    reRenderQr($('#username').val());
+
+                    $('#token').val(data.token)
+                }
+            }).fail(function (data) {
+                try {
+                    errorNotification(data.responseJSON.error);
+                } catch (e) {
+                    errorNotification('Unknown error');
+                }
+            });
+        }
+
         function registerWithEmail() {
             sendTokenEmail("/email/register", getRegistrationToken());
         }
@@ -169,11 +204,17 @@
             $('#register_user_pass').click(function () {
                 sendForm('/basic/register')
             });
+            $('#register_totp').click(function () {
+                sendForm('/totp/register')
+            });
             $('#login_user_pass').click(function () {
                 sendForm('/basic/login')
             });
             $('#login_ldap').click(function () {
                 sendForm('/ldap/login')
+            });
+            $('#login_totp').click(function () {
+                sendForm('/totp/login')
             });
             $('#login_github').click(function () {
                 window.location.replace('/github/login');
@@ -190,6 +231,7 @@
             $('#login_email').click(sendEmailLogin);
             $('#send_reset_password_email').click(sendEmailResetPAsswordRequest);
             $('#reset_password_email').click(resetPasswordWithEmail);
+            $('#generate_qr').click(getTOTPData);
         }
 
         function handleCallbackLogin() {
@@ -220,6 +262,10 @@
         $(window).on('load', function () {
             handleCallbackLogin();
             initButtons();
+
+            $('#username').change(function () {
+                reRenderQr($('#username').val())
+            });
 
             if (!!localStorage.userid) {
                 $('#userid').text(localStorage.userid);
@@ -267,19 +313,29 @@
             background-color: lightseagreen;
         }
 
+        .totp {
+            background-color: rosybrown;
+        }
         .oauth {
             background-color: lightsalmon;
+        }
+        #qrcode {
+            float:right;
         }
     </style>
 </head>
 <body>
 <div id="login" style="display: none">
     <p>
+    <div id="qrcode"></div>
     <div>
         <label>User:</label><input type="text" id="username"/>
     </div>
     <div>
         <label>Pass:</label><input type="password" id="password"/>
+    </div>
+    <div>
+        <label>Token:</label><input type="text" id="token" disabled/>
     </div>
     <div>
         <label>Extra Json:</label><textarea id="extra"></textarea>
@@ -291,6 +347,9 @@
         <button id="send_register_email" class="email">Send register email</button>
         <button id="register_email" class="email" disabled>Register with email</button>
         <button id="login_email" class="email">Login with email</button>
+        <button id="generate_qr" class="totp">Generate QRCode</button>
+        <button id="register_totp" class="totp">Register with TOTP</button>
+        <button id="login_totp" class="totp">Login with TOTP</button>
         <button id="send_reset_password_email" class="email_reset">Send reset password email</button>
         <button id="reset_password_email" class="email_reset" disabled>Change password</button>
     </div>

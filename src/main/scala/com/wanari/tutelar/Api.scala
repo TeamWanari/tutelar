@@ -6,6 +6,7 @@ import com.wanari.tutelar.core.healthcheck.HealthCheckApi
 import com.wanari.tutelar.providers.userpass.basic.BasicProviderApi
 import com.wanari.tutelar.providers.userpass.email.EmailProviderApi
 import com.wanari.tutelar.providers.userpass.ldap.LdapApi
+import com.wanari.tutelar.providers.userpass.token.TotpApi
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 
 import scala.concurrent.Future
@@ -35,7 +36,8 @@ object Api {
       new GoogleApi(),
       new LdapApi(),
       new BasicProviderApi(),
-      new EmailProviderApi()
+      new EmailProviderApi(),
+      new TotpApi()
     )
 
     cors() {

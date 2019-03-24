@@ -1,7 +1,7 @@
 package com.wanari.tutelar.core.config
 import java.util.concurrent.TimeUnit
 
-import cats.Monad
+import cats.MonadError
 import com.typesafe.config.{Config, ConfigFactory}
 import com.wanari.tutelar.core.HookService.{BasicAuthConfig, HookConfig}
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
@@ -9,11 +9,15 @@ import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.providers.userpass.email.EmailProviderService.EmailProviderConfig
 import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
+import com.wanari.tutelar.providers.userpass.token.OTP.OTPAlgorithm
+import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl.TotpConfig
 
 import scala.concurrent.duration.FiniteDuration
 
-class RuntimeConfigFromConf[F[_]: Monad](filepath: String) extends RuntimeConfig[F] {
+class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String) extends RuntimeConfig[F] {
   import cats.syntax.applicative._
+  import com.wanari.tutelar.util.ApplicativeErrorSyntax._
+
   private lazy val conf: Config = ConfigFactory.load(filepath)
 
   lazy val getRootUrl: F[String] = conf.getString("rootUrl").pure
@@ -27,6 +31,7 @@ class RuntimeConfigFromConf[F[_]: Monad](filepath: String) extends RuntimeConfig
   val githubConfig: () => F[OAuth2Config]      = () => readOauth2Config("oauth2.github")
   val googleConfig: () => F[OAuth2Config]      = () => readOauth2Config("oauth2.google")
   implicit val ldapConfig: () => F[LdapConfig] = readLdapConfig _
+  implicit val totpConfig: () => F[TotpConfig] = readTOTPConfig _
 
   private def readJwtConfig = {
     val config = conf.getConfig("jwt")
@@ -95,4 +100,22 @@ class RuntimeConfigFromConf[F[_]: Monad](filepath: String) extends RuntimeConfig
       config.getString("scopes").split(",").toSeq
     )
   }.pure
+
+  private def readTOTPConfig = {
+    val config = conf.getConfig("totp")
+    val algo   = config.getString("algorithm")
+    OTPAlgorithm.algos
+      .find(_.name == algo)
+      .fold {
+        (new Exception).raise[F, TotpConfig]
+      } { _ =>
+        TotpConfig(
+          algo,
+          config.getInt("window"),
+          config.getDuration("period").toMillis / 1000 toInt,
+          config.getInt("digits"),
+          config.getBoolean("startFromCurrentTime")
+        ).pure
+      }
+  }
 }
