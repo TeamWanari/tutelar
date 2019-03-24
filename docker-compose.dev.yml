@@ -1,22 +1,5 @@
 version: '3'
 services:
-  backend:
-    image: hseeberger/scala-sbt:8u181_2.12.7_1.2.6
-    volumes:
-    - .:/code
-    - ~/.sbt:/root/.sbt
-    - ~/.ivy2:/root/.ivy2
-    working_dir: /code
-    depends_on:
-    - db
-    - ldap
-    - emailservice
-    entrypoint: "sleep infinity"
-    environment:
-      DB_URL: "jdbc:postgresql://db:5432/postgres?user=postgres&password=postgres"
-      LDAP_URL: "ldap://ldap:389"
-      EMAIL_SERVICE_URL: "http://emailservice:9000"
-      EMAIL_SERVICE_PASSWORD: "super_secret_123"
   db:
     image: postgres:11.0
     environment:
@@ -44,10 +27,7 @@ services:
     - ./scripts/nginx/cert.key:/etc/nginx/ssl/cert.key
     - ./scripts/nginx/cert.pem:/etc/nginx/ssl/cert.pem
     - ./scripts/nginx/www:/var/www
-    depends_on:
-      - backend
-    ports:
-    - 9443:9443
+    network_mode: "host"
   emailservice:
     image: ksisu/emailservice
     volumes:

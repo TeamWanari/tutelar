@@ -14,18 +14,6 @@ down: ## Destroy all services and volumes
 psql: ## Open psql console
 	$(compose) exec db bash -c "psql -U postgres"
 
-sbt: ## Open sbt console
-	$(compose) exec backend bash -c "sbt"
-
-backend: ## Open backend console
-	$(compose) exec backend bash
-
-test: ## Run tests
-	$(compose) exec backend bash -c "sbt test it:test"
-
-compile: ## Compile
-	$(compose) exec backend bash -c "sbt clean compile"
-
 rundocs: ## Start docs localhost:4000
 	sbt "project docs" previewAuto
 
