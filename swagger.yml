@@ -138,12 +138,12 @@ paths:
                   type: string
                 data:
                   type: object
-                username:
+                email:
                   type: string
             examples:
               '0':
                 value: >-
-                  {"username":"bob@bobemail.com", "password": "pw", "data":
+                  {"email":"bob@bobemail.com", "password": "pw", "data":
                   {"fullname": "Bob Name"}}
       responses:
         '200':

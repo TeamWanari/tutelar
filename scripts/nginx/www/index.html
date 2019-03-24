@@ -7,25 +7,27 @@
     <script>
         var params = new URLSearchParams(window.location.search);
 
-        function errorNotification(message) {
-            var error = $('#error');
-            error.text(message);
-            error.fadeIn(200, function () {
-                error.fadeOut(3500);
+        function showAndHide(elem, message) {
+            elem.text(message);
+            elem.fadeIn(200, function () {
+                elem.fadeOut(3500);
             });
         }
+        function errorNotification(message) {
+            showAndHide($('#error'), message);
+        }
         function infoNotification(message) {
-            var info = $('#info');
-            info.text(message);
-            info.fadeIn(200, function () {
-                info.fadeOut(3500);
-            });
+            showAndHide($('#info'), message);
+        }
+
+        function getJwtData(token) {
+            var base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+            return JSON.parse(window.atob(base64));
         }
 
         function login(token) {
             try {
-                var base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-                localStorage.userid = JSON.parse(window.atob(base64)).id;
+                localStorage.userid = getJwtData(token).id;
             } catch (e) {
                 errorNotification('WRONG TOKEN');
             } finally {
@@ -33,21 +35,47 @@
             }
         }
 
-        function sendForm(url) {
-            var extraData;
+        function getExtraData() {
             try {
-                extraData = JSON.parse($('#extra').val());
+                return JSON.parse($('#extra').val());
             } catch (e) {
+                return undefined;
             }
+        }
 
-            var formData = {
+        function sendForm(url) {
+           var formData = {
                 username: $('#username').val(),
                 password: $('#password').val(),
-                data: extraData
+                data: getExtraData()
             };
             $.ajax({
                 type: 'POST',
                 url: url,
+                data: JSON.stringify(formData),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                success: function (data) {
+                    login(data.token);
+                }
+            }).fail(function (data) {
+                try {
+                    errorNotification(data.responseJSON.error);
+                } catch (e) {
+                    errorNotification('Unknown error');
+                }
+            });
+        }
+
+        function sendEmailLogin() {
+            var formData = {
+                email: $('#username').val(),
+                password: $('#password').val(),
+                data: getExtraData()
+            };
+            $.ajax({
+                type: 'POST',
+                url: "/email/login",
                 data: JSON.stringify(formData),
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
@@ -84,11 +112,9 @@
             });
         }
 
-
         function sendEmailRegisterRequest() {
             sendEmailRequest("/email/send-register");
         }
-
 
         function sendEmailResetPAsswordRequest() {
             sendEmailRequest("/email/send-reset-password");
@@ -97,21 +123,16 @@
         function getRegistrationToken() {
             return params.get('registerToken')
         }
+
         function getResetPasswordToken() {
             return params.get('resetPasswordToken')
         }
 
         function sendTokenEmail(url, token) {
-            var extraData;
-            try {
-                extraData = JSON.parse($('#extra').val());
-            } catch (e) {
-            }
-
             var formData = {
                 token: token,
                 password: $('#password').val(),
-                data: extraData
+                data: getExtraData()
             };
             $.ajax({
                 type: 'POST',
@@ -166,9 +187,7 @@
 
             $('#send_register_email').click(sendEmailRegisterRequest);
             $('#register_email').click(registerWithEmail);
-            $('#login_email').click(function () {
-                sendForm('/email/login')
-            });
+            $('#login_email').click(sendEmailLogin);
             $('#send_reset_password_email').click(sendEmailResetPAsswordRequest);
             $('#reset_password_email').click(resetPasswordWithEmail);
         }
@@ -181,8 +200,7 @@
                 login(params.get('token'));
             }
             if (params.has('registerToken')) {
-                var base64 = params.get('registerToken').split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-                var email = JSON.parse(window.atob(base64)).email;
+                var email = getJwtData(params.get('registerToken')).email;
                 var username = $('#username');
                 username.prop('disabled', true);
                 username.val(email);
@@ -190,8 +208,7 @@
                 $('#register_email').prop('disabled', false);
             }
             if (params.has('resetPasswordToken')) {
-                var base64 = params.get('resetPasswordToken').split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-                var email = JSON.parse(window.atob(base64)).email;
+                var email = getJwtData(params.get('resetPasswordToken')).email;
                 var username = $('#username');
                 username.prop('disabled', true);
                 username.val(email);
@@ -223,7 +240,7 @@
             margin-bottom: 5px;
         }
 
-        #error {
+        #error, #info {
             border: 1px solid red;
             background: lightpink;
             padding: 5px;
@@ -231,10 +248,7 @@
         }
 
         #info {
-            border: 1px solid blue;
             background: lightblue;
-            padding: 5px;
-            text-align: center;
         }
 
         .user_pass {

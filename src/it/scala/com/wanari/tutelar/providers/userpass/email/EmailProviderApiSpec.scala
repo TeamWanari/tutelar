@@ -5,7 +5,7 @@ import com.wanari.tutelar.RouteTestBase
 import com.wanari.tutelar.core.ProviderApi.{ErrorData, TokenData}
 import spray.json._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import com.wanari.tutelar.providers.userpass.email.EmailProviderApi.{EmailData, RegisterData}
+import com.wanari.tutelar.providers.userpass.email.EmailProviderApi.{EmailData, EmailLoginData, RegisterData}
 import org.mockito.ArgumentMatchersSugar._
 import org.mockito.Mockito._
 
@@ -18,7 +18,34 @@ class EmailProviderApiSpec extends RouteTestBase {
     implicit lazy val callbackConfig = services.configService.runtimeConfig.callbackConfig
     override lazy val route          = new EmailProviderApi().route()
   }
+  "POST /testPath/login" should {
+    val postLoginRequest = {
+      val jsonRequest = EmailLoginData("email", "pw", Some(JsObject("hello" -> JsTrue))).toJson.compactPrint
+      val entity      = HttpEntity(MediaTypes.`application/json`, jsonRequest)
+      Post("/email/login").withEntity(entity)
+    }
 
+    "forward the username, password and extra data to service" in new TestScope {
+      when(serviceMock.login(any[String], any[String], any[Option[JsObject]])) thenReturn Future.successful("TOKEN")
+      postLoginRequest ~> route ~> check {
+        verify(serviceMock).login("email", "pw", Some(JsObject("hello" -> JsTrue)))
+      }
+    }
+    "return redirect with callback" in new TestScope {
+      when(serviceMock.login(any[String], any[String], any[Option[JsObject]])) thenReturn Future.successful("TOKEN")
+      postLoginRequest ~> route ~> check {
+        status shouldEqual StatusCodes.OK
+        responseAs[TokenData] shouldEqual TokenData("TOKEN")
+      }
+    }
+    "return redirect with error" in new TestScope {
+      when(serviceMock.login(any[String], any[String], any[Option[JsObject]])) thenReturn Future.failed(new Exception())
+      postLoginRequest ~> route ~> check {
+        status shouldEqual StatusCodes.Unauthorized
+        responseAs[ErrorData] shouldEqual ErrorData("AUTHENTICATION_FAILED")
+      }
+    }
+  }
   "POST /email/register" should {
     val postRegisterRequest = {
       val jsonRequest = RegisterData("registerToken", "pw", Some(JsObject("hello" -> JsTrue))).toJson.compactPrint
