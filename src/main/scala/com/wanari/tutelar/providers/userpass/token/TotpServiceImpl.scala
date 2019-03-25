@@ -47,8 +47,8 @@ class TotpServiceImpl[F[_]: MonadError[?[_], Throwable]](
     val result = for {
       config           <- OptionT.liftF(totpConfig())
       totpDataAsString <- OptionT.liftF(decodeToken(registerToken))
-      _ <- checkPassword(totpDataAsString, password, config.window)
-      usernameIsUsed <- OptionT.liftF(authService.findCustomData(authType, userName).isDefined) if !usernameIsUsed
+      _                <- checkPassword(totpDataAsString, password, config.window)
+      usernameIsUsed   <- OptionT.liftF(authService.findCustomData(authType, userName).isDefined) if !usernameIsUsed
       token <- OptionT.liftF(
         authService.registerOrLogin(authType, userName, totpDataAsString, data.getOrElse(JsObject()))
       )
@@ -72,7 +72,7 @@ class TotpServiceImpl[F[_]: MonadError[?[_], Throwable]](
     val totpResponse = for {
       data <- Try(savedData.parseJson.convertTo[TotpData]).toOption
       algo <- OTPAlgorithm.algos.find(_.name == data.algorithm)
-      key <- Try(OTPKey(data.otpkey)).toOption
+      key  <- Try(OTPKey(data.otpkey)).toOption
       totp = TOTP(algo, data.digits, data.period, data.initialTimestamp, key)
       matchingTimestamp <- totp.validate(now, window)(recievedToken)
     } yield {
