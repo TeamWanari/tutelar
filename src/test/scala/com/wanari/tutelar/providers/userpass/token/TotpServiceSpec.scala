@@ -65,7 +65,7 @@ class TotpServiceSpec extends TestBase {
       initMock(jwtService)
       service.register("newUser", "token", "755224", Some(JsObject("hello" -> JsTrue)))
 
-      verify(hookService).register(any[String], eqTo("TOTP"), eqTo(JsObject("hello" -> JsTrue)))
+      verify(hookService).register(any[String], eqTo("newUser"), eqTo("TOTP"), eqTo(JsObject("hello" -> JsTrue)))
     }
 
     "failure" when {
@@ -92,7 +92,7 @@ class TotpServiceSpec extends TestBase {
       "send extra data via hook" in new TestScope {
         initDb()
         service.login(savedAccount.externalId, "755224", Some(JsObject("hello" -> JsTrue)))
-        verify(hookService).login(savedAccount.userId, "TOTP", JsObject("hello" -> JsTrue))
+        verify(hookService).login(savedAccount.userId, savedAccount.externalId, "TOTP", JsObject("hello" -> JsTrue))
       }
       "failure" when {
         "user not found" in new TestScope {

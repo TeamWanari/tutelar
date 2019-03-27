@@ -9,6 +9,7 @@ import com.wanari.tutelar.providers.oauth2.{FacebookService, GithubService, Goog
 import com.wanari.tutelar.providers.userpass.basic.{BasicProviderService, BasicProviderServiceImpl}
 import com.wanari.tutelar.providers.userpass.email._
 import com.wanari.tutelar.providers.userpass.ldap.LdapService
+import com.wanari.tutelar.providers.userpass.token.{TotpService, TotpServiceImpl}
 import com.wanari.tutelar.util._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -46,4 +47,5 @@ class ItTestServices(implicit ec: ExecutionContext) extends Services[Future] {
   override implicit lazy val basicLoginService: BasicProviderService[Future] = new BasicProviderServiceImpl[Future]()
   override implicit lazy val emailService: EmailService[Future]              = new EmailServiceImpl[Future]()
   override implicit lazy val emailLoginService: EmailProviderService[Future] = new EmailProviderServiceImpl[Future]()
+  override implicit lazy val totpService: TotpService[Future]                = new TotpServiceImpl[Future]()
 }

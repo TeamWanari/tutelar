@@ -18,7 +18,7 @@ class EmailProviderApiSpec extends RouteTestBase {
     implicit lazy val callbackConfig = services.configService.runtimeConfig.callbackConfig
     override lazy val route          = new EmailProviderApi().route()
   }
-  "POST /testPath/login" should {
+  "POST /email/login" should {
     val postLoginRequest = {
       val jsonRequest = EmailLoginData("email", "pw", Some(JsObject("hello" -> JsTrue))).toJson.compactPrint
       val entity      = HttpEntity(MediaTypes.`application/json`, jsonRequest)
