@@ -1,10 +1,12 @@
 package com.wanari.tutelar
 
-import akka.actor.ActorSystem
+import akka.Done
+import akka.actor.{ActorSystem, CoordinatedShutdown}
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import com.wanari.tutelar.util.LoggerUtil
 
+import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
 object Main extends App {
@@ -21,10 +23,22 @@ object Main extends App {
   val starting = for {
     route  <- Api.createApi(services)
     server <- Http().bindAndHandle(route, "0.0.0.0", 9000)
-  } yield server
+  } yield {
+    setupShutdownHook(server)
+  }
 
   starting.onComplete {
     case Success(_)  => logger.info("LoginService started")
-    case Failure(ex) => logger.error("LoginService starting failed", ex)
+    case Failure(ex) =>
+      logger.error("LoginService starting failed", ex)
+      system.terminate()
+  }
+
+  def setupShutdownHook(server: Http.ServerBinding): Unit = {
+    CoordinatedShutdown(system).addTask(
+      CoordinatedShutdown.PhaseServiceUnbind, "http_shutdown") { () =>
+      logger.info("LoginService shutting down...")
+      server.terminate(hardDeadline = 8.seconds).map(_ => Done)
+    }
   }
 }
