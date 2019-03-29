@@ -18,9 +18,12 @@ object Main extends App {
 
   val services = new RealServices()
 
-  val route = Api.createApi(services)
+  val starting = for {
+    route  <- Api.createApi(services)
+    server <- Http().bindAndHandle(route, "0.0.0.0", 9000)
+  } yield server
 
-  Http().bindAndHandle(route, "0.0.0.0", 9000).onComplete {
+  starting.onComplete {
     case Success(_)  => logger.info("LoginService started")
     case Failure(ex) => logger.error("LoginService starting failed", ex)
   }

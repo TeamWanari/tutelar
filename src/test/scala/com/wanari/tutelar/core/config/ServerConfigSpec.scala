@@ -20,4 +20,18 @@ class ServerConfigSpec extends TestBase {
     service.runtimeConfig.callbackConfig().get.failure shouldEqual "url?e=<<ERROR>>"
   }
 
+  "#isModuleEnabled" should {
+    val service        = new ServerConfigImpl[Try]()
+    val enabledModules = service.getEnabledModules
+    "convert to lowecase" in {
+      enabledModules.get should contain("testmodule1")
+    }
+    "trim config" in {
+      enabledModules.get should contain("testmodule2")
+    }
+    "drop empty elements" in {
+      enabledModules.get should not contain ("")
+    }
+  }
+
 }

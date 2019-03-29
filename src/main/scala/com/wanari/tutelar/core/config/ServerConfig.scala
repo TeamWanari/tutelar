@@ -6,6 +6,8 @@ trait ServerConfig[F[_]] {
   def getVersion: F[String]
   def getHostname: F[String]
 
+  def getEnabledModules: F[Seq[String]]
+
   val runtimeConfig: RuntimeConfig[F]
 }
 
@@ -18,4 +20,14 @@ class ServerConfigImpl[F[_]: MonadError[?[_], Throwable]]() extends ServerConfig
 
   private lazy val configType              = conf.getString("configType")
   lazy val runtimeConfig: RuntimeConfig[F] = RuntimeConfig(configType, conf.getConfig(configType))
+
+  lazy val getEnabledModules: F[Seq[String]] = {
+    conf
+      .getString("modulesEnabled")
+      .split(',')
+      .map(_.trim.toLowerCase)
+      .filterNot(_.isEmpty)
+      .toSeq
+      .pure
+  }
 }

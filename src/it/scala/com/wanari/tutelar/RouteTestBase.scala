@@ -20,7 +20,7 @@ trait RouteTestBase extends TestBase with ScalatestRouteTest {
       when(githubService.TYPE) thenReturn "github"
       when(googleService.TYPE) thenReturn "google"
     }
-    lazy val route: Route = Api.createApi(services)
+    lazy val route: Route = await(Api.createApi(services))
   }
 
   override def afterAll(): Unit = {
