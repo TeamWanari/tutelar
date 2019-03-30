@@ -20,6 +20,7 @@ object JwtServiceImpl {
   def create[F[_]: MonadError[?[_], Throwable]](implicit jwtConfig: () => F[JwtConfig]): F[JwtService[F]] = {
     import cats.syntax.applicative._
     import cats.syntax.flatMap._
+    import cats.syntax.functor._
     import com.wanari.tutelar.util.ApplicativeErrorSyntax._
     import spray.json._
 
@@ -40,9 +41,8 @@ object JwtServiceImpl {
 
               override def decode(token: String): F[JsObject] = {
                 algo match {
-                  case a: JwtHmacAlgorithm => JwtSprayJson.decodeJson(token, decodeKey, Seq(a)).fold(_.raise, _.pure)
-                  case a: JwtAsymmetricAlgorithm =>
-                    JwtSprayJson.decodeJson(token, decodeKey, Seq(a)).fold(_.raise, _.pure)
+                  case a: JwtHmacAlgorithm       => JwtSprayJson.decodeJson(token, decodeKey, Seq(a)).pureOrRise
+                  case a: JwtAsymmetricAlgorithm => JwtSprayJson.decodeJson(token, decodeKey, Seq(a)).pureOrRise
                 }
               }
 
@@ -51,6 +51,13 @@ object JwtServiceImpl {
                   case a: JwtHmacAlgorithm       => JwtSprayJson.isValid(token, decodeKey, Seq(a)).pure
                   case a: JwtAsymmetricAlgorithm => JwtSprayJson.isValid(token, decodeKey, Seq(a)).pure
                 }
+              }
+
+              override def validateAndDecode(token: String): F[JsObject] = {
+                for {
+                  _    <- validate(token).map(_.pureUnitOrRise(new Exception("Invalid token")))
+                  data <- decode(token)
+                } yield data
               }
             }
         }

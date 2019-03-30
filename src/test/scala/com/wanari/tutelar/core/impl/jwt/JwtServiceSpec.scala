@@ -86,6 +86,25 @@ class JwtServiceSpec extends TestBase {
           "validate fail" in {
             service.validate("wrongtoken") shouldEqual Success(false)
           }
+          "validateAndDecode" in {
+            (for {
+              encoded <- service.encode(data)
+              decoded <- service.validateAndDecode(encoded)
+            } yield {
+              decoded.getFields("hello") shouldEqual Seq(JsString("JWT"))
+            }).get
+          }
+          "validateAndDecode fail - wrong secret" in {
+            (for {
+              encoded <- service2.encode(data)
+              result  <- service.validateAndDecode(encoded)
+            } yield {
+              result
+            }) shouldBe a[Failure[_]]
+          }
+          "validateAndDecode fail" in {
+            service.validateAndDecode("wrongtoken") shouldBe a[Failure[_]]
+          }
         }
     }
 }

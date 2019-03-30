@@ -84,7 +84,7 @@ class TotpServiceImpl[F[_]: MonadError[?[_], Throwable]](
   private def decodeToken(str: String): F[String] = {
     for {
       service   <- jwtService
-      tokenData <- service.decode(str)
+      tokenData <- service.validateAndDecode(str)
     } yield {
       tokenData.toString
     }

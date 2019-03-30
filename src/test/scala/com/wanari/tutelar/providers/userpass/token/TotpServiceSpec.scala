@@ -44,7 +44,7 @@ class TotpServiceSpec extends TestBase {
 
   "register" should {
     def initMock(jwtService: JwtService[Try]) = {
-      when(jwtService.decode(any[String])).thenReturn(
+      when(jwtService.validateAndDecode(any[String])).thenReturn(
         Success(
           TotpData("SHA1", 6, 30000, 0, "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ").toJson.asJsObject
         )
@@ -54,7 +54,7 @@ class TotpServiceSpec extends TestBase {
       initMock(jwtService)
 
       service.register("newUser", "token", "755224", None)
-      verify(jwtService).decode("token")
+      verify(jwtService).validateAndDecode("token")
 
       val newUserData = databaseService.accounts.get(authType -> "newUser")
       newUserData shouldBe a[Some[_]]
@@ -74,7 +74,7 @@ class TotpServiceSpec extends TestBase {
         service.register(savedAccount.externalId, "token", "755224", None) shouldBe a[Failure[_]]
       }
       "the incoming token is not valid" in new TestScope {
-        when(jwtService.decode(any[String])).thenReturn(Failure(new Exception))
+        when(jwtService.validateAndDecode(any[String])).thenReturn(Failure(new Exception))
         service.register("newUser", "token", "755224", None) shouldBe a[Failure[_]]
       }
 

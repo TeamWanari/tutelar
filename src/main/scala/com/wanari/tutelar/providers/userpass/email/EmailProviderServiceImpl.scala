@@ -57,7 +57,7 @@ class EmailProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](
     import EmailProviderServiceImpl._
     for {
       service    <- jwtService
-      tokenData  <- service.decode(registerToken)
+      tokenData  <- service.validateAndDecode(registerToken)
       emailToken <- tokenData.convertToF[F, EmailToken]
       _          <- (emailToken.`type` == `type`).pureUnitOrRise(new Exception)
     } yield emailToken.email
