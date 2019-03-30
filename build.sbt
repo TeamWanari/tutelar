@@ -43,9 +43,10 @@ lazy val core = (project in file("."))
       "-Xlint"
     ),
     libraryDependencies ++= {
-      val akkaHttpV  = "10.1.7"
-      val akkaV      = "2.5.21"
-      val scalaTestV = "3.0.5"
+      val akkaHttpV = "10.1.8"
+      val akkaV     = "2.5.21"
+      val slickV    = "3.3.0"
+      val jwtV      = "2.1.0"
       Seq(
         "org.typelevel"        %% "cats-core"               % "1.6.0",
         "com.typesafe.akka"    %% "akka-http"               % akkaHttpV,
@@ -58,17 +59,17 @@ lazy val core = (project in file("."))
         "ch.qos.logback"       % "logback-classic"          % "1.2.3",
         "net.logstash.logback" % "logstash-logback-encoder" % "5.3",
         "org.slf4j"            % "jul-to-slf4j"             % "1.7.26",
-        "com.typesafe.slick"   %% "slick"                   % "3.3.0",
-        "com.typesafe.slick"   %% "slick-hikaricp"          % "3.3.0",
+        "com.typesafe.slick"   %% "slick"                   % slickV,
+        "com.typesafe.slick"   %% "slick-hikaricp"          % slickV,
         "org.postgresql"       % "postgresql"               % "42.2.5",
-        "com.pauldijou"        %% "jwt-core"                % "2.1.0",
-        "com.pauldijou"        %% "jwt-spray-json"          % "2.1.0",
+        "com.pauldijou"        %% "jwt-core"                % jwtV,
+        "com.pauldijou"        %% "jwt-spray-json"          % jwtV,
         "org.mindrot"          % "jbcrypt"                  % "0.4",
         "commons-codec"        % "commons-codec"            % "1.12",
         "ch.megard"            %% "akka-http-cors"          % "0.4.0",
-        "org.scalatest"        %% "scalatest"               % scalaTestV % "it,test",
-        "org.mockito"          % "mockito-core"             % "2.24.5" % "it,test",
-        "org.mockito"          %% "mockito-scala"           % "1.2.0" % "it,test"
+        "org.scalatest"        %% "scalatest"               % "3.0.5" % "it,test",
+        "org.mockito"          % "mockito-core"             % "2.25.1" % "it,test",
+        "org.mockito"          %% "mockito-scala"           % "1.2.1" % "it,test"
       )
     }
   )

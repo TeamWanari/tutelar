@@ -40,7 +40,7 @@ class OAuth2ServiceSpec extends TestBase {
       implicit val materializer = ActorMaterializer()
       val trh                   = TokenRequestHelper("a", "b", "c", "d")
       val formEntity            = trh.formEntity("uri")
-      formEntity.contentType shouldBe (MediaTypes.`application/x-www-form-urlencoded` withCharset HttpCharsets.`UTF-8`)
+      formEntity.contentType shouldBe MediaTypes.`application/x-www-form-urlencoded`.toContentType
       await(formEntity.httpEntity.toStrict(timeout)).data.utf8String shouldBe
         """state=d&redirect_uri=uri&client_id=a&code=c&client_secret=b&grant_type=authorization_code"""
     }
