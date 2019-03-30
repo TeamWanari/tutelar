@@ -12,8 +12,8 @@ class JwtServiceSpec extends TestBase {
 
   def createServiceWithConf(config: JwtConfig): JwtService[Try] = {
     import cats.instances.try_._
-    implicit val configService = () => Try(config)
-    JwtServiceImpl.create[Try].get
+    implicit val configService = () => Success(config)
+    new JwtServiceImpl[Try]
   }
 
   val symmetric = Seq("HMD5", "HS224", "HS256", "HS384", "HS512")

@@ -25,7 +25,7 @@ trait Services[F[_]] {
   implicit val githubService: GithubService[F]
   implicit val googleService: GoogleService[F]
   implicit val databaseService: DatabaseService[F]
-  implicit val jwtService: F[JwtService[F]]
+  implicit val jwtService: JwtService[F]
   implicit val idGenerator: IdGenerator[F]
   implicit val dateTimeService: DateTimeUtil[F]
   implicit val hookService: HookService[F]
@@ -68,7 +68,7 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
     new GithubService[Future](configService.runtimeConfig.githubConfig)
   implicit lazy val googleService: GoogleService[Future] =
     new GoogleService[Future](configService.runtimeConfig.googleConfig)
-  implicit lazy val jwtService: Future[JwtService[Future]]          = JwtServiceImpl.create
+  implicit lazy val jwtService: JwtService[Future]                  = new JwtServiceImpl[Future]
   implicit lazy val idGenerator: IdGenerator[Future]                = new IdGeneratorImpl[Future]
   implicit lazy val dateTimeService: DateTimeUtil[Future]           = new DateTimeUtilImpl[Future]
   implicit lazy val hookService: HookService[Future]                = new HookServiceImpl[Future]

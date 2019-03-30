@@ -12,7 +12,7 @@ class EmailProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](
     implicit emailService: EmailService[F],
     configF: () => F[EmailProviderConfig],
     authService: AuthService[F],
-    jwtService: F[JwtService[F]]
+    jwtService: JwtService[F]
 ) extends BasicProviderServiceImpl
     with EmailProviderService[F] {
 
@@ -56,18 +56,14 @@ class EmailProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](
   private def decodeToken(registerToken: String, `type`: String): F[String] = {
     import EmailProviderServiceImpl._
     for {
-      service    <- jwtService
-      tokenData  <- service.validateAndDecode(registerToken)
+      tokenData  <- jwtService.validateAndDecode(registerToken)
       emailToken <- tokenData.convertToF[F, EmailToken]
       _          <- (emailToken.`type` == `type`).pureUnitOrRise(new Exception)
     } yield emailToken.email
   }
 
   private def createToken(email: String, `type`: String): F[String] = {
-    for {
-      service <- jwtService
-      token   <- service.encode(EmailToken(email, `type`).toJson.asJsObject)
-    } yield token
+    jwtService.encode(EmailToken(email, `type`).toJson.asJsObject)
   }
 
   private def createRegistrationUrl(registerToken: String): F[Token] = {

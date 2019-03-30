@@ -15,7 +15,7 @@ import scala.util.Try
 class TotpServiceImpl[F[_]: MonadError[?[_], Throwable]](
     implicit authService: AuthService[F],
     totpConfig: () => F[TotpConfig],
-    jwtService: F[JwtService[F]]
+    jwtService: JwtService[F]
 ) extends TotpService[F] {
   import TotpServiceImpl._
   import cats.implicits._
@@ -34,8 +34,7 @@ class TotpServiceImpl[F[_]: MonadError[?[_], Throwable]](
       totp     = TOTP(algo, config.digits, config.period, if (config.startFromCurrentTime) now else 0, key)
       totpData = TotpData(config.algorithm, totp.digits, totp.period, totp.initialTimestamp, key.toBase32)
       uri      = totp.toURI("")
-      service <- OptionT.liftF(jwtService)
-      token   <- OptionT.liftF(service.encode(totpData.toJson.asJsObject))
+      token <- OptionT.liftF(jwtService.encode(totpData.toJson.asJsObject))
     } yield {
       QRData(token, uri)
     }
@@ -82,12 +81,7 @@ class TotpServiceImpl[F[_]: MonadError[?[_], Throwable]](
   }
 
   private def decodeToken(str: String): F[String] = {
-    for {
-      service   <- jwtService
-      tokenData <- service.validateAndDecode(str)
-    } yield {
-      tokenData.toString
-    }
+    jwtService.validateAndDecode(str).map(_.toString)
   }
 }
 

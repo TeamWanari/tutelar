@@ -21,7 +21,7 @@ class ItTestServices(implicit ec: ExecutionContext) extends Services[Future] {
   override implicit lazy val healthCheckService: HealthCheckService[Future] = new HealthCheckServiceImpl[Future]
   override implicit lazy val databaseService: DatabaseService[Future]       = new DatabaseServiceMemImpl[Future]
 
-  override implicit lazy val jwtService: Future[JwtService[Future]] = JwtServiceImpl.create
+  override implicit lazy val jwtService: JwtService[Future] = new JwtServiceImpl
 
   override implicit lazy val idGenerator: IdGenerator[Future]      = new IdGeneratorCounterImpl[Future]
   override implicit lazy val dateTimeService: DateTimeUtil[Future] = new DateTimeUtilCounterImpl[Future]

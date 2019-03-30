@@ -13,7 +13,7 @@ class AuthServiceImpl[F[_]: Monad](
     hookService: HookService[F],
     idGenerator: IdGenerator[F],
     timeService: DateTimeUtil[F],
-    jwtService: F[JwtService[F]]
+    jwtService: JwtService[F]
 ) extends AuthService[F] {
   import cats.syntax.applicative._
   import cats.syntax.flatMap._
@@ -79,9 +79,8 @@ class AuthServiceImpl[F[_]: Monad](
 
   private def createJwt(account: Account, extraData: JsObject): F[String] = {
     for {
-      data    <- createJwtData(account, extraData)
-      service <- jwtService
-      jwt     <- service.encode(data)
+      data <- createJwtData(account, extraData)
+      jwt  <- jwtService.encode(data)
     } yield jwt
   }
 
