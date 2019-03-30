@@ -55,7 +55,7 @@ trait TestBase extends WordSpecLike with Matchers with MockitoSugar with BeforeA
     }
 
     val jwtTokenResponse = "JWT"
-    when(jwtService.encode(any[JsObject])).thenReturn(jwtTokenResponse.pure[F])
+    when(jwtService.encode(any[JsObject], any[Option[Duration]])).thenReturn(jwtTokenResponse.pure[F])
     when(hookService.register(any[String], any[String], any[String], any[JsObject]))
       .thenReturn(hookResponseRegister.pure[F])
     when(hookService.login(any[String], any[String], any[String], any[JsObject])).thenReturn(hookResponseLogin.pure[F])

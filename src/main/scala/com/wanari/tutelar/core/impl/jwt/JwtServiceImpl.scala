@@ -15,7 +15,7 @@ class JwtServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit jwtConfig: () =
   import cats.syntax.functor._
   import com.wanari.tutelar.util.ApplicativeErrorSyntax._
 
-  private lazy val settings: F[Settings] = {
+  private def settings: F[Settings] = {
     jwtConfig().flatMap { config =>
       val expirationTime = config.expirationTime.toSeconds
       JwtAlgorithm
@@ -32,9 +32,10 @@ class JwtServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit jwtConfig: () =
     settings.map(_ => ())
   }
 
-  override def encode(data: JsObject): F[String] = {
+  override def encode(data: JsObject, expirationTime: Option[Duration] = None): F[String] = {
     settings.map { set =>
-      val claim = JwtClaim(data.compactPrint).expiresIn(set.expirationTime)
+      val expTime = expirationTime.map(_.toSeconds).getOrElse(set.expirationTime)
+      val claim   = JwtClaim(data.compactPrint).expiresIn(expTime)
       JwtSprayJson.encode(claim, set.encodeKey, set.algo)
     }
   }

@@ -5,9 +5,10 @@ import com.wanari.tutelar.TestBase
 import com.wanari.tutelar.providers.userpass.email.EmailProviderService.EmailProviderConfig
 import org.mindrot.jbcrypt.BCrypt
 import org.mockito.ArgumentMatchersSugar._
-import org.mockito.Mockito.{verify, when, never}
+import org.mockito.Mockito.{never, verify, when}
 import spray.json.{JsObject, JsString, JsTrue}
 
+import scala.concurrent.duration.Duration
 import scala.util.{Failure, Success, Try}
 
 class EmailProviderServiceSpec extends TestBase {
@@ -112,7 +113,7 @@ class EmailProviderServiceSpec extends TestBase {
       }
       "create register url with token and call send service" in new TestScope {
         when(emailService.sendRegisterUrl(any[String], any[String])).thenReturn(Success(()))
-        when(jwtService.encode(any[JsObject])).thenReturn(Success("REG_TOKEN"))
+        when(jwtService.encode(any[JsObject], any[Option[Duration]])).thenReturn(Success("REG_TOKEN"))
         service.sendRegister("")
         verify(emailService).sendRegisterUrl(any[String], eqTo("reg?t=REG_TOKEN"))
       }
@@ -194,7 +195,7 @@ class EmailProviderServiceSpec extends TestBase {
     "create register url with token and call send service" in new TestScope {
       initDb()
       when(emailService.sendResetPasswordUrl(any[String], any[String])).thenReturn(Success(()))
-      when(jwtService.encode(any[JsObject])).thenReturn(Success("RESET_TOKEN"))
+      when(jwtService.encode(any[JsObject], any[Option[Duration]])).thenReturn(Success("RESET_TOKEN"))
       service.sendResetPassword(savedExternalId)
       verify(emailService).sendResetPasswordUrl(any[String], eqTo("res?t=RESET_TOKEN"))
     }

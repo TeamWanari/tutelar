@@ -9,6 +9,8 @@ import org.mockito.ArgumentMatchersSugar._
 import org.mockito.Mockito.{verify, when}
 import spray.json.{JsObject, JsString}
 
+import scala.concurrent.duration.Duration
+
 class AuthServiceSpec extends TestBase {
 
   val authType             = "AUTH_TYPE"
@@ -31,7 +33,7 @@ class AuthServiceSpec extends TestBase {
     databaseService.saveUser(savedUser)
     databaseService.saveAccount(savedAccount)
 
-    when(jwtService.encode(any[JsObject])).thenReturn("JWT")
+    when(jwtService.encode(any[JsObject], any[Option[Duration]])).thenReturn("JWT")
     when(hookService.register(any[String], any[String], any[String], any[JsObject])).thenReturn(hookResponseRegister)
     when(hookService.login(any[String], any[String], any[String], any[JsObject])).thenReturn(hookResponseLogin)
 
