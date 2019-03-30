@@ -45,6 +45,7 @@ trait Services[F[_]] {
     for {
       _ <- initialize(configService, "config")
       _ <- initialize(databaseService, "database")
+      _ <- initialize(jwtService, "jwt")
       _ <- initializeIfEnabled(ldapService, "ldap")
     } yield ()
   }
