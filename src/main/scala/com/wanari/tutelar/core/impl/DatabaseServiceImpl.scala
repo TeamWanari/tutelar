@@ -8,6 +8,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class DatabaseServiceImpl(db: Database)(implicit ec: ExecutionContext) extends DatabaseService[Future] {
 
+  override def init: Future[Unit] = {
+    db.run(sql"SELECT 1".as[Int]).map(_ => ())
+  }
+
   override def checkStatus(): Future[Boolean] = {
     db.run(sql"SELECT 1".as[Int])
       .map(_ => true)

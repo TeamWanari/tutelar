@@ -1,8 +1,9 @@
 package com.wanari.tutelar.core.config
 import cats.MonadError
 import com.typesafe.config.{Config, ConfigFactory}
+import com.wanari.tutelar.Initable
 
-trait ServerConfig[F[_]] {
+trait ServerConfig[F[_]] extends Initable[F] {
   def getVersion: F[String]
   def getHostname: F[String]
 
@@ -29,5 +30,11 @@ class ServerConfigImpl[F[_]: MonadError[?[_], Throwable]]() extends ServerConfig
       .filterNot(_.isEmpty)
       .toSeq
       .pure
+  }
+
+  override def init: F[Unit] = {
+    import com.wanari.tutelar.util.ApplicativeErrorSyntax._
+    if (conf.isEmpty) new Exception("Config is empty!").raise
+    else ().pure
   }
 }

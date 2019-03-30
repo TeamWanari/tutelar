@@ -2,6 +2,7 @@ package com.wanari.tutelar
 
 import akka.actor.ActorSystem
 import akka.stream.Materializer
+import cats.MonadError
 import com.wanari.tutelar.core._
 import com.wanari.tutelar.core.config.{ServerConfig, ServerConfigImpl}
 import com.wanari.tutelar.core.healthcheck.{HealthCheckService, HealthCheckServiceImpl}
@@ -13,6 +14,7 @@ import com.wanari.tutelar.providers.userpass.email._
 import com.wanari.tutelar.providers.userpass.ldap.{LdapService, LdapServiceImpl}
 import com.wanari.tutelar.providers.userpass.token.{TotpService, TotpServiceImpl}
 import com.wanari.tutelar.util._
+import org.slf4j.Logger
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -33,6 +35,19 @@ trait Services[F[_]] {
   implicit val emailService: EmailService[F]
   implicit val emailLoginService: EmailProviderService[F]
   implicit val totpService: TotpService[F]
+
+  def init()(implicit logger: Logger, ev: MonadError[F, Throwable]): F[Unit] = {
+    import cats.syntax.flatMap._
+    import cats.syntax.functor._
+    import Initable._
+
+    logger.info("Init services")
+    for {
+      _ <- initialize(configService, "config")
+      _ <- initialize(databaseService, "database")
+      _ <- initializeIfEnabled(ldapService, "ldap")
+    } yield ()
+  }
 }
 
 class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, materializer: Materializer)

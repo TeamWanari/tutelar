@@ -19,6 +19,10 @@ class LdapServiceImpl(
   private lazy val context  = createSearchContext()
   private lazy val controls = createSearchControls()
 
+  override def init: Future[Unit] = {
+    for (_ <- context; _ <- controls) yield ()
+  }
+
   override def login(username: String, password: String, data: Option[JsObject]): Future[Token] = {
     for {
       user       <- findUser(username)

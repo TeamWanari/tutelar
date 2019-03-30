@@ -12,15 +12,17 @@ import scala.util.{Failure, Success}
 object Main extends App {
   LoggerUtil.initBridge()
 
-  lazy val logger = LoggerUtil.getDefaultLogger
+  implicit lazy val logger = LoggerUtil.getDefaultLogger
 
   implicit lazy val system           = ActorSystem("tutelar-system")
   implicit lazy val materializer     = ActorMaterializer()
   implicit lazy val executionContext = system.dispatcher
+  import cats.instances.future._
 
   val services = new RealServices()
 
   val starting = for {
+    _      <- services.init()
     route  <- Api.createApi(services)
     server <- Http().bindAndHandle(route, "0.0.0.0", 9000)
   } yield {
@@ -28,15 +30,14 @@ object Main extends App {
   }
 
   starting.onComplete {
-    case Success(_)  => logger.info("LoginService started")
+    case Success(_) => logger.info("LoginService started")
     case Failure(ex) =>
       logger.error("LoginService starting failed", ex)
       system.terminate()
   }
 
   def setupShutdownHook(server: Http.ServerBinding): Unit = {
-    CoordinatedShutdown(system).addTask(
-      CoordinatedShutdown.PhaseServiceUnbind, "http_shutdown") { () =>
+    CoordinatedShutdown(system).addTask(CoordinatedShutdown.PhaseServiceUnbind, "http_shutdown") { () =>
       logger.info("LoginService shutting down...")
       server.terminate(hardDeadline = 8.seconds).map(_ => Done)
     }

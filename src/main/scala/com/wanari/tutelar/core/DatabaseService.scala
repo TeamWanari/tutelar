@@ -1,8 +1,9 @@
 package com.wanari.tutelar.core
 
+import com.wanari.tutelar.Initable
 import com.wanari.tutelar.core.DatabaseService.{Account, AccountId, User}
 
-trait DatabaseService[F[_]] {
+trait DatabaseService[F[_]] extends Initable[F] {
   def checkStatus(): F[Boolean]
   def saveUser(user: User): F[Unit]
   def saveAccount(account: Account): F[Unit]

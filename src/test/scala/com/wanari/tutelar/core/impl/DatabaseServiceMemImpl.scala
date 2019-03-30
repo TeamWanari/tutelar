@@ -32,4 +32,6 @@ class DatabaseServiceMemImpl[F[_]: Applicative] extends DatabaseService[F] {
   }
 
   override def checkStatus(): F[Boolean] = true.pure
+
+  override def init: F[Unit] = ().pure
 }
