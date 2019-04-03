@@ -3,6 +3,7 @@ package com.wanari.tutelar.providers.userpass.email
 import cats.MonadError
 import com.wanari.tutelar.TestBase
 import com.wanari.tutelar.providers.userpass.email.EmailProviderService.EmailProviderConfig
+import com.wanari.tutelar.util.NonEmptyPasswordChecker
 import org.mindrot.jbcrypt.BCrypt
 import org.mockito.ArgumentMatchersSugar._
 import org.mockito.Mockito.{never, verify, when}
@@ -21,6 +22,8 @@ class EmailProviderServiceSpec extends TestBase {
 
     implicit val configF      = () => Success(EmailProviderConfig("", "", "", "reg?t=<<TOKEN>>", "res?t=<<TOKEN>>"))
     implicit val emailService = mock[EmailServiceImpl[Try]]
+
+    implicit val passwordChecker = new NonEmptyPasswordChecker[Try]
 
     lazy val service = new EmailProviderServiceImpl[Try]()
   }
@@ -73,11 +76,23 @@ class EmailProviderServiceSpec extends TestBase {
             )
           )
         )
-        service.register("", "", Some(JsObject("hello" -> JsTrue)))
+        service.register("", "pw", Some(JsObject("hello" -> JsTrue)))
 
         verify(hookService).register(any[String], eqTo("new@user"), eqTo("EMAIL"), eqTo(JsObject("hello" -> JsTrue)))
       }
       "failure" when {
+        "password is weak" in new TestScope {
+
+          when(jwtService.validateAndDecode(any[String])).thenReturn(
+            Success(
+              JsObject(
+                "email" -> JsString("new@user"),
+                "type"  -> JsString("register")
+              )
+            )
+          )
+          service.register("emailRegisterToken", "", None) shouldBe a[Failure[_]]
+        }
         "username is already used" in new TestScope {
           initDb()
           when(jwtService.validateAndDecode(any[String]))
@@ -93,11 +108,11 @@ class EmailProviderServiceSpec extends TestBase {
               )
             )
           )
-          service.register("", "", Some(JsObject("hello" -> JsTrue))) shouldBe a[Failure[_]]
+          service.register("", "pw", Some(JsObject("hello" -> JsTrue))) shouldBe a[Failure[_]]
         }
         "token is wrong" in new TestScope {
           when(jwtService.validateAndDecode(any[String])).thenReturn(Failure(new Exception))
-          service.register("", "", Some(JsObject("hello" -> JsTrue))) shouldBe a[Failure[_]]
+          service.register("", "pw", Some(JsObject("hello" -> JsTrue))) shouldBe a[Failure[_]]
         }
       }
     }
@@ -137,7 +152,7 @@ class EmailProviderServiceSpec extends TestBase {
 
     "successful" in new ResetPasswordScope {
       initDb()
-      service.resetPassword("resetToken", "", None) shouldBe Success(jwtTokenResponse)
+      service.resetPassword("resetToken", "pw", None) shouldBe Success(jwtTokenResponse)
       verify(jwtService).validateAndDecode("resetToken")
     }
     "change the password" in new ResetPasswordScope {
@@ -150,12 +165,12 @@ class EmailProviderServiceSpec extends TestBase {
     }
     "send extra data via hook" in new ResetPasswordScope {
       initDb()
-      service.resetPassword("", "", Some(JsObject("hello" -> JsTrue)))
+      service.resetPassword("", "pw", Some(JsObject("hello" -> JsTrue)))
       verify(hookService).login(savedAccount.userId, savedAccount.externalId, "EMAIL", JsObject("hello" -> JsTrue))
     }
     "failure" when {
       "user not found" in new ResetPasswordScope {
-        service.resetPassword("", "", None) shouldBe a[Failure[_]]
+        service.resetPassword("", "pw", None) shouldBe a[Failure[_]]
       }
       "wrong token" in new TestScope {
         initDb()
@@ -167,12 +182,12 @@ class EmailProviderServiceSpec extends TestBase {
             )
           )
         )
-        service.resetPassword("", "", None) shouldBe a[Failure[_]]
+        service.resetPassword("", "pw", None) shouldBe a[Failure[_]]
       }
       "token is wrong" in new TestScope {
         initDb()
         when(jwtService.validateAndDecode(any[String])).thenReturn(Failure(new Exception))
-        service.resetPassword("", "", None) shouldBe a[Failure[_]]
+        service.resetPassword("", "pw", None) shouldBe a[Failure[_]]
       }
     }
   }

@@ -7,6 +7,7 @@ import com.wanari.tutelar.core.HookService.{BasicAuthConfig, HookConfig}
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
+import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
 import com.wanari.tutelar.providers.userpass.email.EmailProviderService.EmailProviderConfig
 import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
 import com.wanari.tutelar.providers.userpass.token.OTP.OTPAlgorithm
@@ -26,6 +27,7 @@ class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String)
   implicit val callbackConfig: () => F[CallbackConfig]          = readCallbackConfig _
   implicit val hookConfig: () => F[HookConfig]                  = readHookConfig _
   implicit val emailServiceConfig: () => F[EmailProviderConfig] = readEmailServiceConfig _
+  implicit val passwordSettings: () => F[PasswordSettings]      = readPasswordSettings _
 
   val facebookConfig: () => F[OAuth2Config]    = () => readOauth2Config("oauth2.facebook")
   val githubConfig: () => F[OAuth2Config]      = () => readOauth2Config("oauth2.github")
@@ -118,4 +120,11 @@ class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String)
         ).pure
       }
   }
+
+  private def readPasswordSettings = {
+    val config = conf.getConfig("passwordDifficulty")
+    PasswordSettings(
+      config.getString("pattern")
+    )
+  }.pure
 }

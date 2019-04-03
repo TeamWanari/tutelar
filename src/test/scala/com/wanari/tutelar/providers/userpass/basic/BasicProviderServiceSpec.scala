@@ -1,6 +1,7 @@
 package com.wanari.tutelar.providers.userpass.basic
 import cats.MonadError
 import com.wanari.tutelar.TestBase
+import com.wanari.tutelar.util.NonEmptyPasswordChecker
 import org.mindrot.jbcrypt.BCrypt
 import org.mockito.Mockito.verify
 import spray.json.{JsObject, JsTrue}
@@ -17,6 +18,8 @@ class BasicProviderServiceSpec extends TestBase {
   class TestScope extends ProviderTestScope[Try] {
     override lazy val authType        = "BASIC"
     override lazy val savedCustomData = BCrypt.hashpw("secretpw", BCrypt.gensalt())
+
+    implicit val passwordChecker = new NonEmptyPasswordChecker[Try]
 
     val service = new BasicProviderServiceImpl[Try]()
   }
@@ -55,6 +58,9 @@ class BasicProviderServiceSpec extends TestBase {
       verify(hookService).register(any[String], eqTo("newUser"), eqTo("BASIC"), eqTo(JsObject("hello" -> JsTrue)))
     }
     "failure" when {
+      "password is weak" in new TestScope {
+        service.register("newUser", "", None) shouldBe a[Failure[_]]
+      }
       "username is already used" in new TestScope {
         initDb()
         service.register(savedAccount.externalId, "asd", None) shouldBe a[Failure[_]]

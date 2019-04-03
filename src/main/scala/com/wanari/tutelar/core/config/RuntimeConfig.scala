@@ -5,6 +5,7 @@ import com.wanari.tutelar.core.HookService.HookConfig
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
+import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
 import com.wanari.tutelar.providers.userpass.email.EmailProviderService.EmailProviderConfig
 import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
 import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl.TotpConfig
@@ -20,6 +21,7 @@ trait RuntimeConfig[F[_]] {
   val githubConfig: () => F[OAuth2Config]
   val googleConfig: () => F[OAuth2Config]
   implicit val ldapConfig: () => F[LdapConfig]
+  implicit val passwordSettings: () => F[PasswordSettings]
 }
 
 object RuntimeConfig {

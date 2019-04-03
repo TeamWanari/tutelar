@@ -3,6 +3,7 @@ package com.wanari.tutelar.providers.userpass.email
 import cats.MonadError
 import com.wanari.tutelar.core.{AuthService, JwtService}
 import com.wanari.tutelar.core.AuthService.Token
+import com.wanari.tutelar.providers.userpass.PasswordDifficultyChecker
 import com.wanari.tutelar.providers.userpass.basic.BasicProviderServiceImpl
 import com.wanari.tutelar.providers.userpass.email.EmailProviderService.EmailProviderConfig
 import com.wanari.tutelar.providers.userpass.email.EmailProviderServiceImpl.EmailToken
@@ -12,6 +13,7 @@ class EmailProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](
     implicit emailService: EmailService[F],
     configF: () => F[EmailProviderConfig],
     authService: AuthService[F],
+    passwordDifficultyChecker: PasswordDifficultyChecker[F],
     jwtService: JwtService[F]
 ) extends BasicProviderServiceImpl
     with EmailProviderService[F] {

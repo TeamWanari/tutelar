@@ -6,6 +6,7 @@ import com.wanari.tutelar.core.healthcheck.{HealthCheckService, HealthCheckServi
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl
 import com.wanari.tutelar.core.impl.{AuthServiceImpl, DatabaseServiceMemImpl, HookServiceImpl}
 import com.wanari.tutelar.providers.oauth2.{FacebookService, GithubService, GoogleService, OAuth2Service}
+import com.wanari.tutelar.providers.userpass.{PasswordDifficultyChecker, PasswordDifficultyCheckerImpl}
 import com.wanari.tutelar.providers.userpass.basic.{BasicProviderService, BasicProviderServiceImpl}
 import com.wanari.tutelar.providers.userpass.email._
 import com.wanari.tutelar.providers.userpass.ldap.LdapService
@@ -48,4 +49,6 @@ class ItTestServices(implicit ec: ExecutionContext) extends Services[Future] {
   override implicit lazy val emailService: EmailService[Future]              = new EmailServiceImpl[Future]()
   override implicit lazy val emailLoginService: EmailProviderService[Future] = new EmailProviderServiceImpl[Future]()
   override implicit lazy val totpService: TotpService[Future]                = new TotpServiceImpl[Future]()
+  override implicit val passwordDifficultyChecker: PasswordDifficultyChecker[Future] =
+    new PasswordDifficultyCheckerImpl[Future]
 }

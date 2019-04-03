@@ -9,6 +9,7 @@ import com.wanari.tutelar.core.healthcheck.{HealthCheckService, HealthCheckServi
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl
 import com.wanari.tutelar.core.impl.{AuthServiceImpl, CsrfServiceNotChecked, DatabaseServiceImpl, HookServiceImpl}
 import com.wanari.tutelar.providers.oauth2.{FacebookService, GithubService, GoogleService}
+import com.wanari.tutelar.providers.userpass.{PasswordDifficultyChecker, PasswordDifficultyCheckerImpl}
 import com.wanari.tutelar.providers.userpass.basic.{BasicProviderService, BasicProviderServiceImpl}
 import com.wanari.tutelar.providers.userpass.email._
 import com.wanari.tutelar.providers.userpass.ldap.{LdapService, LdapServiceImpl}
@@ -35,6 +36,7 @@ trait Services[F[_]] {
   implicit val emailService: EmailService[F]
   implicit val emailLoginService: EmailProviderService[F]
   implicit val totpService: TotpService[F]
+  implicit val passwordDifficultyChecker: PasswordDifficultyChecker[F]
 
   def init()(implicit logger: Logger, ev: MonadError[F, Throwable]): F[Unit] = {
     import cats.syntax.flatMap._
@@ -79,4 +81,6 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
   implicit lazy val emailService: EmailService[Future]              = new EmailServiceImpl[Future]()
   implicit lazy val emailLoginService: EmailProviderService[Future] = new EmailProviderServiceImpl[Future]()
   implicit lazy val totpService: TotpService[Future]                = new TotpServiceImpl[Future]()
+  implicit lazy val passwordDifficultyChecker: PasswordDifficultyChecker[Future] =
+    new PasswordDifficultyCheckerImpl[Future]
 }
