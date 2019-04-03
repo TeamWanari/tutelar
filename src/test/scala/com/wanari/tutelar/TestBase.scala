@@ -35,7 +35,7 @@ trait TestBase extends WordSpecLike with Matchers with MockitoSugar with BeforeA
 
     import cats.syntax.applicative._
 
-    lazy val savedExternalId      = "EXT_ID"
+    lazy val savedExternalId      = "ext_id"
     lazy val savedCustomData      = ""
     lazy val savedUser            = User("99999", 98765)
     lazy val savedAccount         = Account(authType, savedExternalId, savedUser.id, savedCustomData)

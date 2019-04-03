@@ -53,19 +53,19 @@ class TotpServiceSpec extends TestBase {
     "successful" in new TestScope {
       initMock(jwtService)
 
-      service.register("newUser", "token", "755224", None)
+      service.register("newuser", "token", "755224", None)
       verify(jwtService).validateAndDecode("token")
 
-      val newUserData = databaseService.accounts.get(authType -> "newUser")
-      newUserData shouldBe a[Some[_]]
-      newUserData.get.customData shouldBe savedCustomData
+      val newuserData = databaseService.accounts.get(authType -> "newuser")
+      newuserData shouldBe a[Some[_]]
+      newuserData.get.customData shouldBe savedCustomData
     }
 
     "sends extra data via hook" in new TestScope {
       initMock(jwtService)
-      service.register("newUser", "token", "755224", Some(JsObject("hello" -> JsTrue)))
+      service.register("newuser", "token", "755224", Some(JsObject("hello" -> JsTrue)))
 
-      verify(hookService).register(any[String], eqTo("newUser"), eqTo("TOTP"), eqTo(JsObject("hello" -> JsTrue)))
+      verify(hookService).register(any[String], eqTo("newuser"), eqTo("TOTP"), eqTo(JsObject("hello" -> JsTrue)))
     }
 
     "failure" when {
@@ -75,12 +75,12 @@ class TotpServiceSpec extends TestBase {
       }
       "the incoming token is not valid" in new TestScope {
         when(jwtService.validateAndDecode(any[String])).thenReturn(Failure(new Exception))
-        service.register("newUser", "token", "755224", None) shouldBe a[Failure[_]]
+        service.register("newuser", "token", "755224", None) shouldBe a[Failure[_]]
       }
 
       "the token + pass pair not match" in new TestScope {
         initMock(jwtService)
-        service.register("newUser", "token", "755225", None) shouldBe a[Failure[_]]
+        service.register("newuser", "token", "755225", None) shouldBe a[Failure[_]]
       }
     }
 

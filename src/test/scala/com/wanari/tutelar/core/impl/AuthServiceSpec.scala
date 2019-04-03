@@ -14,10 +14,10 @@ import scala.concurrent.duration.Duration
 class AuthServiceSpec extends TestBase {
 
   val authType             = "AUTH_TYPE"
-  val externalId           = "EXT_ID"
+  val externalId           = "ext_id"
   val customData           = "customData"
   val savedUser            = User("99999", 98765)
-  val savedAccount         = Account(authType, "SAVED_EXT_ID", savedUser.id, "somedata")
+  val savedAccount         = Account(authType, "saved_ext_id", savedUser.id, "somedata")
   val providedData         = JsObject("userdata" -> JsString("helo"))
   val hookResponseLogin    = JsObject("group" -> JsString("log"))
   val hookResponseRegister = JsObject("group" -> JsString("reg"))
@@ -84,11 +84,34 @@ class AuthServiceSpec extends TestBase {
         verify(hookService).login(savedAccount.userId, savedAccount.externalId, authType, providedData)
       }
     }
+    "the externalId" should {
+      "be standardized and lowercased" in new TestScope {
+        val externalId  = "SPEC_EXT_ID_\u0065\u0301"
+        val standarized = "spec_ext_id_\u00e9"
+        service.registerOrLogin(authType, externalId, customData, providedData) shouldEqual "JWT"
+        databaseService.users("1") shouldEqual User("1", 1)
+        verify(hookService).register("1", standarized, authType, providedData)
+      }
+    }
   }
 
   "#findCustomData" when {
     "user found" in new TestScope {
       service.findCustomData(savedAccount.authType, savedAccount.externalId).value shouldEqual Some(
+        savedAccount.customData
+      )
+    }
+    "the externalId should be standardized and lowercased" in new TestScope {
+      val externalId  = "SPEC_EXT_ID_\u0065\u0301"
+      val standarized = "spec_ext_id_\u00e9"
+
+      val savedUser    = User("88888", 98765)
+      val savedAccount = Account("AUTH_TYPE_S", standarized, savedUser.id, "customData")
+
+      databaseService.saveUser(savedUser)
+      databaseService.saveAccount(savedAccount)
+
+      service.findCustomData(savedAccount.authType, externalId).value shouldEqual Some(
         savedAccount.customData
       )
     }

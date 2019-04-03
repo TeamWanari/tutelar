@@ -25,15 +25,17 @@ class AuthServiceImpl[F[_]: Monad](
       customData: String,
       providedData: JsObject
   ): F[Token] = {
+    val standardizedExternalId = convertToStandardizedLowercase(externalId)
     for {
-      account_hookresponse <- createOrUpdateAccount(authType, externalId, customData, providedData)
+      account_hookresponse <- createOrUpdateAccount(authType, standardizedExternalId, customData, providedData)
       (account, hookResponse) = account_hookresponse
       token <- createJwt(account, hookResponse)
     } yield token
   }
 
   override def findCustomData(authType: String, externalId: String): OptionT[F, String] = {
-    OptionT(databaseService.findAccountByTypeAndExternalId((authType, externalId))).map(_.customData)
+    val standardizedExternalId = convertToStandardizedLowercase(externalId)
+    OptionT(databaseService.findAccountByTypeAndExternalId((authType, standardizedExternalId))).map(_.customData)
   }
 
   private def createOrUpdateAccount(
@@ -87,5 +89,10 @@ class AuthServiceImpl[F[_]: Monad](
   private def createJwtData(account: Account, extraData: JsObject): F[JsObject] = {
     import com.wanari.tutelar.util.SpraySyntax._
     (extraData + ("id" -> JsString(account.userId))).pure
+  }
+
+  private def convertToStandardizedLowercase(s: String): String = {
+    import java.text.Normalizer
+    Normalizer.normalize(s, Normalizer.Form.NFC).toLowerCase
   }
 }

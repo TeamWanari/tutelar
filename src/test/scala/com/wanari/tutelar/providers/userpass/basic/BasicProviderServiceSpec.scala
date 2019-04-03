@@ -46,20 +46,20 @@ class BasicProviderServiceSpec extends TestBase {
   }
   "#register" should {
     "successful" in new TestScope {
-      service.register("newUser", "pw", None) shouldBe Success(jwtTokenResponse)
+      service.register("newuser", "pw", None) shouldBe Success(jwtTokenResponse)
 
-      val newUserData = databaseService.accounts.get(authType -> "newUser")
+      val newUserData = databaseService.accounts.get(authType -> "newuser")
       newUserData shouldBe a[Some[_]]
       BCrypt.checkpw("pw", newUserData.get.customData) shouldBe true
     }
     "send extra data via hook" in new TestScope {
-      service.register("newUser", "pw", Some(JsObject("hello" -> JsTrue)))
+      service.register("newuser", "pw", Some(JsObject("hello" -> JsTrue)))
 
-      verify(hookService).register(any[String], eqTo("newUser"), eqTo("BASIC"), eqTo(JsObject("hello" -> JsTrue)))
+      verify(hookService).register(any[String], eqTo("newuser"), eqTo("BASIC"), eqTo(JsObject("hello" -> JsTrue)))
     }
     "failure" when {
       "password is weak" in new TestScope {
-        service.register("newUser", "", None) shouldBe a[Failure[_]]
+        service.register("newuser", "", None) shouldBe a[Failure[_]]
       }
       "username is already used" in new TestScope {
         initDb()
