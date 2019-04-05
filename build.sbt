@@ -3,7 +3,8 @@ import org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings
 lazy val commonSettings = Seq(
   scalaVersion := "2.12.8",
   organization := "com.wanari",
-  scalafmtOnCompile := true
+  scalafmtOnCompile := true,
+  version := "0.1.0"
 )
 
 lazy val ItTest         = config("it") extend Test
@@ -26,9 +27,9 @@ lazy val core = (project in file("."))
   .configs(ItTest)
   .settings(inConfig(ItTest)(itTestSettings): _*)
   .settings(commonSettings: _*)
+  .settings(buildInfoSettings: _*)
   .settings(
     name := "tutelar",
-    version := "0.1.0",
     scalacOptions ++= Seq(
       "-deprecation",
       "-encoding",
@@ -75,11 +76,26 @@ lazy val core = (project in file("."))
   )
 
 addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt it:scalafmt")
-addCommandAlias("testAll", "; test ; it:test")
+addCommandAlias("testAll", "test it:test")
 
 enablePlugins(JavaAppPackaging)
+enablePlugins(BuildInfoPlugin)
 
 addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.9")
 addCompilerPlugin("io.tryp"        % "splain"          % "0.4.0" cross CrossVersion.patch)
 
 cancelable in Global := true
+
+lazy val buildInfoSettings = Seq(
+  buildInfoKeys := Seq[BuildInfoKey](
+    name,
+    version,
+    scalaVersion,
+    sbtVersion,
+    BuildInfoKey.action("commitHash") {
+      git.gitHeadCommit.value
+    }
+  ),
+  buildInfoOptions := Seq(BuildInfoOption.BuildTime),
+  buildInfoPackage := "com.wanari.tutelar"
+)

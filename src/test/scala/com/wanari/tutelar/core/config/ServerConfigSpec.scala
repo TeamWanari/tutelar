@@ -6,10 +6,6 @@ import scala.util.Try
 class ServerConfigSpec extends TestBase {
   import cats.instances.try_._
 
-  "#getVersion" in {
-    val service = new ServerConfigImpl[Try]()
-    service.getVersion.get shouldEqual "TestVersion"
-  }
   "#getHostname" in {
     val service = new ServerConfigImpl[Try]()
     service.getHostname.get shouldEqual "TestHostname"

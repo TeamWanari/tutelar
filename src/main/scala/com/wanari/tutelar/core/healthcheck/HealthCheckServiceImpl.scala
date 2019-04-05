@@ -1,6 +1,7 @@
 package com.wanari.tutelar.core.healthcheck
 
 import cats.MonadError
+import com.wanari.tutelar.BuildInfo
 import com.wanari.tutelar.core.config.ServerConfig
 import com.wanari.tutelar.core.DatabaseService
 import com.wanari.tutelar.core.healthcheck.HealthCheckService.HealthCheckResult
@@ -16,12 +17,19 @@ class HealthCheckServiceImpl[F[_]](
 
   def getStatus: F[HealthCheckResult] = {
     for {
-      version  <- config.getVersion.recover { case _             => "" }
       hostname <- config.getHostname.recover { case _            => "" }
       dbStatus <- databaseService.checkStatus().recover { case _ => false }
     } yield {
-      val success = !(version.isEmpty || hostname.isEmpty) && dbStatus
-      HealthCheckResult(success, version, hostname, dbStatus)
+      val success = hostname.nonEmpty && dbStatus
+      HealthCheckResult(
+        success,
+        BuildInfo.version,
+        hostname,
+        dbStatus,
+        BuildInfo.builtAtString,
+        BuildInfo.builtAtMillis,
+        BuildInfo.commitHash
+      )
     }
   }
 }

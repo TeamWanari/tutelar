@@ -1,7 +1,7 @@
 package com.wanari.tutelar.core.healthcheck
 
 import akka.http.scaladsl.model.StatusCodes
-import com.wanari.tutelar.RouteTestBase
+import com.wanari.tutelar.{BuildInfo, RouteTestBase}
 
 class HealthCheckItSpec extends RouteTestBase {
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
@@ -15,7 +15,15 @@ class HealthCheckItSpec extends RouteTestBase {
     }
     "return with data" in new BaseTestScope {
       Get("/healthCheck") ~> route ~> check {
-        responseAs[HealthCheckResult] shouldEqual HealthCheckResult(true, "ItTestVersion", "ItTestHostName", true)
+        responseAs[HealthCheckResult] shouldEqual HealthCheckResult(
+          true,
+          BuildInfo.version,
+          "ItTestHostName",
+          true,
+          BuildInfo.builtAtString,
+          BuildInfo.builtAtMillis,
+          BuildInfo.commitHash
+        )
       }
     }
   }

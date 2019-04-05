@@ -8,6 +8,14 @@ trait HealthCheckService[F[_]] {
 
 object HealthCheckService {
   import spray.json.DefaultJsonProtocol._
-  final case class HealthCheckResult(success: Boolean, version: String, hostname: String, database: Boolean)
-  implicit val healthCheckResultFormat = jsonFormat4(HealthCheckResult)
+  final case class HealthCheckResult(
+      success: Boolean,
+      version: String,
+      hostname: String,
+      database: Boolean,
+      buildAtString: String,
+      buildAtMilis: Long,
+      commitHash: Option[String]
+  )
+  implicit val healthCheckResultFormat = jsonFormat7(HealthCheckResult)
 }

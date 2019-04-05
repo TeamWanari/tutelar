@@ -1,6 +1,6 @@
 package com.wanari.tutelar.core.healthcheck
 
-import com.wanari.tutelar.TestBase
+import com.wanari.tutelar.{BuildInfo, TestBase}
 import com.wanari.tutelar.core.config.ServerConfig
 import com.wanari.tutelar.core.healthcheck.HealthCheckService.HealthCheckResult
 import com.wanari.tutelar.core.DatabaseService
@@ -19,39 +19,60 @@ class HealthCheckServiceSpec extends TestBase {
 
   "#getStatus" when {
     "ok" in new TestScope {
-      when(configService.getVersion).thenReturn(Success("TestVersionMock"))
       when(configService.getHostname).thenReturn(Success("TestHostnameMock"))
       when(databaseServiceMock.checkStatus()).thenReturn(Success(true))
 
-      service.getStatus.get shouldEqual HealthCheckResult(true, "TestVersionMock", "TestHostnameMock", true)
-    }
-    "version failed" in new TestScope {
-      when(configService.getVersion).thenReturn(Failure(new Exception))
-      when(configService.getHostname).thenReturn(Success("TestHostnameMock"))
-      when(databaseServiceMock.checkStatus()).thenReturn(Success(true))
-
-      service.getStatus.get shouldEqual HealthCheckResult(false, "", "TestHostnameMock", true)
+      service.getStatus.get shouldEqual HealthCheckResult(
+        true,
+        BuildInfo.version,
+        "TestHostnameMock",
+        true,
+        BuildInfo.builtAtString,
+        BuildInfo.builtAtMillis,
+        BuildInfo.commitHash
+      )
     }
     "hostname failed" in new TestScope {
-      when(configService.getVersion).thenReturn(Success("TestVersionMock"))
       when(configService.getHostname).thenReturn(Failure(new Exception))
       when(databaseServiceMock.checkStatus()).thenReturn(Success(true))
 
-      service.getStatus.get shouldEqual HealthCheckResult(false, "TestVersionMock", "", true)
+      service.getStatus.get shouldEqual HealthCheckResult(
+        false,
+        BuildInfo.version,
+        "",
+        true,
+        BuildInfo.builtAtString,
+        BuildInfo.builtAtMillis,
+        BuildInfo.commitHash
+      )
     }
     "db failed" in new TestScope {
-      when(configService.getVersion).thenReturn(Success("TestVersionMock"))
       when(configService.getHostname).thenReturn(Success("TestHostnameMock"))
       when(databaseServiceMock.checkStatus()).thenReturn(Success(false))
 
-      service.getStatus.get shouldEqual HealthCheckResult(false, "TestVersionMock", "TestHostnameMock", false)
+      service.getStatus.get shouldEqual HealthCheckResult(
+        false,
+        BuildInfo.version,
+        "TestHostnameMock",
+        false,
+        BuildInfo.builtAtString,
+        BuildInfo.builtAtMillis,
+        BuildInfo.commitHash
+      )
     }
     "db check failed" in new TestScope {
-      when(configService.getVersion).thenReturn(Success("TestVersionMock"))
       when(configService.getHostname).thenReturn(Success("TestHostnameMock"))
       when(databaseServiceMock.checkStatus()).thenReturn(Failure(new Exception))
 
-      service.getStatus.get shouldEqual HealthCheckResult(false, "TestVersionMock", "TestHostnameMock", false)
+      service.getStatus.get shouldEqual HealthCheckResult(
+        false,
+        BuildInfo.version,
+        "TestHostnameMock",
+        false,
+        BuildInfo.builtAtString,
+        BuildInfo.builtAtMillis,
+        BuildInfo.commitHash
+      )
     }
   }
 }

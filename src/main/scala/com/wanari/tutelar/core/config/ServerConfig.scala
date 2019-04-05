@@ -4,7 +4,6 @@ import com.typesafe.config.{Config, ConfigFactory}
 import com.wanari.tutelar.Initable
 
 trait ServerConfig[F[_]] extends Initable[F] {
-  def getVersion: F[String]
   def getHostname: F[String]
 
   def getEnabledModules: F[Seq[String]]
@@ -16,7 +15,6 @@ class ServerConfigImpl[F[_]: MonadError[?[_], Throwable]]() extends ServerConfig
   import cats.syntax.applicative._
   private lazy val conf: Config = ConfigFactory.load
 
-  lazy val getVersion: F[String]  = conf.getString("version").pure
   lazy val getHostname: F[String] = conf.getString("hostname").pure
 
   private lazy val configType              = conf.getString("configType")

@@ -1,2 +1,0 @@
-#!/usr/bin/env sh
-docker build --build-arg BUILD_VERSION=$SOURCE_COMMIT -t $IMAGE_NAME .

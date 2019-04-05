@@ -19,7 +19,6 @@ class InitiableSpec extends TestBase {
     }
     implicit val logger = LoggerFactory.getLogger("test")
     implicit val config = new ServerConfig[Try] {
-      override def getVersion: Try[String]             = ???
       override def getHostname: Try[String]            = ???
       override def getEnabledModules: Try[Seq[String]] = Success(Seq("modulename"))
       override val runtimeConfig: RuntimeConfig[Try]   = null
