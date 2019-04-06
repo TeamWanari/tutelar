@@ -3,6 +3,7 @@ import cats.MonadError
 import com.typesafe.config.Config
 import com.wanari.tutelar.core.HookService.HookConfig
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
+import com.wanari.tutelar.core.impl.database.DatabaseServiceProxy.DatabaseServiceProxyConfig
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
@@ -16,6 +17,7 @@ trait RuntimeConfig[F[_]] {
   implicit val hookConfig: () => F[HookConfig]
   implicit val emailServiceConfig: () => F[EmailProviderConfig]
   implicit val totpConfig: () => F[TotpConfig]
+  implicit val databaseProxyConfig: () => F[DatabaseServiceProxyConfig]
 
   val facebookConfig: () => F[OAuth2Config]
   val githubConfig: () => F[OAuth2Config]

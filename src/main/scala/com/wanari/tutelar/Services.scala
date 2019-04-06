@@ -6,7 +6,8 @@ import cats.MonadError
 import com.wanari.tutelar.core._
 import com.wanari.tutelar.core.config.{ServerConfig, ServerConfigImpl}
 import com.wanari.tutelar.core.healthcheck.{HealthCheckService, HealthCheckServiceImpl}
-import com.wanari.tutelar.core.impl.database.PostgresDatabaseService
+import com.wanari.tutelar.core.impl.database.DatabaseServiceProxy.DatabaseServiceProxyConfig
+import com.wanari.tutelar.core.impl.database.{DatabaseServiceProxy, MemoryDatabaseService, PostgresDatabaseService}
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl
 import com.wanari.tutelar.core.impl.{AuthServiceImpl, CsrfServiceNotChecked, HookServiceImpl}
 import com.wanari.tutelar.providers.oauth2.{FacebookService, GithubService, GoogleService}
@@ -63,9 +64,14 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
   import configService.runtimeConfig._
 
   implicit lazy val healthCheckService: HealthCheckService[Future] = new HealthCheckServiceImpl[Future]
-  implicit lazy val databaseService: DatabaseService[Future]       = new PostgresDatabaseService(PostgresDatabaseService.getDatabase)
-  implicit lazy val httpWrapper: HttpWrapper[Future]               = new AkkaHttpWrapper()
-  implicit lazy val csrfService: CsrfService[Future]               = new CsrfServiceNotChecked[Future]
+  implicit lazy val databaseService: DatabaseService[Future] = new DatabaseServiceProxy[Future](
+    Map(
+      DatabaseServiceProxyConfig.MEMORY   -> (() => new MemoryDatabaseService[Future]),
+      DatabaseServiceProxyConfig.POSTGRES -> (() => new PostgresDatabaseService(PostgresDatabaseService.getDatabase))
+    )
+  )
+  implicit lazy val httpWrapper: HttpWrapper[Future] = new AkkaHttpWrapper()
+  implicit lazy val csrfService: CsrfService[Future] = new CsrfServiceNotChecked[Future]
   implicit lazy val facebookService: FacebookService[Future] =
     new FacebookService[Future](configService.runtimeConfig.facebookConfig)
   implicit lazy val githubService: GithubService[Future] =

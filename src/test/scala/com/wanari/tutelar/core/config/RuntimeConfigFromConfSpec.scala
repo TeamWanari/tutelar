@@ -1,6 +1,7 @@
 package com.wanari.tutelar.core.config
 import com.wanari.tutelar.TestBase
 import com.wanari.tutelar.core.HookService.{BasicAuthConfig, HookConfig}
+import com.wanari.tutelar.core.impl.database.DatabaseServiceProxy.DatabaseServiceProxyConfig
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
@@ -104,6 +105,13 @@ class RuntimeConfigFromConfSpec extends TestBase {
     val config  = service.passwordSettings().get
     config shouldBe PasswordSettings(
       "PATTERN"
+    )
+  }
+  "#getDatabaseProxyConfig" in {
+    val service = new RuntimeConfigFromConf[Try](confFile)
+    val config  = service.databaseProxyConfig().get
+    config shouldBe DatabaseServiceProxyConfig(
+      "DBTYPE"
     )
   }
 }

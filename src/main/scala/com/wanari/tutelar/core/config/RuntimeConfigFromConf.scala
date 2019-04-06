@@ -5,6 +5,7 @@ import cats.MonadError
 import com.typesafe.config.{Config, ConfigFactory}
 import com.wanari.tutelar.core.HookService.{BasicAuthConfig, HookConfig}
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
+import com.wanari.tutelar.core.impl.database.DatabaseServiceProxy.DatabaseServiceProxyConfig
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
@@ -23,11 +24,12 @@ class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String)
 
   lazy val getRootUrl: F[String] = conf.getString("rootUrl").pure
 
-  implicit val jwtConfig: () => F[JwtConfig]                    = readJwtConfig _
-  implicit val callbackConfig: () => F[CallbackConfig]          = readCallbackConfig _
-  implicit val hookConfig: () => F[HookConfig]                  = readHookConfig _
-  implicit val emailServiceConfig: () => F[EmailProviderConfig] = readEmailServiceConfig _
-  implicit val passwordSettings: () => F[PasswordSettings]      = readPasswordSettings _
+  implicit val jwtConfig: () => F[JwtConfig]                            = readJwtConfig _
+  implicit val callbackConfig: () => F[CallbackConfig]                  = readCallbackConfig _
+  implicit val hookConfig: () => F[HookConfig]                          = readHookConfig _
+  implicit val emailServiceConfig: () => F[EmailProviderConfig]         = readEmailServiceConfig _
+  implicit val passwordSettings: () => F[PasswordSettings]              = readPasswordSettings _
+  implicit val databaseProxyConfig: () => F[DatabaseServiceProxyConfig] = readDatabaseProxyConfig _
 
   val facebookConfig: () => F[OAuth2Config]    = () => readOauth2Config("oauth2.facebook")
   val githubConfig: () => F[OAuth2Config]      = () => readOauth2Config("oauth2.github")
@@ -125,6 +127,13 @@ class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String)
     val config = conf.getConfig("passwordDifficulty")
     PasswordSettings(
       config.getString("pattern")
+    )
+  }.pure
+
+  private def readDatabaseProxyConfig = {
+    val config = conf.getConfig("database")
+    DatabaseServiceProxyConfig(
+      config.getString("type")
     )
   }.pure
 }
