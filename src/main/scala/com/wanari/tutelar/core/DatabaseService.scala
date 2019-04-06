@@ -11,6 +11,7 @@ trait DatabaseService[F[_]] extends Initable[F] {
   def findAccountByTypeAndExternalId(accountId: AccountId): F[Option[Account]]
   def listAccountsByUserId(userId: String): F[Seq[Account]]
   def updateCustomData(accountId: AccountId, customData: String): F[Unit]
+  def deleteUserWithAccountsById(userId: String): F[Unit]
 }
 
 object DatabaseService {

@@ -61,6 +61,27 @@ class DatabaseServiceImpl(db: Database)(implicit ec: ExecutionContext) extends D
     db.run(query).map(_ => {})
   }
 
+  override def deleteUserWithAccountsById(userId: String): Future[Unit] = {
+    for {
+      _ <- deleteAccountsByUserId(userId)
+      _ <- deleteUserById(userId)
+    } yield ()
+  }
+
+  private def deleteAccountsByUserId(userId: String): Future[Unit] = {
+    val query = accounts
+      .filter(_.userId === userId)
+      .delete
+    db.run(query).map(_ => {})
+  }
+
+  private def deleteUserById(userId: String): Future[Unit] = {
+    val query = users
+      .filter(_.id === userId)
+      .delete
+    db.run(query).map(_ => {})
+  }
+
   private lazy val users    = TableQuery[UsersTable]
   private lazy val accounts = TableQuery[AccountsTable]
 

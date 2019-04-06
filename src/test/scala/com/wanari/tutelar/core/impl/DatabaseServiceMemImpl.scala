@@ -34,4 +34,9 @@ class DatabaseServiceMemImpl[F[_]: Applicative] extends DatabaseService[F] {
   override def checkStatus(): F[Boolean] = true.pure
 
   override def init: F[Unit] = ().pure
+
+  override def deleteUserWithAccountsById(userId: String): F[Unit] = {
+    users.remove(userId)
+    accounts.filter(_._2.userId == userId).keys.foreach(accounts.remove).pure
+  }
 }
