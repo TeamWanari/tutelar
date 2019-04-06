@@ -1,7 +1,7 @@
-package com.wanari.tutelar.core
+package com.wanari.tutelar.core.database
 
 import com.wanari.tutelar.core.DatabaseService.{Account, User}
-import com.wanari.tutelar.core.impl.DatabaseServiceImpl
+import com.wanari.tutelar.core.impl.database.PostgresDatabaseService
 import com.wanari.tutelar.{AwaitUtil, ItTestServices}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
@@ -10,8 +10,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class DatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUtil with BeforeAndAfterAll {
 
   private val services    = new ItTestServices
-  private val db          = DatabaseServiceImpl.getDatabase
-  private val realService = new DatabaseServiceImpl(db)
+  private val db          = PostgresDatabaseService.getDatabase
+  private val realService = new PostgresDatabaseService(db)
 
   override def beforeAll(): Unit = truncateDb()
 
@@ -26,8 +26,8 @@ class DatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUtil wi
   }
 
   Seq(
-    "slick instance"  -> realService,
-    "memory instance" -> services.databaseService
+    "postgres slick instance" -> realService,
+    "memory instance"         -> services.databaseService
   ).foreach {
     case (name, service) =>
       name when {

@@ -1,4 +1,4 @@
-package com.wanari.tutelar.core.impl
+package com.wanari.tutelar.core.impl.database
 
 import cats.Applicative
 import com.wanari.tutelar.core.DatabaseService
@@ -6,9 +6,10 @@ import com.wanari.tutelar.core.DatabaseService.{Account, AccountId, User}
 
 import scala.collection.mutable
 
-class DatabaseServiceMemImpl[F[_]: Applicative] extends DatabaseService[F] {
+class MemoryDatabaseService[F[_]: Applicative] extends DatabaseService[F] {
   import cats.syntax.applicative._
 
+  // todo: to be thread safe
   val users    = mutable.Map.empty[String, User]
   val accounts = mutable.Map.empty[AccountId, Account]
 

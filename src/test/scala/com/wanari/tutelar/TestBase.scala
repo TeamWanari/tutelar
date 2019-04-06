@@ -3,7 +3,8 @@ package com.wanari.tutelar
 import akka.actor.ActorSystem
 import cats.MonadError
 import com.wanari.tutelar.core.DatabaseService.{Account, User}
-import com.wanari.tutelar.core.impl.{AuthServiceImpl, DatabaseServiceMemImpl}
+import com.wanari.tutelar.core.impl.AuthServiceImpl
+import com.wanari.tutelar.core.impl.database.MemoryDatabaseService
 import com.wanari.tutelar.core.{AuthService, HookService, JwtService}
 import com.wanari.tutelar.util.{DateTimeUtilCounterImpl, IdGeneratorCounterImpl}
 import org.mockito.ArgumentMatchersSugar.any
@@ -43,7 +44,7 @@ trait TestBase extends WordSpecLike with Matchers with MockitoSugar with BeforeA
     lazy val hookResponseLogin    = JsObject("group" -> JsString("log"))
     lazy val hookResponseRegister = JsObject("group" -> JsString("reg"))
 
-    implicit lazy val databaseService = new DatabaseServiceMemImpl[F]
+    implicit lazy val databaseService = new MemoryDatabaseService[F]
     implicit lazy val idGenerator     = new IdGeneratorCounterImpl[F]
     implicit lazy val timeService     = new DateTimeUtilCounterImpl[F]
     implicit lazy val jwtService      = mock[JwtService[F]]

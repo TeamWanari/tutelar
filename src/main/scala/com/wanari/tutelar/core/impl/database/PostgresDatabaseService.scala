@@ -1,12 +1,12 @@
-package com.wanari.tutelar.core.impl
+package com.wanari.tutelar.core.impl.database
 
 import com.wanari.tutelar.core.DatabaseService
 import com.wanari.tutelar.core.DatabaseService.{Account, AccountId, User}
-
 import slick.jdbc.PostgresProfile.api._
+
 import scala.concurrent.{ExecutionContext, Future}
 
-class DatabaseServiceImpl(db: Database)(implicit ec: ExecutionContext) extends DatabaseService[Future] {
+class PostgresDatabaseService(db: Database)(implicit ec: ExecutionContext) extends DatabaseService[Future] {
 
   override def init: Future[Unit] = {
     db.run(sql"SELECT 1".as[Int]).map(_ => ())
@@ -102,7 +102,7 @@ class DatabaseServiceImpl(db: Database)(implicit ec: ExecutionContext) extends D
 
 }
 
-object DatabaseServiceImpl {
+object PostgresDatabaseService {
   //TODO this is an uncontrolled read from the config
   def getDatabase: Database = Database.forConfig("database")
 }

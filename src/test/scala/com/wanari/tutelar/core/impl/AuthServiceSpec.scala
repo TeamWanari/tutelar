@@ -2,6 +2,7 @@ package com.wanari.tutelar.core.impl
 
 import com.wanari.tutelar.TestBase
 import com.wanari.tutelar.core.DatabaseService.{Account, User}
+import com.wanari.tutelar.core.impl.database.MemoryDatabaseService
 import com.wanari.tutelar.core.{HookService, JwtService}
 import com.wanari.tutelar.util.{DateTimeUtilCounterImpl, IdGeneratorCounterImpl}
 import org.mockito.ArgumentMatchersSugar._
@@ -25,7 +26,7 @@ class AuthServiceSpec extends TestBase {
 
   trait TestScope {
 
-    implicit val databaseService = new DatabaseServiceMemImpl[Try]
+    implicit val databaseService = new MemoryDatabaseService[Try]
     implicit val idGenerator     = new IdGeneratorCounterImpl[Try]
     implicit val timeService     = new DateTimeUtilCounterImpl[Try]
     implicit val jwtService      = mock[JwtService[Try]]
