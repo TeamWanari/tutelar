@@ -7,6 +7,7 @@ import spray.json.JsObject
 trait AuthService[F[_]] {
   def findCustomData(authType: String, externalId: String): OptionT[F, String]
   def registerOrLogin(authType: String, externalId: String, customData: String, providedData: JsObject): F[Token]
+  def deleteUser(userId: String): F[Unit]
 }
 
 object AuthService {

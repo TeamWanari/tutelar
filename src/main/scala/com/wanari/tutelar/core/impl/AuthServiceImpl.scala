@@ -1,6 +1,6 @@
 package com.wanari.tutelar.core.impl
 
-import cats.Monad
+import cats.MonadError
 import cats.data.OptionT
 import com.wanari.tutelar.core.AuthService.Token
 import com.wanari.tutelar.core.DatabaseService.{Account, User}
@@ -8,7 +8,7 @@ import com.wanari.tutelar.core.{AuthService, DatabaseService, HookService, JwtSe
 import com.wanari.tutelar.util.{DateTimeUtil, IdGenerator}
 import spray.json.{JsObject, JsString}
 
-class AuthServiceImpl[F[_]: Monad](
+class AuthServiceImpl[F[_]: MonadError[?[_], Throwable]](
     implicit databaseService: DatabaseService[F],
     hookService: HookService[F],
     idGenerator: IdGenerator[F],
@@ -18,6 +18,7 @@ class AuthServiceImpl[F[_]: Monad](
   import cats.syntax.applicative._
   import cats.syntax.flatMap._
   import cats.syntax.functor._
+  import com.wanari.tutelar.util.ApplicativeErrorSyntax._
 
   override def registerOrLogin(
       authType: String,
@@ -36,6 +37,15 @@ class AuthServiceImpl[F[_]: Monad](
   override def findCustomData(authType: String, externalId: String): OptionT[F, String] = {
     val standardizedExternalId = convertToStandardizedLowercase(externalId)
     OptionT(databaseService.findAccountByTypeAndExternalId((authType, standardizedExternalId))).map(_.customData)
+  }
+
+  override def deleteUser(userId: String): F[Unit] = {
+    for {
+      user <- databaseService.findUserById(userId)
+      _    <- user.nonEmpty.pureUnitOrRise(new Exception(s"User not found $userId"))
+      _    <- databaseService.deleteUserWithAccountsById(userId)
+      _    <- hookService.delete(userId)
+    } yield ()
   }
 
   private def createOrUpdateAccount(
