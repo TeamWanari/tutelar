@@ -8,6 +8,7 @@ trait AuthService[F[_]] {
   def findCustomData(authType: String, externalId: String): OptionT[F, String]
   def registerOrLogin(authType: String, externalId: String, customData: String, providedData: JsObject): F[Token]
   def deleteUser(userId: String): F[Unit]
+  def findUserIdInToken(token: String): OptionT[F, String]
 }
 
 object AuthService {

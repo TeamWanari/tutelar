@@ -5,7 +5,21 @@ info:
   version: '0.1'
 servers:
   - url: 'https://lvh.me:9443'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
 paths:
+  /core/delete:
+    post:
+      description: Delete own user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Success
   /basic/register:
     post:
       description: Simple user-pass register

@@ -2,12 +2,13 @@ package com.wanari.tutelar
 
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+import com.wanari.tutelar.core.CoreApi
 import com.wanari.tutelar.core.healthcheck.HealthCheckApi
 import com.wanari.tutelar.providers.userpass.basic.BasicProviderApi
 import com.wanari.tutelar.providers.userpass.email.EmailProviderApi
 import com.wanari.tutelar.providers.userpass.ldap.LdapApi
 import com.wanari.tutelar.providers.userpass.token.TotpApi
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import org.slf4j.Logger
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -44,6 +45,7 @@ object Api {
         }
       }
       .map(_ :+ new HealthCheckApi())
+      .map(_ :+ new CoreApi)
       .map { api =>
         cors() {
           createRoute(api)

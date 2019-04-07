@@ -48,6 +48,14 @@ class AuthServiceImpl[F[_]: MonadError[?[_], Throwable]](
     } yield ()
   }
 
+  override def findUserIdInToken(token: String): OptionT[F, String] = {
+    OptionT(for {
+      decoded <- jwtService.validateAndDecode(token)
+    } yield {
+      decoded.fields.get("id").collect { case JsString(id) => id }
+    })
+  }
+
   private def createOrUpdateAccount(
       authType: String,
       externalId: String,

@@ -150,4 +150,15 @@ class AuthServiceSpec extends TestBase {
     }
   }
 
+  "#findUserIdInToken" when {
+    "good token" in new TestScope {
+      when(jwtService.validateAndDecode(any[String])).thenReturn(Success(JsObject("id" -> JsString("ID"))))
+      service.findUserIdInToken("TOKEN").value shouldEqual Success(Some("ID"))
+    }
+    "wrong token if not contains id" in new TestScope {
+      when(jwtService.validateAndDecode(any[String])).thenReturn(Success(JsObject("notid" -> JsString("ID"))))
+      service.findUserIdInToken("TOKEN").value shouldBe Success(None)
+    }
+  }
+
 }
