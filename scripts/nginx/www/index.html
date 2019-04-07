@@ -40,6 +40,7 @@
         function login(token) {
             try {
                 localStorage.userid = getJwtData(token).id;
+                localStorage.token = token;
             } catch (e) {
                 errorNotification('WRONG TOKEN');
             } finally {
@@ -195,11 +196,31 @@
             sendTokenEmail("/email/reset-password", getResetPasswordToken());
         }
 
-        function initButtons() {
-            $('#logout').click(function () {
-                localStorage.removeItem('userid');
-                window.location.replace('https://lvh.me:9443/index.html');
+        function logout() {
+            localStorage.removeItem('userid');
+            localStorage.removeItem('token');
+            window.location.replace('https://lvh.me:9443/index.html');
+        }
+
+        function deleteAccount() {
+            $.ajax({
+                type: 'POST',
+                url: "/core/delete",
+                headers: {
+                    "Authorization":"Bearer " + localStorage.token
+                },
+                success: logout
+            }).fail(function (data) {
+                try {
+                    errorNotification(data.responseJSON.error);
+                } catch (e) {
+                    errorNotification('Unknown error');
+                }
             });
+        }
+
+        function initButtons() {
+            $('#logout').click(logout);
 
             $('#register_user_pass').click(function () {
                 sendForm('/basic/register')
@@ -232,6 +253,7 @@
             $('#send_reset_password_email').click(sendEmailResetPAsswordRequest);
             $('#reset_password_email').click(resetPasswordWithEmail);
             $('#generate_qr').click(getTOTPData);
+            $('#delete').click(deleteAccount);
         }
 
         function handleCallbackLogin() {
@@ -319,6 +341,9 @@
         .oauth {
             background-color: lightsalmon;
         }
+        #delete {
+            background-color: red;
+        }
         #qrcode {
             float:right;
         }
@@ -364,6 +389,7 @@
 <div id="authenticated" style="display: none">
     Hello <b><span id="userid"></span></b>!<br/>
     <button id="logout">Logout</button>
+    <button id="delete">Delete Account</button>
 </div>
 
 <div id="error" style="display: none"></div>
