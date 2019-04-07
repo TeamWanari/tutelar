@@ -35,6 +35,7 @@ object Api {
       .map { modules =>
         logger.info(s"Load api for modules: ${modules.mkString(",")}")
         modules.collect {
+          case "health"   => new HealthCheckApi()
           case "github"   => new GithubApi()
           case "facebook" => new FacebookApi()
           case "google"   => new GoogleApi()
@@ -44,7 +45,6 @@ object Api {
           case "totp"     => new TotpApi()
         }
       }
-      .map(_ :+ new HealthCheckApi())
       .map(_ :+ new CoreApi)
       .map { api =>
         cors() {
