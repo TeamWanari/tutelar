@@ -43,6 +43,9 @@ class DatabaseServiceProxy[F[_]: MonadError[?[_], Throwable]](services: Map[Stri
 
   override def deleteUserWithAccountsById(userId: String): F[Unit] =
     service.flatMap(_.deleteUserWithAccountsById(userId))
+
+  override def deleteAccountByUserAndType(userId: String, authType: String): F[Unit] =
+    service.flatMap(_.deleteAccountByUserAndType(userId, authType))
 }
 
 object DatabaseServiceProxy {

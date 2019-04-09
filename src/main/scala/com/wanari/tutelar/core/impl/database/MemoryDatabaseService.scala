@@ -40,4 +40,13 @@ class MemoryDatabaseService[F[_]: Applicative] extends DatabaseService[F] {
     users.remove(userId)
     accounts.filter(_._2.userId == userId).keys.foreach(accounts.remove).pure
   }
+
+  override def deleteAccountByUserAndType(userId: String, authType: String): F[Unit] = {
+    accounts
+      .filter(_._2.userId == userId)
+      .filter(_._2.authType == authType)
+      .keys
+      .foreach(accounts.remove)
+      .pure
+  }
 }

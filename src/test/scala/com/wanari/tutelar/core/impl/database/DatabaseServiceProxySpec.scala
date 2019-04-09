@@ -47,7 +47,8 @@ class DatabaseServiceProxySpec extends TestBase with BeforeAndAfterEach {
       ("findAccountByTypeAndExternalId", (s: DatabaseService[Try]) => s.findAccountByTypeAndExternalId(null)),
       ("listAccountsByUserId", (s: DatabaseService[Try]) => s.listAccountsByUserId(null)),
       ("updateCustomData", (s: DatabaseService[Try]) => s.updateCustomData(null, null)),
-      ("deleteUserWithAccountsById", (s: DatabaseService[Try]) => s.deleteUserWithAccountsById(null))
+      ("deleteUserWithAccountsById", (s: DatabaseService[Try]) => s.deleteUserWithAccountsById(null)),
+      ("deleteAccountByUserAndType", (s: DatabaseService[Try]) => s.deleteAccountByUserAndType(null, null))
     ).foreach {
       case (name, func) =>
         s"#$name" should {
@@ -75,5 +76,6 @@ class DatabaseServiceProxySpec extends TestBase with BeforeAndAfterEach {
     when(service.listAccountsByUserId(any[String])).thenReturn(Success(Seq.empty))
     when(service.updateCustomData(any[AccountId], any[String])).thenReturn(Success(()))
     when(service.deleteUserWithAccountsById(any[String])).thenReturn(Success(()))
+    when(service.deleteAccountByUserAndType(any[String], any[String])).thenReturn(Success(()))
   }
 }

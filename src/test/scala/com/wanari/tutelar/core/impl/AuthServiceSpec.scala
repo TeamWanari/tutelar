@@ -40,6 +40,8 @@ class AuthServiceSpec extends TestBase {
       .thenReturn(Success(hookResponseRegister))
     when(hookService.login(any[String], any[String], any[String], any[JsObject])).thenReturn(Success(hookResponseLogin))
     when(hookService.delete(any[String])).thenReturn(Success(()))
+    when(hookService.link(any[String], any[String], any[String], any[JsObject])).thenReturn(Success(hookResponseLogin))
+    when(hookService.unlink(any[String], any[String], any[String])).thenReturn(Success(()))
 
     val service = new AuthServiceImpl[Try]()
   }
@@ -158,6 +160,55 @@ class AuthServiceSpec extends TestBase {
     "wrong token if not contains id" in new TestScope {
       when(jwtService.validateAndDecode(any[String])).thenReturn(Success(JsObject("notid" -> JsString("ID"))))
       service.findUserIdInToken("TOKEN").value shouldBe Success(None)
+    }
+  }
+
+  "#link" should {
+    "fail if account is already used " in new TestScope {
+      val savedUser2    = User("88888", 77777)
+      val savedAccount2 = Account("type2", "some_ext_id", savedUser2.id, "somedata")
+      databaseService.saveUser(savedUser2)
+      databaseService.saveAccount(savedAccount2)
+      service.link(savedUser2.id, savedAccount.authType, savedAccount.externalId, "", JsObject()) shouldBe a[Failure[_]]
+    }
+    "fail if user not found" in new TestScope {
+      val account = Account("type2", "some_ext_id", savedUser.id, "somedata")
+      service.link("missing_user", account.authType, account.externalId, "", JsObject()) shouldBe a[Failure[_]]
+    }
+    "fail if user already have this account type" in new TestScope {
+      val account = Account(savedAccount.authType, "some_ext_id", savedUser.id, "somedata")
+      service.link(savedUser.id, account.authType, account.externalId, "", JsObject()) shouldBe a[Failure[_]]
+    }
+    "save the account" in new TestScope {
+      val account = Account("new_type", "ext_id", savedUser.id, "customData")
+      service.link(savedUser.id, account.authType, account.externalId, account.customData, JsObject()).get
+      databaseService.listAccountsByUserId(savedUser.id) shouldEqual Success(Seq(savedAccount, account))
+    }
+    "call hook service" in new TestScope {
+      val account = Account("new_type", "ext_id", savedUser.id, "customData")
+      service.link(savedUser.id, account.authType, account.externalId, account.customData, providedData).get
+      verify(hookService).link(savedAccount.userId, account.externalId, account.authType, providedData)
+    }
+  }
+
+  "#unlink" when {
+    "fail if it is the user's last account " in new TestScope {
+      service.unlink(savedUser.id, savedAccount.authType) shouldBe a[Failure[_]]
+    }
+    "fail if account not found " in new TestScope {
+      service.unlink(savedUser.id, "random_type") shouldBe a[Failure[_]]
+    }
+    "delete the account " in new TestScope {
+      val account = Account("new_type", "some_ext_id", savedUser.id, "somedata")
+      databaseService.saveAccount(account)
+      service.unlink(savedUser.id, account.authType) shouldBe Success(())
+      databaseService.listAccountsByUserId(savedUser.id) shouldEqual Success(Seq(savedAccount))
+    }
+    "call hook servicet " in new TestScope {
+      val account = Account("new_type", "some_ext_id", savedUser.id, "somedata")
+      databaseService.saveAccount(account)
+      service.unlink(savedUser.id, account.authType) shouldBe Success(())
+      verify(hookService).unlink(savedUser.id, account.externalId, account.authType)
     }
   }
 

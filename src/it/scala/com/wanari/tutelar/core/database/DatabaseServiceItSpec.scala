@@ -126,6 +126,27 @@ class DatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUtil wi
             await(service.findUserById(user1.id)) shouldEqual None
             await(service.findUserById(user2.id)) shouldEqual Some(user2)
           }
+
+          "deleteAccountByUserAndType" in {
+            val user1    = User("id5", 1)
+            val user2    = User("id6", 2)
+            val account1 = Account("type10", "ext1", user1.id, "XXX4")
+            val account2 = Account("type11", "ext1", user1.id, "XXX5")
+            val account3 = Account("type11", "ext2", user2.id, "XXX6")
+
+            await(for {
+              _ <- service.saveUser(user1)
+              _ <- service.saveUser(user2)
+              _ <- service.saveAccount(account1)
+              _ <- service.saveAccount(account2)
+              _ <- service.saveAccount(account3)
+            } yield ())
+
+            await(service.deleteAccountByUserAndType(user1.id, "type11"))
+
+            await(service.listAccountsByUserId(user1.id)) shouldEqual Seq(account1)
+            await(service.listAccountsByUserId(user2.id)) shouldEqual Seq(account3)
+          }
         }
       }
   }

@@ -56,6 +56,36 @@ class AuthServiceImpl[F[_]: MonadError[?[_], Throwable]](
     })
   }
 
+  override def link(
+      userId: String,
+      authType: String,
+      externalId: String,
+      customData: String,
+      providedData: JsObject
+  ): F[Unit] = {
+    val standardizedExternalId = convertToStandardizedLowercase(externalId)
+    val account                = Account(authType, standardizedExternalId, userId, customData)
+    for {
+      accountO <- databaseService.findAccountByTypeAndExternalId((authType, standardizedExternalId))
+      _        <- accountO.isEmpty.pureUnitOrRise(new Exception("Account is already used"))
+      accounts <- databaseService.listAccountsByUserId(userId)
+      _        <- accounts.nonEmpty.pureUnitOrRise(new Exception("User not found"))
+      _        <- accounts.exists(_.authType != authType).pureUnitOrRise(new Exception("User already has this type account"))
+      _        <- databaseService.saveAccount(account)
+      _        <- hookService.link(userId, standardizedExternalId, authType, providedData)
+    } yield ()
+  }
+
+  override def unlink(userId: String, authType: String): F[Unit] = {
+    for {
+      accounts <- databaseService.listAccountsByUserId(userId)
+      _        <- (accounts.size > 1).pureUnitOrRise(new Exception("Can not unlink the last account"))
+      account  <- accounts.find(_.authType == authType).pureOrRaise(new Exception("Account not found"))
+      _        <- databaseService.deleteAccountByUserAndType(userId, authType)
+      _        <- hookService.unlink(userId, account.externalId, authType)
+    } yield ()
+  }
+
   private def createOrUpdateAccount(
       authType: String,
       externalId: String,

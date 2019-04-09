@@ -68,6 +68,14 @@ class PostgresDatabaseService(db: Database)(implicit ec: ExecutionContext) exten
     } yield ()
   }
 
+  override def deleteAccountByUserAndType(userId: String, authType: String): Future[Unit] = {
+    val query = accounts
+      .filter(_.userId === userId)
+      .filter(_.authType === authType)
+      .delete
+    db.run(query).map(_ => {})
+  }
+
   private def deleteAccountsByUserId(userId: String): Future[Unit] = {
     val query = accounts
       .filter(_.userId === userId)
