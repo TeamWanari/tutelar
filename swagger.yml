@@ -20,6 +20,26 @@ paths:
       responses:
         '200':
           description: Success
+  /core/unlink:
+    post:
+      description: Unlink an account from user
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                authType:
+                  type: string
+            examples:
+              '0':
+                value: >-
+                  {"authType":"github"}
+      responses:
+        '200':
+          description: Success
   /basic/register:
     post:
       description: Simple user-pass register

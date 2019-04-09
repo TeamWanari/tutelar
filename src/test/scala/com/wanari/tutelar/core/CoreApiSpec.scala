@@ -1,6 +1,6 @@
 package com.wanari.tutelar.core
 
-import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity, StatusCodes}
 import akka.http.scaladsl.model.headers.OAuth2BearerToken
 import akka.http.scaladsl.server.AuthenticationFailedRejection
 import akka.http.scaladsl.testkit.ScalatestRouteTest
@@ -41,6 +41,24 @@ class CoreApiSpec extends TestBase with ScalatestRouteTest with BeforeAndAfterEa
           status shouldEqual StatusCodes.OK
         }
         verify(authServiceMock).deleteUser("UserID")
+      }
+    }
+    "/core/unlink" should {
+      val authTypeEntity = HttpEntity(ContentTypes.`application/json`, """{"authType":"AuthType"}""")
+      "reject if auth failed" in new TestScope {
+        override val authResult: Option[String] = None
+        Post("/core/unlink").withEntity(authTypeEntity) ~> addCredentials(OAuth2BearerToken("TOKEN")) ~> coreApi
+          .route() ~> check {
+          rejection shouldBe a[AuthenticationFailedRejection]
+        }
+      }
+      "call the auth service unlink with the userid and authtype" in new TestScope {
+        when(authServiceMock.unlink(any[String], any[String])).thenReturn(Future.successful(()))
+        Post("/core/unlink").withEntity(authTypeEntity) ~> addCredentials(OAuth2BearerToken("TOKEN")) ~> coreApi
+          .route() ~> check {
+          status shouldEqual StatusCodes.OK
+        }
+        verify(authServiceMock).unlink("UserID", "AuthType")
       }
     }
   }
