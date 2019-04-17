@@ -15,8 +15,6 @@ object EmailProviderService {
   case class EmailProviderConfig(
       url: String,
       username: String,
-      password: String,
-      registerUrl: String,
-      resetPasswordUrl: String
+      password: String
   )
 }

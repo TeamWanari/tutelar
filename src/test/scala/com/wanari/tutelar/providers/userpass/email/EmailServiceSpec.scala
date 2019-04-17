@@ -31,7 +31,7 @@ class EmailServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with Test
     implicit lazy val httpWrapper                   = mock[HttpWrapper[Try]]
     when(httpWrapper.singleRequest(any[HttpRequest])).thenReturn(Failure(new Exception))
     implicit lazy val config: () => Try[EmailProviderConfig] = () => {
-      Success(EmailProviderConfig("_SERVICE_URL_", "_USER_", "_PASS_", "", ""))
+      Success(EmailProviderConfig("_SERVICE_URL_", "_USER_", "_PASS_"))
     }
     lazy val service = new EmailServiceImpl[Try]()
   }
@@ -52,13 +52,13 @@ class EmailServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with Test
 
       }
       "send the correct data" in new TestScope {
-        service.sendRegisterUrl("to@test", "RegisterURL")
+        service.sendRegisterUrl("to@test", "RegisterTOKEN")
 
         val expectedRequest = JsObject(
           "email"          -> JsString("to@test"),
           "templateId"     -> JsString("register"),
           "titleArguments" -> JsObject(),
-          "bodyArguments"  -> JsObject("registrationUrl" -> JsString("RegisterURL"))
+          "bodyArguments"  -> JsObject("token" -> JsString("RegisterTOKEN"))
         )
 
         val captor: ArgumentCaptor[HttpRequest] = ArgumentCaptor.forClass(classOf[HttpRequest])
@@ -94,13 +94,13 @@ class EmailServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with Test
 
       }
       "send the correct data" in new TestScope {
-        service.sendResetPasswordUrl("to@test", "ResetUrl")
+        service.sendResetPasswordUrl("to@test", "ResetTOKEN")
 
         val expectedRequest = JsObject(
           "email"          -> JsString("to@test"),
           "templateId"     -> JsString("reset-password"),
           "titleArguments" -> JsObject(),
-          "bodyArguments"  -> JsObject("resetPasswordUrl" -> JsString("ResetUrl"))
+          "bodyArguments"  -> JsObject("token" -> JsString("ResetTOKEN"))
         )
 
         val captor: ArgumentCaptor[HttpRequest] = ArgumentCaptor.forClass(classOf[HttpRequest])

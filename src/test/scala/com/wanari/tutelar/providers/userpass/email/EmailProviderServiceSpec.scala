@@ -20,7 +20,7 @@ class EmailProviderServiceSpec extends TestBase {
     override lazy val authType        = "EMAIL"
     override lazy val savedCustomData = BCrypt.hashpw("secretpw", BCrypt.gensalt())
 
-    implicit val configF      = () => Success(EmailProviderConfig("", "", "", "reg?t=<<TOKEN>>", "res?t=<<TOKEN>>"))
+    implicit val configF      = () => Success(EmailProviderConfig("", "", ""))
     implicit val emailService = mock[EmailServiceImpl[Try]]
 
     implicit val passwordChecker = new NonEmptyPasswordChecker[Try]
@@ -126,11 +126,11 @@ class EmailProviderServiceSpec extends TestBase {
         service.sendRegister("test@email")
         verify(jwtService).encode(JsObject("email" -> JsString("test@email"), "type" -> JsString("register")))
       }
-      "create register url with token and call send service" in new TestScope {
+      "call send service" in new TestScope {
         when(emailService.sendRegisterUrl(any[String], any[String])).thenReturn(Success(()))
         when(jwtService.encode(any[JsObject], any[Option[Duration]])).thenReturn(Success("REG_TOKEN"))
         service.sendRegister("")
-        verify(emailService).sendRegisterUrl(any[String], eqTo("reg?t=REG_TOKEN"))
+        verify(emailService).sendRegisterUrl(any[String], eqTo("REG_TOKEN"))
       }
       "fail when send failed" in new TestScope {
         when(emailService.sendRegisterUrl(any[String], any[String])).thenReturn(Failure(new Exception))
@@ -207,12 +207,12 @@ class EmailProviderServiceSpec extends TestBase {
       service.sendResetPassword(savedExternalId)
       verify(jwtService).encode(JsObject("email" -> JsString(savedExternalId), "type" -> JsString("reset")))
     }
-    "create register url with token and call send service" in new TestScope {
+    "and call send service" in new TestScope {
       initDb()
       when(emailService.sendResetPasswordUrl(any[String], any[String])).thenReturn(Success(()))
       when(jwtService.encode(any[JsObject], any[Option[Duration]])).thenReturn(Success("RESET_TOKEN"))
       service.sendResetPassword(savedExternalId)
-      verify(emailService).sendResetPasswordUrl(any[String], eqTo("res?t=RESET_TOKEN"))
+      verify(emailService).sendResetPasswordUrl(any[String], eqTo("RESET_TOKEN"))
     }
     "fail when send failed" in new TestScope {
       when(emailService.sendResetPasswordUrl(any[String], any[String])).thenReturn(Failure(new Exception))

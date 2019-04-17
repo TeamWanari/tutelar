@@ -34,8 +34,7 @@ class EmailProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](
   def sendRegister(email: String): F[Unit] = {
     for {
       token  <- createToken(email, EmailToken.RegisterType)
-      url    <- createRegistrationUrl(token)
-      result <- emailService.sendRegisterUrl(email, url)
+      result <- emailService.sendRegisterUrl(email, token)
     } yield result
   }
 
@@ -50,8 +49,7 @@ class EmailProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](
     for {
       _      <- checkIsExists(email)
       token  <- createToken(email, EmailToken.ResetPasswordType)
-      url    <- createResetPasswordUrl(token)
-      result <- emailService.sendResetPasswordUrl(email, url)
+      result <- emailService.sendResetPasswordUrl(email, token)
     } yield result
   }
 
@@ -66,14 +64,6 @@ class EmailProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](
 
   private def createToken(email: String, `type`: String): F[String] = {
     jwtService.encode(EmailToken(email, `type`).toJson.asJsObject)
-  }
-
-  private def createRegistrationUrl(registerToken: String): F[Token] = {
-    configF().map(_.registerUrl.replace("<<TOKEN>>", registerToken))
-  }
-
-  private def createResetPasswordUrl(resetPasswordToken: String): F[Token] = {
-    configF().map(_.resetPasswordUrl.replace("<<TOKEN>>", resetPasswordToken))
   }
 
   private def changePasswordAndLogin(email: String, password: String, data: Option[JsObject]): F[Token] = {

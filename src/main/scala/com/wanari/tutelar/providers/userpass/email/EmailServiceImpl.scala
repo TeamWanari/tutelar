@@ -14,12 +14,12 @@ class EmailServiceImpl[F[_]: MonadError[?[_], Throwable]](
     configF: () => F[EmailProviderConfig]
 ) extends EmailService[F] {
 
-  override def sendRegisterUrl(email: String, url: String): F[Unit] = {
-    send(EmailRequestData(email, "register", JsObject(), JsObject("registrationUrl" -> JsString(url))))
+  override def sendRegisterUrl(email: String, token: String): F[Unit] = {
+    send(EmailRequestData(email, "register", JsObject(), JsObject("token" -> JsString(token))))
   }
 
-  override def sendResetPasswordUrl(email: String, url: String): F[Unit] = {
-    send(EmailRequestData(email, "reset-password", JsObject(), JsObject("resetPasswordUrl" -> JsString(url))))
+  override def sendResetPasswordUrl(email: String, token: String): F[Unit] = {
+    send(EmailRequestData(email, "reset-password", JsObject(), JsObject("token" -> JsString(token))))
   }
 
   private def send(data: EmailRequestData): F[Unit] = {

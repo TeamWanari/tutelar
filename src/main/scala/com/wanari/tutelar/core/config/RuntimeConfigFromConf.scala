@@ -89,9 +89,7 @@ class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String)
     EmailProviderConfig(
       config.getString("serviceUrl"),
       config.getString("serviceUsername"),
-      config.getString("servicePassword"),
-      config.getString("registerUrl"),
-      config.getString("resetPasswordUrl")
+      config.getString("servicePassword")
     )
   }.pure
 
