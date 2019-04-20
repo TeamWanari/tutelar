@@ -12,8 +12,10 @@ class HealthCheckApi(implicit service: HealthCheckService[Future]) extends Api {
   def route(): Route = {
     path("healthCheck") {
       get {
-        onSuccess(service.getStatus) { result =>
-          complete(result)
+        withTrace("HealthCheck") { _ =>
+          onSuccess(service.getStatus) { result =>
+            complete(result)
+          }
         }
       }
     }

@@ -22,37 +22,47 @@ class EmailProviderApi(
       path("login") {
         post {
           entity(as[EmailLoginData]) { data =>
-            completeLoginFlowWithJson(service.login(data.email, data.password, data.data))
+            withTrace("Login_email") { _ =>
+              completeLoginFlowWithJson(service.login(data.email, data.password, data.data))
+            }
           }
         }
       } ~
         path("register") {
           post {
             entity(as[RegisterData]) { data =>
-              completeLoginFlowWithJson(service.register(data.token, data.password, data.data))
+              withTrace("Register_email") { _ =>
+                completeLoginFlowWithJson(service.register(data.token, data.password, data.data))
+              }
             }
           }
         } ~ path("send-register") {
         post {
           entity(as[EmailData]) { data =>
-            onComplete(service.sendRegister(data.email)) {
-              case Success(_) => complete(StatusCodes.OK)
-              case _          => complete(StatusCodes.InternalServerError)
+            withTrace("SendRegister_email") { _ =>
+              onComplete(service.sendRegister(data.email)) {
+                case Success(_) => complete(StatusCodes.OK)
+                case _          => complete(StatusCodes.InternalServerError)
+              }
             }
           }
         }
       } ~ path("reset-password") {
         post {
           entity(as[RegisterData]) { data =>
-            completeLoginFlowWithJson(service.resetPassword(data.token, data.password, data.data))
+            withTrace("ResetPassword_email") { _ =>
+              completeLoginFlowWithJson(service.resetPassword(data.token, data.password, data.data))
+            }
           }
         }
       } ~ path("send-reset-password") {
         post {
           entity(as[EmailData]) { data =>
-            onComplete(service.sendResetPassword(data.email)) {
-              case Success(_) => complete(StatusCodes.OK)
-              case _          => complete(StatusCodes.InternalServerError)
+            withTrace("SendResetPassword_email") { _ =>
+              onComplete(service.sendResetPassword(data.email)) {
+                case Success(_) => complete(StatusCodes.OK)
+                case _          => complete(StatusCodes.InternalServerError)
+              }
             }
           }
         }

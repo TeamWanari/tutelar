@@ -68,6 +68,11 @@ lazy val core = (project in file("."))
         "org.mindrot"          % "jbcrypt"                  % "0.4",
         "commons-codec"        % "commons-codec"            % "1.12",
         "ch.megard"            %% "akka-http-cors"          % "0.4.0",
+        "io.opentracing"       % "opentracing-api"          % "0.32.0",
+        "io.opentracing"       % "opentracing-util"         % "0.32.0",
+        "io.opentracing"       % "opentracing-noop"         % "0.32.0",
+        "io.opentracing"       % "opentracing-mock"         % "0.32.0",
+        "io.jaegertracing"     % "jaeger-client"            % "0.32.0",
         "org.scalatest"        %% "scalatest"               % "3.0.5" % "it,test",
         "org.mockito"          % "mockito-core"             % "2.25.1" % "it,test",
         "org.mockito"          %% "mockito-scala"           % "1.2.1" % "it,test"

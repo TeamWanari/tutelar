@@ -1,7 +1,7 @@
 package com.wanari.tutelar
 
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.{Directive1, Route}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import com.wanari.tutelar.core.CoreApi
 import com.wanari.tutelar.core.healthcheck.HealthCheckApi
@@ -9,11 +9,18 @@ import com.wanari.tutelar.providers.userpass.basic.BasicProviderApi
 import com.wanari.tutelar.providers.userpass.email.EmailProviderApi
 import com.wanari.tutelar.providers.userpass.ldap.LdapApi
 import com.wanari.tutelar.providers.userpass.token.TotpApi
+import com.wanari.tutelar.util.LoggerUtil.LogContext
+import com.wanari.tutelar.util.TracingDirectives._
+import io.opentracing.Tracer
+import io.opentracing.util.GlobalTracer
 import org.slf4j.Logger
 
 import scala.concurrent.{ExecutionContext, Future}
 
 trait Api {
+  private val tracer: Tracer                                    = GlobalTracer.get()
+  protected def withTrace(name: String): Directive1[LogContext] = trace(tracer, name).map(new LogContext(tracer, _))
+
   def route(): Route
 }
 

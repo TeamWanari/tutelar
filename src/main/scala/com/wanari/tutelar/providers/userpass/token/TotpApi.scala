@@ -24,18 +24,22 @@ class TotpApi(
         path("register") {
           post {
             entity(as[RegisterData]) { data =>
-              completeLoginFlowWithJson(service.register(data.username, data.token, data.password, data.data))
+              withTrace(s"Register_$servicePath") { _ =>
+                completeLoginFlowWithJson(service.register(data.username, data.token, data.password, data.data))
+              }
             }
           }
         } ~
           path("qrCode") {
             get {
-              import TotpServiceImpl._
-              import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+              withTrace(s"QrCode_$servicePath") { _ =>
+                import TotpServiceImpl._
+                import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 
-              onComplete(service.qrCodeData) {
-                case Success(t) => complete(t)
-                case Failure(_) => complete(StatusCodes.InternalServerError)
+                onComplete(service.qrCodeData) {
+                  case Success(t) => complete(t)
+                  case Failure(_) => complete(StatusCodes.InternalServerError)
+                }
               }
             }
           }

@@ -22,7 +22,9 @@ trait OAuth2Api extends ProviderApi {
         path("login") {
           post {
             entity(as[AccessToken]) { data =>
-              completeLoginFlowWithJson(service.authenticateWithAccessToken(data.accessToken))
+              withTrace(s"Login_${service.TYPE.toLowerCase}") { _ =>
+                completeLoginFlowWithJson(service.authenticateWithAccessToken(data.accessToken))
+              }
             }
           } ~
             onComplete(service.generateIdentifierUrl) {
@@ -32,7 +34,9 @@ trait OAuth2Api extends ProviderApi {
         } ~
           path("callback") {
             parameters(('code.as[String], 'state.as[String])).as(CodeAndState) { codeAndState =>
-              completeLoginFlowWithRedirect(service.authenticateWithCallback(codeAndState.code, codeAndState.state))
+              withTrace(s"Callback_${service.TYPE.toLowerCase}") { _ =>
+                completeLoginFlowWithRedirect(service.authenticateWithCallback(codeAndState.code, codeAndState.state))
+              }
             }
           }
       }

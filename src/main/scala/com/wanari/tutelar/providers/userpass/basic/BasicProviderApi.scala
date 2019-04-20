@@ -21,7 +21,9 @@ class BasicProviderApi(
         path("register") {
           post {
             entity(as[LoginData]) { data =>
-              completeLoginFlowWithJson(service.register(data.username, data.password, data.data))
+              withTrace(s"Register_$servicePath") { _ =>
+                completeLoginFlowWithJson(service.register(data.username, data.password, data.data))
+              }
             }
           }
         }

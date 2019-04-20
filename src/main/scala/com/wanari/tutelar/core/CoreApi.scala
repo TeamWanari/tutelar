@@ -16,16 +16,20 @@ class CoreApi(implicit val authService: AuthService[Future]) extends Api with Au
       userAuth { userId =>
         path("delete") {
           post {
-            onSuccess(authService.deleteUser(userId)) {
-              complete(StatusCodes.OK)
+            withTrace("Delete_core") { _ =>
+              onSuccess(authService.deleteUser(userId)) {
+                complete(StatusCodes.OK)
+              }
             }
           }
         } ~
           path("unlink") {
             post {
               entity(as[UnlinkData]) { data =>
-                onSuccess(authService.unlink(userId, data.authType)) {
-                  complete(StatusCodes.OK)
+                withTrace("Unlink_core") { _ =>
+                  onSuccess(authService.unlink(userId, data.authType)) {
+                    complete(StatusCodes.OK)
+                  }
                 }
               }
             }
