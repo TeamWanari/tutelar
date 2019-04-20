@@ -39,7 +39,7 @@ class EmailProviderApi(
         } ~ path("send-register") {
         post {
           entity(as[EmailData]) { data =>
-            withTrace("SendRegister_email") { _ =>
+            withTrace("SendRegister_email") { implicit ctx =>
               onComplete(service.sendRegister(data.email)) {
                 case Success(_) => complete(StatusCodes.OK)
                 case _          => complete(StatusCodes.InternalServerError)
@@ -58,7 +58,7 @@ class EmailProviderApi(
       } ~ path("send-reset-password") {
         post {
           entity(as[EmailData]) { data =>
-            withTrace("SendResetPassword_email") { _ =>
+            withTrace("SendResetPassword_email") { implicit ctx =>
               onComplete(service.sendResetPassword(data.email)) {
                 case Success(_) => complete(StatusCodes.OK)
                 case _          => complete(StatusCodes.InternalServerError)

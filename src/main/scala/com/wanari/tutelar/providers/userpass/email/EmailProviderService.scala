@@ -2,13 +2,14 @@ package com.wanari.tutelar.providers.userpass.email
 
 import com.wanari.tutelar.core.AuthService.Token
 import com.wanari.tutelar.providers.userpass.UserPassService
+import com.wanari.tutelar.util.LoggerUtil.LogContext
 import spray.json.JsObject
 
 trait EmailProviderService[F[_]] extends UserPassService[F] {
   def register(registerToken: String, password: String, data: Option[JsObject]): F[Token]
-  def sendRegister(email: String): F[Unit]
+  def sendRegister(email: String)(implicit ctx: LogContext): F[Unit]
   def resetPassword(resetPasswordToken: String, password: String, data: Option[JsObject]): F[Token]
-  def sendResetPassword(email: String): F[Unit]
+  def sendResetPassword(email: String)(implicit ctx: LogContext): F[Unit]
 }
 
 object EmailProviderService {

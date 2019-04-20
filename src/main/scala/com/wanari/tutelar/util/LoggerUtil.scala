@@ -4,10 +4,14 @@ import java.io.PrintStream
 import java.util.UUID
 import java.util.logging.Level
 
+import akka.http.scaladsl.model.HttpHeader
+import akka.http.scaladsl.model.headers.RawHeader
+import io.opentracing.propagation.{Format, TextMapAdapter}
 import io.opentracing.{Span, Tracer}
 import net.logstash.logback.marker.Markers
 import org.slf4j.LoggerFactory
 import org.slf4j.bridge.SLF4JBridgeHandler
+import scala.collection.immutable
 
 object LoggerUtil {
   def initBridge(): Unit = {
@@ -20,6 +24,13 @@ object LoggerUtil {
   class LogContext(val tracer: Tracer, val span: Span) {
     val requestId: String = UUID.randomUUID().toString
     span.setTag("requestId", requestId)
+
+    def getInjectHeaders: immutable.Seq[HttpHeader] = {
+      import scala.collection.JavaConverters._
+      val collector = new java.util.HashMap[String, String]()
+      tracer.inject(span.context(), Format.Builtin.HTTP_HEADERS, new TextMapAdapter(collector))
+      immutable.Seq(collector.asScala.map(t => RawHeader(t._1, t._2)).toSeq: _*)
+    }
   }
 
   class Logger(name: String) {

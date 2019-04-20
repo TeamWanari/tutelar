@@ -3,6 +3,7 @@ package com.wanari.tutelar.providers.userpass.email
 import cats.MonadError
 import com.wanari.tutelar.TestBase
 import com.wanari.tutelar.providers.userpass.email.EmailProviderService.EmailProviderConfig
+import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.NonEmptyPasswordChecker
 import org.mindrot.jbcrypt.BCrypt
 import org.mockito.ArgumentMatchersSugar._
@@ -118,22 +119,22 @@ class EmailProviderServiceSpec extends TestBase {
     }
     "#send-register" should {
       "call send service with the given email address" in new TestScope {
-        when(emailService.sendRegisterUrl(any[String], any[String])).thenReturn(Success(()))
+        when(emailService.sendRegisterUrl(any[String], any[String])(any[LogContext])).thenReturn(Success(()))
         service.sendRegister("test@email") shouldBe Success(())
-        verify(emailService).sendRegisterUrl(eqTo("test@email"), any[String])
+        verify(emailService).sendRegisterUrl(eqTo("test@email"), any[String])(any[LogContext])
       }
       "create token with the email address and type" in new TestScope {
         service.sendRegister("test@email")
         verify(jwtService).encode(JsObject("email" -> JsString("test@email"), "type" -> JsString("register")))
       }
       "call send service" in new TestScope {
-        when(emailService.sendRegisterUrl(any[String], any[String])).thenReturn(Success(()))
+        when(emailService.sendRegisterUrl(any[String], any[String])(any[LogContext])).thenReturn(Success(()))
         when(jwtService.encode(any[JsObject], any[Option[Duration]])).thenReturn(Success("REG_TOKEN"))
         service.sendRegister("")
-        verify(emailService).sendRegisterUrl(any[String], eqTo("REG_TOKEN"))
+        verify(emailService).sendRegisterUrl(any[String], eqTo("REG_TOKEN"))(any[LogContext])
       }
       "fail when send failed" in new TestScope {
-        when(emailService.sendRegisterUrl(any[String], any[String])).thenReturn(Failure(new Exception))
+        when(emailService.sendRegisterUrl(any[String], any[String])(any[LogContext])).thenReturn(Failure(new Exception))
         service.sendRegister("") shouldBe a[Failure[_]]
       }
     }
@@ -194,13 +195,13 @@ class EmailProviderServiceSpec extends TestBase {
   "#send-reset-password" should {
     "not call email service if not find email in db" in new TestScope {
       service.sendResetPassword(savedExternalId) shouldBe a[Failure[_]]
-      verify(emailService, never).sendRegisterUrl(eqTo(savedExternalId), any[String])
+      verify(emailService, never).sendRegisterUrl(eqTo(savedExternalId), any[String])(any[LogContext])
     }
     "call send service with the given email address" in new TestScope {
       initDb()
-      when(emailService.sendResetPasswordUrl(any[String], any[String])).thenReturn(Success(()))
+      when(emailService.sendResetPasswordUrl(any[String], any[String])(any[LogContext])).thenReturn(Success(()))
       service.sendResetPassword(savedExternalId) shouldBe Success(())
-      verify(emailService).sendResetPasswordUrl(eqTo(savedExternalId), any[String])
+      verify(emailService).sendResetPasswordUrl(eqTo(savedExternalId), any[String])(any[LogContext])
     }
     "create token with the email address and type" in new TestScope {
       initDb()
@@ -209,13 +210,14 @@ class EmailProviderServiceSpec extends TestBase {
     }
     "and call send service" in new TestScope {
       initDb()
-      when(emailService.sendResetPasswordUrl(any[String], any[String])).thenReturn(Success(()))
+      when(emailService.sendResetPasswordUrl(any[String], any[String])(any[LogContext])).thenReturn(Success(()))
       when(jwtService.encode(any[JsObject], any[Option[Duration]])).thenReturn(Success("RESET_TOKEN"))
       service.sendResetPassword(savedExternalId)
-      verify(emailService).sendResetPasswordUrl(any[String], eqTo("RESET_TOKEN"))
+      verify(emailService).sendResetPasswordUrl(any[String], eqTo("RESET_TOKEN"))(any[LogContext])
     }
     "fail when send failed" in new TestScope {
-      when(emailService.sendResetPasswordUrl(any[String], any[String])).thenReturn(Failure(new Exception))
+      when(emailService.sendResetPasswordUrl(any[String], any[String])(any[LogContext]))
+        .thenReturn(Failure(new Exception))
       service.sendResetPassword("") shouldBe a[Failure[_]]
     }
   }

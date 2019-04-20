@@ -5,13 +5,12 @@ import com.wanari.tutelar.core.{AuthService, JwtService}
 import com.wanari.tutelar.core.AuthService.Token
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyChecker
 import com.wanari.tutelar.providers.userpass.basic.BasicProviderServiceImpl
-import com.wanari.tutelar.providers.userpass.email.EmailProviderService.EmailProviderConfig
 import com.wanari.tutelar.providers.userpass.email.EmailProviderServiceImpl.EmailToken
+import com.wanari.tutelar.util.LoggerUtil.LogContext
 import spray.json._
 
 class EmailProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](
     implicit emailService: EmailService[F],
-    configF: () => F[EmailProviderConfig],
     authService: AuthService[F],
     passwordDifficultyChecker: PasswordDifficultyChecker[F],
     jwtService: JwtService[F]
@@ -31,7 +30,7 @@ class EmailProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](
     } yield token
   }
 
-  def sendRegister(email: String): F[Unit] = {
+  def sendRegister(email: String)(implicit ctx: LogContext): F[Unit] = {
     for {
       token  <- createToken(email, EmailToken.RegisterType)
       result <- emailService.sendRegisterUrl(email, token)
@@ -45,7 +44,7 @@ class EmailProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](
     } yield token
   }
 
-  def sendResetPassword(email: String): F[Unit] = {
+  def sendResetPassword(email: String)(implicit ctx: LogContext): F[Unit] = {
     for {
       _      <- checkIsExists(email)
       token  <- createToken(email, EmailToken.ResetPasswordType)

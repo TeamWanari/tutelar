@@ -6,6 +6,7 @@ import com.wanari.tutelar.core.ProviderApi.{ErrorData, TokenData}
 import spray.json._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import com.wanari.tutelar.providers.userpass.email.EmailProviderApi.{EmailData, EmailLoginData, RegisterData}
+import com.wanari.tutelar.util.LoggerUtil.LogContext
 import org.mockito.ArgumentMatchersSugar._
 import org.mockito.Mockito._
 
@@ -84,19 +85,19 @@ class EmailProviderApiSpec extends RouteTestBase {
     }
 
     "forward the email address to service" in new TestScope {
-      when(serviceMock.sendRegister(any[String])) thenReturn Future.successful(())
+      when(serviceMock.sendRegister(any[String])(any[LogContext])) thenReturn Future.successful(())
       postSendRegisterRequest ~> route ~> check {
-        verify(serviceMock).sendRegister("email")
+        verify(serviceMock).sendRegister(eqTo("email"))(any[LogContext])
       }
     }
     "return ok" in new TestScope {
-      when(serviceMock.sendRegister(any[String])) thenReturn Future.successful(())
+      when(serviceMock.sendRegister(any[String])(any[LogContext])) thenReturn Future.successful(())
       postSendRegisterRequest ~> route ~> check {
         status shouldEqual StatusCodes.OK
       }
     }
     "return error" in new TestScope {
-      when(serviceMock.sendRegister(any[String])) thenReturn Future.failed(new Exception())
+      when(serviceMock.sendRegister(any[String])(any[LogContext])) thenReturn Future.failed(new Exception())
       postSendRegisterRequest ~> route ~> check {
         status shouldEqual StatusCodes.InternalServerError
       }

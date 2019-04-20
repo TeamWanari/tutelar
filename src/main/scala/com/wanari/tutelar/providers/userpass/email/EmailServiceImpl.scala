@@ -7,6 +7,7 @@ import cats.MonadError
 import com.wanari.tutelar.providers.userpass.email.EmailProviderService.EmailProviderConfig
 import com.wanari.tutelar.providers.userpass.email.EmailServiceImpl.EmailRequestData
 import com.wanari.tutelar.util.HttpWrapper
+import com.wanari.tutelar.util.LoggerUtil.LogContext
 import spray.json._
 
 class EmailServiceImpl[F[_]: MonadError[?[_], Throwable]](
@@ -14,15 +15,15 @@ class EmailServiceImpl[F[_]: MonadError[?[_], Throwable]](
     configF: () => F[EmailProviderConfig]
 ) extends EmailService[F] {
 
-  override def sendRegisterUrl(email: String, token: String): F[Unit] = {
+  override def sendRegisterUrl(email: String, token: String)(implicit ctx: LogContext): F[Unit] = {
     send(EmailRequestData(email, "register", JsObject(), JsObject("token" -> JsString(token))))
   }
 
-  override def sendResetPasswordUrl(email: String, token: String): F[Unit] = {
+  override def sendResetPasswordUrl(email: String, token: String)(implicit ctx: LogContext): F[Unit] = {
     send(EmailRequestData(email, "reset-password", JsObject(), JsObject("token" -> JsString(token))))
   }
 
-  private def send(data: EmailRequestData): F[Unit] = {
+  private def send(data: EmailRequestData)(implicit ctx: LogContext): F[Unit] = {
     import cats.syntax.flatMap._
     import cats.syntax.functor._
     import com.wanari.tutelar.util.ApplicativeErrorSyntax._
@@ -32,7 +33,7 @@ class EmailServiceImpl[F[_]: MonadError[?[_], Throwable]](
       val entity      = HttpEntity(ContentTypes.`application/json`, data.toJson.compactPrint)
       val credentials = BasicHttpCredentials(config.username, config.password)
 
-      HttpRequest(POST, url, entity = entity)
+      HttpRequest(POST, url, entity = entity, headers = ctx.getInjectHeaders)
         .addCredentials(credentials)
     }
 

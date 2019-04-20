@@ -6,7 +6,9 @@ import com.wanari.tutelar.core.DatabaseService.{Account, User}
 import com.wanari.tutelar.core.impl.AuthServiceImpl
 import com.wanari.tutelar.core.impl.database.MemoryDatabaseService
 import com.wanari.tutelar.core.{AuthService, HookService, JwtService}
+import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.{DateTimeUtilCounterImpl, IdGeneratorCounterImpl}
+import io.opentracing.noop.NoopTracerFactory
 import org.mockito.ArgumentMatchersSugar.any
 import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
@@ -17,6 +19,12 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
 trait TestBase extends WordSpecLike with Matchers with MockitoSugar with BeforeAndAfterAll {
+
+  implicit lazy val dummyLogContext = {
+    val tracer = NoopTracerFactory.create()
+    val span   = tracer.buildSpan("test").start()
+    new LogContext(tracer, span)
+  }
 
   val timeout = 1.second
 
