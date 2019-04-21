@@ -45,7 +45,7 @@ lazy val core = (project in file("."))
     ),
     libraryDependencies ++= {
       val akkaHttpV = "10.1.8"
-      val akkaV     = "2.5.21"
+      val akkaV     = "2.5.22"
       val slickV    = "3.3.0"
       val jwtV      = "2.1.0"
       Seq(
@@ -71,11 +71,10 @@ lazy val core = (project in file("."))
         "io.opentracing"       % "opentracing-api"          % "0.32.0",
         "io.opentracing"       % "opentracing-util"         % "0.32.0",
         "io.opentracing"       % "opentracing-noop"         % "0.32.0",
-        "io.opentracing"       % "opentracing-mock"         % "0.32.0",
-        "io.jaegertracing"     % "jaeger-client"            % "0.32.0",
-        "org.scalatest"        %% "scalatest"               % "3.0.5" % "it,test",
-        "org.mockito"          % "mockito-core"             % "2.25.1" % "it,test",
-        "org.mockito"          %% "mockito-scala"           % "1.2.1" % "it,test"
+        "io.jaegertracing"     % "jaeger-client"            % "0.34.0",
+        "org.scalatest"        %% "scalatest"               % "3.0.7" % "it,test",
+        "org.mockito"          % "mockito-core"             % "2.27.0" % "it,test",
+        "org.mockito"          %% "mockito-scala"           % "1.3.1" % "it,test"
       )
     }
   )
@@ -86,7 +85,7 @@ addCommandAlias("testAll", "test it:test")
 enablePlugins(JavaAppPackaging)
 enablePlugins(BuildInfoPlugin)
 
-addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.9")
+addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.10")
 addCompilerPlugin("io.tryp"        % "splain"          % "0.4.0" cross CrossVersion.patch)
 
 cancelable in Global := true
