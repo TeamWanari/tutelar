@@ -3,6 +3,7 @@ import cats.MonadError
 import com.typesafe.config.Config
 import com.wanari.tutelar.core.HookService.HookConfig
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
+import com.wanari.tutelar.core.TracerService.TracerServiceConfig
 import com.wanari.tutelar.core.impl.database.DatabaseServiceProxy.DatabaseServiceProxyConfig
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
@@ -18,6 +19,7 @@ trait RuntimeConfig[F[_]] {
   implicit val emailServiceConfig: () => F[EmailProviderConfig]
   implicit val totpConfig: () => F[TotpConfig]
   implicit val databaseProxyConfig: () => F[DatabaseServiceProxyConfig]
+  implicit val tracerServiceConfig: () => F[TracerServiceConfig]
 
   val facebookConfig: () => F[OAuth2Config]
   val githubConfig: () => F[OAuth2Config]

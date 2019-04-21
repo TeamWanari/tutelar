@@ -4,7 +4,7 @@ import akka.Done
 import akka.actor.{ActorSystem, CoordinatedShutdown}
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
-import com.wanari.tutelar.util.{LoggerUtil, TracerUtil}
+import com.wanari.tutelar.util.LoggerUtil
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.duration._
@@ -12,7 +12,6 @@ import scala.util.{Failure, Success}
 
 object Main extends App {
   LoggerUtil.initBridge()
-  TracerUtil.initJaeger()
 
   implicit lazy val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)
 

@@ -39,6 +39,7 @@ trait Services[F[_]] {
   implicit val emailLoginService: EmailProviderService[F]
   implicit val totpService: TotpService[F]
   implicit val passwordDifficultyChecker: PasswordDifficultyChecker[F]
+  implicit val tracerService: TracerService[F]
 
   def init()(implicit logger: Logger, ev: MonadError[F, Throwable]): F[Unit] = {
     import cats.syntax.flatMap._
@@ -48,6 +49,7 @@ trait Services[F[_]] {
     logger.info("Init services")
     for {
       _ <- initialize(configService, "config")
+      _ <- initialize(tracerService, "tracer")
       _ <- initialize(databaseService, "database")
       _ <- initialize(jwtService, "jwt")
       _ <- initializeIfEnabled(ldapService, "ldap")
@@ -90,4 +92,5 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
   implicit lazy val totpService: TotpService[Future]                = new TotpServiceImpl[Future]()
   implicit lazy val passwordDifficultyChecker: PasswordDifficultyChecker[Future] =
     new PasswordDifficultyCheckerImpl[Future]
+  implicit lazy val tracerService = new TracerService[Future]()
 }

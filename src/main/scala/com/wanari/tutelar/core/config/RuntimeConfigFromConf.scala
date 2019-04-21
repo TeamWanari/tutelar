@@ -5,6 +5,7 @@ import cats.MonadError
 import com.typesafe.config.{Config, ConfigFactory}
 import com.wanari.tutelar.core.HookService.{BasicAuthConfig, HookConfig}
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
+import com.wanari.tutelar.core.TracerService.TracerServiceConfig
 import com.wanari.tutelar.core.impl.database.DatabaseServiceProxy.DatabaseServiceProxyConfig
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
@@ -30,6 +31,7 @@ class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String)
   implicit val emailServiceConfig: () => F[EmailProviderConfig]         = readEmailServiceConfig _
   implicit val passwordSettings: () => F[PasswordSettings]              = readPasswordSettings _
   implicit val databaseProxyConfig: () => F[DatabaseServiceProxyConfig] = readDatabaseProxyConfig _
+  implicit val tracerServiceConfig: () => F[TracerServiceConfig]        = readTracerServiceConfig _
 
   val facebookConfig: () => F[OAuth2Config]    = () => readOauth2Config("oauth2.facebook")
   val githubConfig: () => F[OAuth2Config]      = () => readOauth2Config("oauth2.github")
@@ -132,6 +134,13 @@ class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String)
     val config = conf.getConfig("database")
     DatabaseServiceProxyConfig(
       config.getString("type")
+    )
+  }.pure
+
+  private def readTracerServiceConfig = {
+    val config = conf.getConfig("tracer")
+    TracerServiceConfig(
+      config.getString("client")
     )
   }.pure
 }
