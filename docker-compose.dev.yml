@@ -36,10 +36,12 @@ services:
       SMTP_HOST: smtp
       TEMPLATES_DIR: /templates
       SECRET: super_secret_123
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
     ports:
     - 9010:9000
     depends_on:
       - smtp
+      - jaeger
   smtp:
     image: mailhog/mailhog:v1.0.0
     ports:
