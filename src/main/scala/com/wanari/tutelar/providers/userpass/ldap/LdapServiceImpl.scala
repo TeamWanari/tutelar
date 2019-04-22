@@ -5,6 +5,7 @@ import java.util.Properties
 import com.wanari.tutelar.core.AuthService
 import com.wanari.tutelar.core.AuthService.Token
 import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
+import com.wanari.tutelar.util.LoggerUtil.LogContext
 import javax.naming.Context
 import javax.naming.directory.{Attributes, InitialDirContext, SearchControls, SearchResult}
 import spray.json.{JsArray, JsBoolean, JsNull, JsNumber, JsObject, JsString, JsValue}
@@ -23,7 +24,9 @@ class LdapServiceImpl(
     for (_ <- context; _ <- controls) yield ()
   }
 
-  override def login(username: String, password: String, data: Option[JsObject]): Future[Token] = {
+  override def login(username: String, password: String, data: Option[JsObject])(
+      implicit ctx: LogContext
+  ): Future[Token] = {
     for {
       user       <- findUser(username)
       _          <- getUserInitialDirContext(user.getNameInNamespace, password)

@@ -6,6 +6,7 @@ import cats.MonadError
 import com.wanari.tutelar.core.HookService
 import com.wanari.tutelar.core.HookService._
 import com.wanari.tutelar.util.HttpWrapper
+import com.wanari.tutelar.util.LoggerUtil.LogContext
 
 class HookServiceImpl[F[_]: MonadError[?[_], Throwable]](
     implicit hookConfig: () => F[HookConfig],
@@ -18,37 +19,45 @@ class HookServiceImpl[F[_]: MonadError[?[_], Throwable]](
   import spray.json.DefaultJsonProtocol._
   import spray.json._
 
-  override def register(id: String, externalId: String, authType: String, data: JsObject): F[JsObject] = {
+  override def register(id: String, externalId: String, authType: String, data: JsObject)(
+      implicit ctx: LogContext
+  ): F[JsObject] = {
     val dto = HookUserData(id, externalId, authType, Option(data)).toJson
     sendHookAndParse("/register", dto)
   }
 
-  override def login(id: String, externalId: String, authType: String, data: JsObject): F[JsObject] = {
+  override def login(id: String, externalId: String, authType: String, data: JsObject)(
+      implicit ctx: LogContext
+  ): F[JsObject] = {
     val dto = HookUserData(id, externalId, authType, Option(data)).toJson
     sendHookAndParse("/login", dto)
   }
 
-  override def modify(id: String, externalId: String, authType: String, data: JsObject): F[Unit] = {
+  override def modify(id: String, externalId: String, authType: String, data: JsObject)(
+      implicit ctx: LogContext
+  ): F[Unit] = {
     val dto = HookUserData(id, externalId, authType, Option(data)).toJson
     sendHookWithoutResponse("/modify", dto)
   }
 
-  override def link(id: String, externalId: String, authType: String, data: JsObject): F[JsObject] = {
+  override def link(id: String, externalId: String, authType: String, data: JsObject)(
+      implicit ctx: LogContext
+  ): F[JsObject] = {
     val dto = HookUserData(id, externalId, authType, Option(data)).toJson
     sendHookAndParse("/link", dto)
   }
 
-  override def unlink(id: String, externalId: String, authType: String): F[Unit] = {
+  override def unlink(id: String, externalId: String, authType: String)(implicit ctx: LogContext): F[Unit] = {
     val dto = HookUserData(id, externalId, authType, None).toJson
     sendHookWithoutResponse("/unlink", dto)
   }
 
-  override def delete(id: String): F[Unit] = {
+  override def delete(id: String)(implicit ctx: LogContext): F[Unit] = {
     val dto = HookDeleteData(id).toJson
     sendHookWithoutResponse("/delete", dto)
   }
 
-  private def sendHookWithoutResponse(endpoint: String, dto: JsValue): F[Unit] = {
+  private def sendHookWithoutResponse(endpoint: String, dto: JsValue)(implicit ctx: LogContext): F[Unit] = {
     sendHook(endpoint, dto)
       .map(_ => {})
       .recover {
@@ -56,7 +65,7 @@ class HookServiceImpl[F[_]: MonadError[?[_], Throwable]](
       }
   }
 
-  private def sendHookAndParse(endpoint: String, dto: JsValue): F[JsObject] = {
+  private def sendHookAndParse(endpoint: String, dto: JsValue)(implicit ctx: LogContext): F[JsObject] = {
     sendHook(endpoint, dto)
       .flatMap(http.unmarshalEntityTo[JsObject])
       .recover {
@@ -64,7 +73,7 @@ class HookServiceImpl[F[_]: MonadError[?[_], Throwable]](
       }
   }
 
-  private def sendHook(endpoint: String, data: JsValue): F[HttpResponse] = {
+  private def sendHook(endpoint: String, data: JsValue)(implicit ctx: LogContext): F[HttpResponse] = {
     import com.wanari.tutelar.util.ApplicativeErrorSyntax._
     hookConfig()
       .flatMap { config =>

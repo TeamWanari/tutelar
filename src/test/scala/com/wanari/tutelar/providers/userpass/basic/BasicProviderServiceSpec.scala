@@ -1,6 +1,7 @@
 package com.wanari.tutelar.providers.userpass.basic
 import cats.MonadError
 import com.wanari.tutelar.TestBase
+import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.NonEmptyPasswordChecker
 import org.mindrot.jbcrypt.BCrypt
 import org.mockito.Mockito.verify
@@ -32,7 +33,12 @@ class BasicProviderServiceSpec extends TestBase {
     "send extra data via hook" in new TestScope {
       initDb()
       service.login(savedAccount.externalId, "secretpw", Some(JsObject("hello" -> JsTrue)))
-      verify(hookService).login(savedAccount.userId, savedAccount.externalId, "BASIC", JsObject("hello" -> JsTrue))
+      verify(hookService).login(
+        eqTo(savedAccount.userId),
+        eqTo(savedAccount.externalId),
+        eqTo("BASIC"),
+        eqTo(JsObject("hello" -> JsTrue))
+      )(any[LogContext])
     }
     "failure" when {
       "user not found" in new TestScope {
@@ -55,7 +61,9 @@ class BasicProviderServiceSpec extends TestBase {
     "send extra data via hook" in new TestScope {
       service.register("newuser", "pw", Some(JsObject("hello" -> JsTrue)))
 
-      verify(hookService).register(any[String], eqTo("newuser"), eqTo("BASIC"), eqTo(JsObject("hello" -> JsTrue)))
+      verify(hookService).register(any[String], eqTo("newuser"), eqTo("BASIC"), eqTo(JsObject("hello" -> JsTrue)))(
+        any[LogContext]
+      )
     }
     "failure" when {
       "password is weak" in new TestScope {

@@ -5,6 +5,7 @@ import com.wanari.tutelar.RouteTestBase
 import com.wanari.tutelar.core.ProviderApi.{ErrorData, LoginData, TokenData}
 import spray.json._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import com.wanari.tutelar.util.LoggerUtil.LogContext
 import org.mockito.ArgumentMatchersSugar._
 import org.mockito.Mockito._
 
@@ -27,22 +28,25 @@ class BasicProviderApiSpec extends RouteTestBase {
     }
 
     "forward the username, password and extra data to service" in new TestScope {
-      when(serviceMock.register(any[String], any[String], any[Option[JsObject]])) thenReturn Future.successful("TOKEN")
+      when(serviceMock.register(any[String], any[String], any[Option[JsObject]])(any[LogContext])) thenReturn Future
+        .successful("TOKEN")
       postRegisterRequest ~> route ~> check {
-        verify(serviceMock).register("user", "pw", Some(JsObject("hello" -> JsTrue)))
+        verify(serviceMock).register(eqTo("user"), eqTo("pw"), eqTo(Some(JsObject("hello" -> JsTrue))))(any[LogContext])
       }
     }
     "return redirect with callback" in new TestScope {
-      when(serviceMock.register(any[String], any[String], any[Option[JsObject]])) thenReturn Future.successful("TOKEN")
+      when(serviceMock.register(any[String], any[String], any[Option[JsObject]])(any[LogContext])) thenReturn Future
+        .successful("TOKEN")
       postRegisterRequest ~> route ~> check {
         status shouldEqual StatusCodes.OK
         responseAs[TokenData] shouldEqual TokenData("TOKEN")
       }
     }
     "return redirect with error" in new TestScope {
-      when(serviceMock.register(any[String], any[String], any[Option[JsObject]])) thenReturn Future.failed(
-        new Exception()
-      )
+      when(serviceMock.register(any[String], any[String], any[Option[JsObject]])(any[LogContext])) thenReturn Future
+        .failed(
+          new Exception()
+        )
       postRegisterRequest ~> route ~> check {
         status shouldEqual StatusCodes.Unauthorized
         responseAs[ErrorData] shouldEqual ErrorData("AUTHENTICATION_FAILED")

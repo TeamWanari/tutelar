@@ -6,6 +6,7 @@ import cats.MonadError
 import com.wanari.tutelar.TestBase
 import com.wanari.tutelar.core.JwtService
 import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl._
+import com.wanari.tutelar.util.LoggerUtil.LogContext
 import org.mockito.ArgumentMatchersSugar.{any, eqTo}
 import org.mockito.Mockito.{verify, when}
 import spray.json._
@@ -65,7 +66,9 @@ class TotpServiceSpec extends TestBase {
       initMock(jwtService)
       service.register("newuser", "token", "755224", Some(JsObject("hello" -> JsTrue)))
 
-      verify(hookService).register(any[String], eqTo("newuser"), eqTo("TOTP"), eqTo(JsObject("hello" -> JsTrue)))
+      verify(hookService).register(any[String], eqTo("newuser"), eqTo("TOTP"), eqTo(JsObject("hello" -> JsTrue)))(
+        any[LogContext]
+      )
     }
 
     "failure" when {
@@ -92,7 +95,12 @@ class TotpServiceSpec extends TestBase {
       "send extra data via hook" in new TestScope {
         initDb()
         service.login(savedAccount.externalId, "755224", Some(JsObject("hello" -> JsTrue)))
-        verify(hookService).login(savedAccount.userId, savedAccount.externalId, "TOTP", JsObject("hello" -> JsTrue))
+        verify(hookService).login(
+          eqTo(savedAccount.userId),
+          eqTo(savedAccount.externalId),
+          eqTo("TOTP"),
+          eqTo(JsObject("hello" -> JsTrue))
+        )(any[LogContext])
       }
       "failure" when {
         "user not found" in new TestScope {

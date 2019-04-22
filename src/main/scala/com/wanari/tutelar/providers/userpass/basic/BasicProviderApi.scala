@@ -21,7 +21,7 @@ class BasicProviderApi(
         path("register") {
           post {
             entity(as[LoginData]) { data =>
-              withTrace(s"Register_$servicePath") { _ =>
+              withTrace(s"Register_$servicePath") { implicit ctx =>
                 completeLoginFlowWithJson(service.register(data.username, data.password, data.data))
               }
             }

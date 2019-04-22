@@ -1,14 +1,15 @@
 package com.wanari.tutelar.core
 
+import com.wanari.tutelar.util.LoggerUtil.LogContext
 import spray.json.{JsObject, RootJsonFormat}
 
 trait HookService[F[_]] {
-  def register(id: String, externalId: String, authType: String, data: JsObject): F[JsObject]
-  def login(id: String, externalId: String, authType: String, data: JsObject): F[JsObject]
-  def modify(id: String, externalId: String, authType: String, data: JsObject): F[Unit]
-  def link(id: String, externalId: String, authType: String, data: JsObject): F[JsObject]
-  def unlink(id: String, externalId: String, authType: String): F[Unit]
-  def delete(id: String): F[Unit]
+  def register(id: String, externalId: String, authType: String, data: JsObject)(implicit ctx: LogContext): F[JsObject]
+  def login(id: String, externalId: String, authType: String, data: JsObject)(implicit ctx: LogContext): F[JsObject]
+  def modify(id: String, externalId: String, authType: String, data: JsObject)(implicit ctx: LogContext): F[Unit]
+  def link(id: String, externalId: String, authType: String, data: JsObject)(implicit ctx: LogContext): F[JsObject]
+  def unlink(id: String, externalId: String, authType: String)(implicit ctx: LogContext): F[Unit]
+  def delete(id: String)(implicit ctx: LogContext): F[Unit]
 }
 
 object HookService {

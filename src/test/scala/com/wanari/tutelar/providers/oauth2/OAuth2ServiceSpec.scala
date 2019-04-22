@@ -11,6 +11,7 @@ import com.wanari.tutelar.providers.oauth2.OAuth2Service.{
   TokenResponseHelper
 }
 import com.wanari.tutelar.util.HttpWrapper
+import com.wanari.tutelar.util.LoggerUtil.LogContext
 import org.mockito.ArgumentMatchersSugar._
 import org.mockito.Mockito._
 import spray.json.{JsObject, JsTrue}
@@ -96,7 +97,7 @@ class OAuth2ServiceSpec extends TestBase {
         override def createTokenRequest(entityHelper: TokenRequestHelper, selfRedirectUri: Uri) = {
           HttpRequest()
         }
-        override def getProfile(token: TokenResponseHelper) =
+        override def getProfile(token: TokenResponseHelper)(implicit ctx: LogContext) =
           if (token.access_token == "token") Try(ProfileData("id", JsObject("raw" -> JsTrue))) else ???
       }
     }
@@ -114,7 +115,7 @@ class OAuth2ServiceSpec extends TestBase {
       when(service.authService.registerOrLogin("dummy", "id", "token", JsObject("raw" -> JsTrue))) thenReturn Try(
         "ultimateUri"
       )
-      when(service.http.singleRequest(any[HttpRequest])) thenReturn Try(HttpResponse())
+      when(service.http.singleRequest(any[HttpRequest])(any[LogContext])) thenReturn Try(HttpResponse())
       when(service.http.unmarshalEntityTo[TokenResponseHelper](HttpResponse())) thenReturn Try(
         TokenResponseHelper("token")
       )

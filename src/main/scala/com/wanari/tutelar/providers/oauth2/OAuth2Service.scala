@@ -11,6 +11,7 @@ import com.wanari.tutelar.providers.oauth2.OAuth2Service.{
   TokenResponseHelper
 }
 import com.wanari.tutelar.util.HttpWrapper
+import com.wanari.tutelar.util.LoggerUtil.LogContext
 import spray.json.{JsObject, JsString, JsValue, RootJsonFormat, RootJsonReader}
 
 trait OAuth2Service[F[_]] {
@@ -23,7 +24,7 @@ trait OAuth2Service[F[_]] {
   val redirectUriBase: Uri
 
   protected def createTokenRequest(entityHelper: TokenRequestHelper, selfRedirectUri: Uri): HttpRequest
-  protected def getProfile(token: TokenResponseHelper): F[ProfileData]
+  protected def getProfile(token: TokenResponseHelper)(implicit ctx: LogContext): F[ProfileData]
 
   def generateIdentifierUrl(implicit me: MonadError[F, Throwable]): F[Uri] = {
     import cats.syntax.flatMap._
@@ -44,7 +45,10 @@ trait OAuth2Service[F[_]] {
       )
   }
 
-  def authenticateWithCallback(code: String, state: String)(implicit me: MonadError[F, Throwable]): F[Token] = {
+  def authenticateWithCallback(
+      code: String,
+      state: String
+  )(implicit me: MonadError[F, Throwable], ctx: LogContext): F[Token] = {
     import cats.syntax.flatMap._
     import cats.syntax.functor._
 
@@ -68,7 +72,9 @@ trait OAuth2Service[F[_]] {
     } yield token
   }
 
-  def authenticateWithAccessToken(accessToken: String)(implicit me: MonadError[F, Throwable]): F[Token] = {
+  def authenticateWithAccessToken(
+      accessToken: String
+  )(implicit me: MonadError[F, Throwable], ctx: LogContext): F[Token] = {
     import cats.syntax.flatMap._
     import cats.syntax.functor._
 

@@ -5,6 +5,7 @@ import cats.data.OptionT
 import com.wanari.tutelar.core.AuthService.Token
 import com.wanari.tutelar.core.DatabaseService.{Account, User}
 import com.wanari.tutelar.core.{AuthService, DatabaseService, HookService, JwtService}
+import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.{DateTimeUtil, IdGenerator}
 import spray.json.{JsObject, JsString}
 
@@ -25,7 +26,7 @@ class AuthServiceImpl[F[_]: MonadError[?[_], Throwable]](
       externalId: String,
       customData: String,
       providedData: JsObject
-  ): F[Token] = {
+  )(implicit ctx: LogContext): F[Token] = {
     val standardizedExternalId = convertToStandardizedLowercase(externalId)
     for {
       account_hookresponse <- createOrUpdateAccount(authType, standardizedExternalId, customData, providedData)
@@ -39,7 +40,7 @@ class AuthServiceImpl[F[_]: MonadError[?[_], Throwable]](
     OptionT(databaseService.findAccountByTypeAndExternalId((authType, standardizedExternalId))).map(_.customData)
   }
 
-  override def deleteUser(userId: String): F[Unit] = {
+  override def deleteUser(userId: String)(implicit ctx: LogContext): F[Unit] = {
     for {
       user <- databaseService.findUserById(userId)
       _    <- user.nonEmpty.pureUnitOrRise(new Exception(s"User not found $userId"))
@@ -62,7 +63,7 @@ class AuthServiceImpl[F[_]: MonadError[?[_], Throwable]](
       externalId: String,
       customData: String,
       providedData: JsObject
-  ): F[Unit] = {
+  )(implicit ctx: LogContext): F[Unit] = {
     val standardizedExternalId = convertToStandardizedLowercase(externalId)
     val account                = Account(authType, standardizedExternalId, userId, customData)
     for {
@@ -76,7 +77,7 @@ class AuthServiceImpl[F[_]: MonadError[?[_], Throwable]](
     } yield ()
   }
 
-  override def unlink(userId: String, authType: String): F[Unit] = {
+  override def unlink(userId: String, authType: String)(implicit ctx: LogContext): F[Unit] = {
     for {
       accounts <- databaseService.listAccountsByUserId(userId)
       _        <- (accounts.size > 1).pureUnitOrRise(new Exception("Can not unlink the last account"))
@@ -91,7 +92,7 @@ class AuthServiceImpl[F[_]: MonadError[?[_], Throwable]](
       externalId: String,
       customData: String,
       providedData: JsObject
-  ): F[(Account, JsObject)] = {
+  )(implicit ctx: LogContext): F[(Account, JsObject)] = {
     databaseService
       .findAccountByTypeAndExternalId((authType, externalId))
       .flatMap(
@@ -103,7 +104,9 @@ class AuthServiceImpl[F[_]: MonadError[?[_], Throwable]](
       )
   }
 
-  private def login(account: Account, customData: String, providedData: JsObject): F[(Account, JsObject)] = {
+  private def login(account: Account, customData: String, providedData: JsObject)(
+      implicit ctx: LogContext
+  ): F[(Account, JsObject)] = {
     for {
       _    <- databaseService.updateCustomData(account.getId, customData)
       data <- hookService.login(account.userId, account.externalId, account.authType, providedData)
@@ -115,7 +118,7 @@ class AuthServiceImpl[F[_]: MonadError[?[_], Throwable]](
       externalId: String,
       customData: String,
       providedData: JsObject
-  ): F[(Account, JsObject)] = {
+  )(implicit ctx: LogContext): F[(Account, JsObject)] = {
     for {
       id   <- idGenerator.generate()
       time <- timeService.getCurrentTimeMillis()

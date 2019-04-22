@@ -5,6 +5,7 @@ import akka.http.scaladsl.model.{StatusCodes, Uri}
 import akka.http.scaladsl.server.MissingQueryParamRejection
 import cats.MonadError
 import com.wanari.tutelar.RouteTestBase
+import com.wanari.tutelar.util.LoggerUtil.LogContext
 import org.mockito.Mockito._
 import org.mockito.ArgumentMatchersSugar._
 
@@ -34,7 +35,7 @@ class Oauth2ApiItSpec extends RouteTestBase {
         when(
           services
             .getOauthServiceByName(provider)
-            .authenticateWithCallback(eqTo("a"), eqTo("b"))(any[MonadError[Future, Throwable]])
+            .authenticateWithCallback(eqTo("a"), eqTo("b"))(any[MonadError[Future, Throwable]], any[LogContext])
         ) thenReturn Future.successful("asd")
         Get(s"/$provider/callback?code=a&state=b") ~> route ~> check {
           status shouldEqual StatusCodes.Found
@@ -45,7 +46,7 @@ class Oauth2ApiItSpec extends RouteTestBase {
         when(
           services
             .getOauthServiceByName(provider)
-            .authenticateWithCallback(eqTo("a"), eqTo("b"))(any[MonadError[Future, Throwable]])
+            .authenticateWithCallback(eqTo("a"), eqTo("b"))(any[MonadError[Future, Throwable]], any[LogContext])
         ) thenReturn Future.failed(new Exception())
         Get(s"/$provider/callback?code=a&state=b") ~> route ~> check {
           status shouldEqual StatusCodes.Found

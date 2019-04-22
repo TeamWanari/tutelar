@@ -10,8 +10,9 @@ import cats.MonadError
 import com.wanari.tutelar.TestBase
 import com.wanari.tutelar.providers.userpass.email.EmailProviderService.EmailProviderConfig
 import com.wanari.tutelar.util.HttpWrapper
+import com.wanari.tutelar.util.LoggerUtil.LogContext
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchersSugar._
+import org.mockito.ArgumentMatchersSugar.any
 import org.mockito.Mockito._
 import spray.json.{JsObject, JsString}
 
@@ -29,7 +30,7 @@ class EmailServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with Test
   trait TestScope {
     implicit lazy val e: MonadError[Try, Throwable] = implicitly
     implicit lazy val httpWrapper                   = mock[HttpWrapper[Try]]
-    when(httpWrapper.singleRequest(any[HttpRequest])).thenReturn(Failure(new Exception))
+    when(httpWrapper.singleRequest(any[HttpRequest])(any[LogContext])).thenReturn(Failure(new Exception))
     implicit lazy val config: () => Try[EmailProviderConfig] = () => {
       Success(EmailProviderConfig("_SERVICE_URL_", "_USER_", "_PASS_"))
     }
@@ -44,7 +45,7 @@ class EmailServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with Test
         val expectedUrl = "_SERVICE_URL_/send"
 
         val captor: ArgumentCaptor[HttpRequest] = ArgumentCaptor.forClass(classOf[HttpRequest])
-        verify(httpWrapper).singleRequest(captor.capture())
+        verify(httpWrapper).singleRequest(captor.capture())(any[LogContext])
 
         captor.getValue.uri.toString() shouldEqual expectedUrl
         captor.getValue.method shouldEqual HttpMethods.POST
@@ -62,7 +63,7 @@ class EmailServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with Test
         )
 
         val captor: ArgumentCaptor[HttpRequest] = ArgumentCaptor.forClass(classOf[HttpRequest])
-        verify(httpWrapper).singleRequest(captor.capture())
+        verify(httpWrapper).singleRequest(captor.capture())(any[LogContext])
 
         import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
         import spray.json.DefaultJsonProtocol._
@@ -70,12 +71,13 @@ class EmailServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with Test
       }
       "return Success if result is successful" in new TestScope {
         reset(httpWrapper)
-        when(httpWrapper.singleRequest(any[HttpRequest])).thenReturn(Success(HttpResponse()))
+        when(httpWrapper.singleRequest(any[HttpRequest])(any[LogContext])).thenReturn(Success(HttpResponse()))
         service.sendRegisterUrl("", "") shouldEqual Success(())
       }
       "return Failure if result is not successful" in new TestScope {
         reset(httpWrapper)
-        when(httpWrapper.singleRequest(any[HttpRequest])).thenReturn(Success(HttpResponse(StatusCodes.BadRequest)))
+        when(httpWrapper.singleRequest(any[HttpRequest])(any[LogContext]))
+          .thenReturn(Success(HttpResponse(StatusCodes.BadRequest)))
         service.sendRegisterUrl("", "") shouldBe a[Failure[_]]
       }
     }
@@ -86,7 +88,7 @@ class EmailServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with Test
         val expectedUrl = "_SERVICE_URL_/send"
 
         val captor: ArgumentCaptor[HttpRequest] = ArgumentCaptor.forClass(classOf[HttpRequest])
-        verify(httpWrapper).singleRequest(captor.capture())
+        verify(httpWrapper).singleRequest(captor.capture())(any[LogContext])
 
         captor.getValue.uri.toString() shouldEqual expectedUrl
         captor.getValue.method shouldEqual HttpMethods.POST
@@ -104,7 +106,7 @@ class EmailServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with Test
         )
 
         val captor: ArgumentCaptor[HttpRequest] = ArgumentCaptor.forClass(classOf[HttpRequest])
-        verify(httpWrapper).singleRequest(captor.capture())
+        verify(httpWrapper).singleRequest(captor.capture())(any[LogContext])
 
         import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
         import spray.json.DefaultJsonProtocol._
@@ -112,12 +114,13 @@ class EmailServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with Test
       }
       "return Success if result is successful" in new TestScope {
         reset(httpWrapper)
-        when(httpWrapper.singleRequest(any[HttpRequest])).thenReturn(Success(HttpResponse()))
+        when(httpWrapper.singleRequest(any[HttpRequest])(any[LogContext])).thenReturn(Success(HttpResponse()))
         service.sendResetPasswordUrl("", "") shouldEqual Success(())
       }
       "return Failure if result is not successful" in new TestScope {
         reset(httpWrapper)
-        when(httpWrapper.singleRequest(any[HttpRequest])).thenReturn(Success(HttpResponse(StatusCodes.BadRequest)))
+        when(httpWrapper.singleRequest(any[HttpRequest])(any[LogContext]))
+          .thenReturn(Success(HttpResponse(StatusCodes.BadRequest)))
         service.sendResetPasswordUrl("", "") shouldBe a[Failure[_]]
       }
     }

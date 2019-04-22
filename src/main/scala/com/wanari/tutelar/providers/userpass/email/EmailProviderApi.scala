@@ -22,7 +22,7 @@ class EmailProviderApi(
       path("login") {
         post {
           entity(as[EmailLoginData]) { data =>
-            withTrace("Login_email") { _ =>
+            withTrace("Login_email") { implicit ctx =>
               completeLoginFlowWithJson(service.login(data.email, data.password, data.data))
             }
           }
@@ -31,7 +31,7 @@ class EmailProviderApi(
         path("register") {
           post {
             entity(as[RegisterData]) { data =>
-              withTrace("Register_email") { _ =>
+              withTrace("Register_email") { implicit ctx =>
                 completeLoginFlowWithJson(service.register(data.token, data.password, data.data))
               }
             }
@@ -50,7 +50,7 @@ class EmailProviderApi(
       } ~ path("reset-password") {
         post {
           entity(as[RegisterData]) { data =>
-            withTrace("ResetPassword_email") { _ =>
+            withTrace("ResetPassword_email") { implicit ctx =>
               completeLoginFlowWithJson(service.resetPassword(data.token, data.password, data.data))
             }
           }

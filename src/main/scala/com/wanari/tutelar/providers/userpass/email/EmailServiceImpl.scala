@@ -33,7 +33,7 @@ class EmailServiceImpl[F[_]: MonadError[?[_], Throwable]](
       val entity      = HttpEntity(ContentTypes.`application/json`, data.toJson.compactPrint)
       val credentials = BasicHttpCredentials(config.username, config.password)
 
-      HttpRequest(POST, url, entity = entity, headers = ctx.getInjectHeaders)
+      HttpRequest(POST, url, entity = entity)
         .addCredentials(credentials)
     }
 

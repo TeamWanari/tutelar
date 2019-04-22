@@ -8,6 +8,7 @@ import akka.testkit.TestKit
 import com.wanari.tutelar.TestBase
 import com.wanari.tutelar.core.HookService
 import com.wanari.tutelar.core.HookService.{BasicAuthConfig, HookConfig}
+import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.{AkkaHttpWrapper, HttpWrapper}
 import org.mockito.ArgumentMatchersSugar.any
 import org.mockito.Mockito.{verify, when}
@@ -41,10 +42,11 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
     import system.dispatcher
 
     val httpMock = mock[HttpWrapper[Future]]
-    when(httpMock.singleRequest(any[HttpRequest])) thenReturn Future.successful(response)
+    when(httpMock.singleRequest(any[HttpRequest])(any[LogContext])) thenReturn Future.successful(response)
 
     implicit val http = new AkkaHttpWrapper() {
-      override def singleRequest(httpRequest: HttpRequest): Future[HttpResponse] = httpMock.singleRequest(httpRequest)
+      override def singleRequest(httpRequest: HttpRequest)(implicit ctx: LogContext): Future[HttpResponse] =
+        httpMock.singleRequest(httpRequest)(ctx)
     }
     implicit val config = () => Future.successful(HookConfig(baseUrl, BasicAuthConfig("user", "pass")))
     lazy val service    = new HookServiceImpl[Future]()
@@ -143,13 +145,13 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
 
   def validateBasicAuth(httpMock: HttpWrapper[Future]): Unit = {
     val captor: ArgumentCaptor[HttpRequest] = ArgumentCaptor.forClass(classOf[HttpRequest])
-    verify(httpMock).singleRequest(captor.capture())
+    verify(httpMock).singleRequest(captor.capture())(any[LogContext])
     captor.getValue.getHeader("Authorization").get().value() shouldEqual "Basic dXNlcjpwYXNz"
   }
 
   def validateRequest(httpMock: HttpWrapper[Future])(expectedUrl: String, expectedRequest: Any): Unit = {
     val captor: ArgumentCaptor[HttpRequest] = ArgumentCaptor.forClass(classOf[HttpRequest])
-    verify(httpMock).singleRequest(captor.capture())
+    verify(httpMock).singleRequest(captor.capture())(any[LogContext])
 
     captor.getValue.uri.toString() shouldEqual expectedUrl
     captor.getValue.method shouldEqual HttpMethods.POST

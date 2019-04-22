@@ -4,6 +4,7 @@ import cats.data.OptionT
 import com.wanari.tutelar.core.AuthService
 import com.wanari.tutelar.core.AuthService.Token
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyChecker
+import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.PasswordCryptor
 import spray.json.JsObject
 
@@ -18,7 +19,9 @@ class BasicProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](
 
   protected val authType = "BASIC"
 
-  override def register(username: String, password: String, data: Option[JsObject]): F[Token] = {
+  override def register(username: String, password: String, data: Option[JsObject])(
+      implicit ctx: LogContext
+  ): F[Token] = {
     for {
       _                 <- passwordDifficultyChecker.validate(password)
       usernameIsNotUsed <- authService.findCustomData(authType, username).isEmpty
@@ -27,7 +30,7 @@ class BasicProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](
     } yield token
   }
 
-  override def login(username: String, password: String, data: Option[JsObject]): F[Token] = {
+  override def login(username: String, password: String, data: Option[JsObject])(implicit ctx: LogContext): F[Token] = {
     val result: OptionT[F, Token] = for {
       passwordHash <- authService.findCustomData(authType, username) if checkPassword(password, passwordHash)
       token        <- OptionT.liftF(authService.registerOrLogin(authType, username, passwordHash, data.getOrElse(JsObject())))

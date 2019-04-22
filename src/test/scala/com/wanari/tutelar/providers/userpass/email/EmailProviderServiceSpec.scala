@@ -38,7 +38,12 @@ class EmailProviderServiceSpec extends TestBase {
       "send extra data via hook" in new TestScope {
         initDb()
         service.login(savedAccount.externalId, "secretpw", Some(JsObject("hello" -> JsTrue)))
-        verify(hookService).login(savedAccount.userId, savedAccount.externalId, "EMAIL", JsObject("hello" -> JsTrue))
+        verify(hookService).login(
+          eqTo(savedAccount.userId),
+          eqTo(savedAccount.externalId),
+          eqTo("EMAIL"),
+          eqTo(JsObject("hello" -> JsTrue))
+        )(any[LogContext])
       }
       "failure" when {
         "user not found" in new TestScope {
@@ -79,7 +84,9 @@ class EmailProviderServiceSpec extends TestBase {
         )
         service.register("", "pw", Some(JsObject("hello" -> JsTrue)))
 
-        verify(hookService).register(any[String], eqTo("new@user"), eqTo("EMAIL"), eqTo(JsObject("hello" -> JsTrue)))
+        verify(hookService).register(any[String], eqTo("new@user"), eqTo("EMAIL"), eqTo(JsObject("hello" -> JsTrue)))(
+          any[LogContext]
+        )
       }
       "failure" when {
         "password is weak" in new TestScope {
@@ -167,7 +174,12 @@ class EmailProviderServiceSpec extends TestBase {
     "send extra data via hook" in new ResetPasswordScope {
       initDb()
       service.resetPassword("", "pw", Some(JsObject("hello" -> JsTrue)))
-      verify(hookService).login(savedAccount.userId, savedAccount.externalId, "EMAIL", JsObject("hello" -> JsTrue))
+      verify(hookService).login(
+        eqTo(savedAccount.userId),
+        eqTo(savedAccount.externalId),
+        eqTo("EMAIL"),
+        eqTo(JsObject("hello" -> JsTrue))
+      )(any[LogContext])
     }
     "failure" when {
       "user not found" in new ResetPasswordScope {

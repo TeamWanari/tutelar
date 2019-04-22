@@ -5,7 +5,8 @@ import akka.http.scaladsl.model.headers.OAuth2BearerToken
 import akka.http.scaladsl.server.AuthenticationFailedRejection
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import com.wanari.tutelar.TestBase
-import org.mockito.ArgumentMatchersSugar.any
+import com.wanari.tutelar.util.LoggerUtil.LogContext
+import org.mockito.ArgumentMatchersSugar.{any, eqTo}
 import org.mockito.Mockito.{reset, verify, when}
 import org.scalatest.BeforeAndAfterEach
 
@@ -36,11 +37,11 @@ class CoreApiSpec extends TestBase with ScalatestRouteTest with BeforeAndAfterEa
         }
       }
       "call the auth service delete with the userid" in new TestScope {
-        when(authServiceMock.deleteUser(any[String])).thenReturn(Future.successful(()))
+        when(authServiceMock.deleteUser(any[String])(any[LogContext])).thenReturn(Future.successful(()))
         Post("/core/delete") ~> addCredentials(OAuth2BearerToken("TOKEN")) ~> coreApi.route() ~> check {
           status shouldEqual StatusCodes.OK
         }
-        verify(authServiceMock).deleteUser("UserID")
+        verify(authServiceMock).deleteUser(eqTo("UserID"))(any[LogContext])
       }
     }
     "/core/unlink" should {
@@ -53,12 +54,12 @@ class CoreApiSpec extends TestBase with ScalatestRouteTest with BeforeAndAfterEa
         }
       }
       "call the auth service unlink with the userid and authtype" in new TestScope {
-        when(authServiceMock.unlink(any[String], any[String])).thenReturn(Future.successful(()))
+        when(authServiceMock.unlink(any[String], any[String])(any[LogContext])).thenReturn(Future.successful(()))
         Post("/core/unlink").withEntity(authTypeEntity) ~> addCredentials(OAuth2BearerToken("TOKEN")) ~> coreApi
           .route() ~> check {
           status shouldEqual StatusCodes.OK
         }
-        verify(authServiceMock).unlink("UserID", "AuthType")
+        verify(authServiceMock).unlink(eqTo("UserID"), eqTo("AuthType"))(any[LogContext])
       }
     }
   }

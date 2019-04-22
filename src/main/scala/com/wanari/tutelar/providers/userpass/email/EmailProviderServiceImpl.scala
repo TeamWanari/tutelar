@@ -23,7 +23,9 @@ class EmailProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](
 
   override protected val authType = "EMAIL"
 
-  override def register(registerToken: String, password: String, data: Option[JsObject]): F[Token] = {
+  override def register(registerToken: String, password: String, data: Option[JsObject])(
+      implicit ctx: LogContext
+  ): F[Token] = {
     for {
       email <- decodeToken(registerToken, EmailToken.RegisterType)
       token <- super.register(email, password, data)
@@ -37,7 +39,9 @@ class EmailProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](
     } yield result
   }
 
-  override def resetPassword(resetPasswordToken: String, password: String, data: Option[JsObject]): F[Token] = {
+  override def resetPassword(resetPasswordToken: String, password: String, data: Option[JsObject])(
+      implicit ctx: LogContext
+  ): F[Token] = {
     for {
       email <- decodeToken(resetPasswordToken, EmailToken.ResetPasswordType)
       token <- changePasswordAndLogin(email, password, data)
@@ -65,7 +69,9 @@ class EmailProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](
     jwtService.encode(EmailToken(email, `type`).toJson.asJsObject)
   }
 
-  private def changePasswordAndLogin(email: String, password: String, data: Option[JsObject]): F[Token] = {
+  private def changePasswordAndLogin(email: String, password: String, data: Option[JsObject])(
+      implicit ctx: LogContext
+  ): F[Token] = {
     for {
       _     <- checkIsExists(email)
       token <- authService.registerOrLogin(authType, email, encryptPassword(password), data.getOrElse(JsObject()))

@@ -4,6 +4,7 @@ import com.wanari.tutelar.TestBase
 import com.wanari.tutelar.core.DatabaseService.{Account, User}
 import com.wanari.tutelar.core.impl.database.MemoryDatabaseService
 import com.wanari.tutelar.core.{HookService, JwtService}
+import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.{DateTimeUtilCounterImpl, IdGeneratorCounterImpl}
 import org.mockito.ArgumentMatchersSugar._
 import org.mockito.Mockito.{verify, when}
@@ -36,12 +37,14 @@ class AuthServiceSpec extends TestBase {
     databaseService.saveAccount(savedAccount)
 
     when(jwtService.encode(any[JsObject], any[Option[Duration]])).thenReturn(Success("JWT"))
-    when(hookService.register(any[String], any[String], any[String], any[JsObject]))
+    when(hookService.register(any[String], any[String], any[String], any[JsObject])(any[LogContext]))
       .thenReturn(Success(hookResponseRegister))
-    when(hookService.login(any[String], any[String], any[String], any[JsObject])).thenReturn(Success(hookResponseLogin))
-    when(hookService.delete(any[String])).thenReturn(Success(()))
-    when(hookService.link(any[String], any[String], any[String], any[JsObject])).thenReturn(Success(hookResponseLogin))
-    when(hookService.unlink(any[String], any[String], any[String])).thenReturn(Success(()))
+    when(hookService.login(any[String], any[String], any[String], any[JsObject])(any[LogContext]))
+      .thenReturn(Success(hookResponseLogin))
+    when(hookService.delete(any[String])(any[LogContext])).thenReturn(Success(()))
+    when(hookService.link(any[String], any[String], any[String], any[JsObject])(any[LogContext]))
+      .thenReturn(Success(hookResponseLogin))
+    when(hookService.unlink(any[String], any[String], any[String])(any[LogContext])).thenReturn(Success(()))
 
     val service = new AuthServiceImpl[Try]()
   }
@@ -65,7 +68,7 @@ class AuthServiceSpec extends TestBase {
       }
       "call hook service" in new TestScope {
         service.registerOrLogin(authType, externalId, customData, providedData).get
-        verify(hookService).register("1", externalId, authType, providedData)
+        verify(hookService).register(eqTo("1"), eqTo(externalId), eqTo(authType), eqTo(providedData))(any[LogContext])
       }
     }
     "login" should {
@@ -89,7 +92,12 @@ class AuthServiceSpec extends TestBase {
       }
       "call hook service" in new TestScope {
         service.registerOrLogin(savedAccount.authType, savedAccount.externalId, customData, providedData).get
-        verify(hookService).login(savedAccount.userId, savedAccount.externalId, authType, providedData)
+        verify(hookService).login(
+          eqTo(savedAccount.userId),
+          eqTo(savedAccount.externalId),
+          eqTo(authType),
+          eqTo(providedData)
+        )(any[LogContext])
       }
     }
     "the externalId" should {
@@ -98,7 +106,7 @@ class AuthServiceSpec extends TestBase {
         val standarized = "spec_ext_id_\u00e9"
         service.registerOrLogin(authType, externalId, customData, providedData) shouldEqual Success("JWT")
         databaseService.users("1") shouldEqual User("1", 1)
-        verify(hookService).register("1", standarized, authType, providedData)
+        verify(hookService).register(eqTo("1"), eqTo(standarized), eqTo(authType), eqTo(providedData))(any[LogContext])
       }
     }
   }
@@ -144,7 +152,7 @@ class AuthServiceSpec extends TestBase {
       }
       "call hook service" in new TestScope {
         service.deleteUser(savedUser.id).get
-        verify(hookService).delete(savedUser.id)
+        verify(hookService).delete(eqTo(savedUser.id))(any[LogContext])
       }
     }
     "user not found" in new TestScope {
@@ -187,7 +195,12 @@ class AuthServiceSpec extends TestBase {
     "call hook service" in new TestScope {
       val account = Account("new_type", "ext_id", savedUser.id, "customData")
       service.link(savedUser.id, account.authType, account.externalId, account.customData, providedData).get
-      verify(hookService).link(savedAccount.userId, account.externalId, account.authType, providedData)
+      verify(hookService).link(
+        eqTo(savedAccount.userId),
+        eqTo(account.externalId),
+        eqTo(account.authType),
+        eqTo(providedData)
+      )(any[LogContext])
     }
   }
 
@@ -208,7 +221,7 @@ class AuthServiceSpec extends TestBase {
       val account = Account("new_type", "some_ext_id", savedUser.id, "somedata")
       databaseService.saveAccount(account)
       service.unlink(savedUser.id, account.authType) shouldBe Success(())
-      verify(hookService).unlink(savedUser.id, account.externalId, account.authType)
+      verify(hookService).unlink(eqTo(savedUser.id), eqTo(account.externalId), eqTo(account.authType))(any[LogContext])
     }
   }
 

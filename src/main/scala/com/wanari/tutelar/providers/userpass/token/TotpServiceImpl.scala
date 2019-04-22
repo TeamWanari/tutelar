@@ -8,6 +8,7 @@ import com.wanari.tutelar.core.AuthService.Token
 import com.wanari.tutelar.core.{AuthService, JwtService}
 import com.wanari.tutelar.providers.userpass.token.OTP.{OTPAlgorithm, OTPKey, TOTP}
 import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl.TotpConfig
+import com.wanari.tutelar.util.LoggerUtil.LogContext
 import spray.json.RootJsonFormat
 
 import scala.util.Try
@@ -42,7 +43,9 @@ class TotpServiceImpl[F[_]: MonadError[?[_], Throwable]](
     result.pureOrRaise(new Exception())
   }
 
-  override def register(userName: String, registerToken: String, password: String, data: Option[JsObject]): F[Token] = {
+  override def register(userName: String, registerToken: String, password: String, data: Option[JsObject])(
+      implicit ctx: LogContext
+  ): F[Token] = {
     val result = for {
       config           <- OptionT.liftF(totpConfig())
       totpDataAsString <- OptionT.liftF(decodeToken(registerToken))
@@ -56,7 +59,7 @@ class TotpServiceImpl[F[_]: MonadError[?[_], Throwable]](
     result.pureOrRaise(new Exception())
   }
 
-  override def login(username: String, password: String, data: Option[JsObject]): F[Token] = {
+  override def login(username: String, password: String, data: Option[JsObject])(implicit ctx: LogContext): F[Token] = {
     val result: OptionT[F, Token] = for {
       config    <- OptionT.liftF(totpConfig())
       savedData <- authService.findCustomData(authType, username)
