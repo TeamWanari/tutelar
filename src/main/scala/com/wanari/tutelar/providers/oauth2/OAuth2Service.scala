@@ -33,7 +33,7 @@ trait OAuth2Service[F[_]] {
       config          <- oAuth2config()
       state           <- csrfService.getCsrfToken(TYPE, JsObject.empty)
       selfRedirectUri <- getSelfRedirectUri
-    } yield
+    } yield {
       redirectUriBase.withQuery(
         Uri.Query(
           "client_id"     -> config.clientId,
@@ -43,6 +43,7 @@ trait OAuth2Service[F[_]] {
           "redirect_uri"  -> selfRedirectUri.toString
         )
       )
+    }
   }
 
   def authenticateWithCallback(
