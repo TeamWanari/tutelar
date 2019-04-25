@@ -9,6 +9,7 @@
     </appender>
 
     <logger name="io.jaegertracing.internal.reporters.LoggingReporter" level="WARN"/>
+    <logger name="reactivemongo" level="WARN" />
 
     <root level="${ROOT_LOGGING_LEVEL:-INFO}">
         <appender-ref ref="CONSOLE"/>

@@ -1,5 +1,6 @@
 package com.wanari.tutelar.core.config
 import com.wanari.tutelar.TestBase
+import com.wanari.tutelar.core.impl.database.MongoDatabaseService.MongoConfig
 
 import scala.util.Try
 
@@ -28,6 +29,11 @@ class ServerConfigSpec extends TestBase {
     "drop empty elements" in {
       enabledModules.get should not contain ("")
     }
+  }
+
+  "#getMongoConfig" in {
+    val service = new ServerConfigImpl[Try]()
+    service.getMongoConfig.get shouldEqual MongoConfig("URI", "COLLECTION")
   }
 
 }

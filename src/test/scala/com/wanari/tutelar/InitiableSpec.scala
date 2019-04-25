@@ -1,6 +1,7 @@
 package com.wanari.tutelar
 
 import com.wanari.tutelar.core.config.{RuntimeConfig, ServerConfig}
+import com.wanari.tutelar.core.impl.database.MongoDatabaseService.MongoConfig
 import org.slf4j.LoggerFactory
 
 import scala.util.{Success, Try}
@@ -23,6 +24,7 @@ class InitiableSpec extends TestBase {
       override def getEnabledModules: Try[Seq[String]] = Success(Seq("modulename"))
       override val runtimeConfig: RuntimeConfig[Try]   = null
       override def init: Try[Unit]                     = ???
+      override def getMongoConfig: Try[MongoConfig]    = ???
     }
   }
   import cats.instances.try_._

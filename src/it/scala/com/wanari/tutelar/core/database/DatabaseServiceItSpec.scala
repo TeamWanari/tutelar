@@ -1,17 +1,37 @@
 package com.wanari.tutelar.core.database
 
+import cats.data.OptionT
+import com.wanari.tutelar.AwaitUtil
 import com.wanari.tutelar.core.DatabaseService.{Account, User}
-import com.wanari.tutelar.core.impl.database.PostgresDatabaseService
-import com.wanari.tutelar.{AwaitUtil, ItTestServices}
+import com.wanari.tutelar.core.impl.database.MongoDatabaseService.MongoConfig
+import com.wanari.tutelar.core.impl.database.{MemoryDatabaseService, MongoDatabaseService, PostgresDatabaseService}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
+import reactivemongo.api.collections.bson.BSONCollection
+import reactivemongo.api.{MongoConnection, MongoDriver}
+import reactivemongo.bson.BSONDocument
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class DatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUtil with BeforeAndAfterAll {
+  import cats.instances.future._
 
-  private val services    = new ItTestServices
-  private val db          = PostgresDatabaseService.getDatabase
-  private val realService = new PostgresDatabaseService(db)
+  private val memoryService = new MemoryDatabaseService[Future]
+
+  private val db              = PostgresDatabaseService.getDatabase
+  private val postgresService = new PostgresDatabaseService(db)
+
+  private implicit val mongoDriver = new MongoDriver()
+  private implicit val mongoConfig = Future.successful(MongoConfig("mongodb://localhost/tutelar", "users"))
+  private val mongoService         = new MongoDatabaseService(mongoConfig)
+  private val mongoCollection = await({
+    (for {
+      config <- OptionT.liftF(mongoConfig)
+      uri    <- OptionT.fromOption(MongoConnection.parseURI(config.uri).toOption)
+      dbname <- OptionT.fromOption(uri.db)
+      db     <- OptionT.liftF(mongoDriver.connection(uri).database(dbname))
+    } yield db.collection[BSONCollection](config.collection)).getOrElseF(Future.failed(new Exception("")))
+  })
 
   override def beforeAll(): Unit = truncateDb()
 
@@ -20,14 +40,16 @@ class DatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUtil wi
   private def truncateDb(): Unit = {
     import slick.jdbc.PostgresProfile.api._
     await(for {
-      _ <- db.run(sqlu"TRUNCATE USERS;")
-      _ <- db.run(sqlu"TRUNCATE ACCOUNTS;")
+      _ <- db.run(sqlu"TRUNCATE USERS CASCADE;")
+      _ <- mongoCollection.delete().one(BSONDocument())
     } yield ())
+
   }
 
   Seq(
-    "postgres slick instance" -> realService,
-    "memory instance"         -> services.databaseService
+    "postgres slick instance" -> postgresService,
+    "memory instance"         -> memoryService,
+    "mongodb instance"        -> mongoService
   ).foreach {
     case (name, service) =>
       name when {
@@ -54,42 +76,50 @@ class DatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUtil wi
 
         "Accounts" should {
           "save and find by external id and auth type" in {
-            val account1 = Account("type1", "ext1", "user1", "XXX1")
-            val account2 = Account("type2", "ext1", "user1", "XXX2")
-            val account3 = Account("type1", "ext2", "user1", "XXX3")
+            val user = User("user1", 1)
+            await(service.saveUser(user))
+
+            val account1 = Account("type1", "ext1", user.id, "XXX1")
+            val account2 = Account("type2", "ext1", user.id, "XXX2")
 
             await(service.findAccountByTypeAndExternalId(account1.getId)) shouldEqual None
             await(service.findAccountByTypeAndExternalId(account2.getId)) shouldEqual None
-            await(service.findAccountByTypeAndExternalId(account3.getId)) shouldEqual None
 
             await(service.saveAccount(account1))
             await(service.saveAccount(account2))
-            await(service.saveAccount(account3))
 
             await(service.findAccountByTypeAndExternalId(account1.getId)) shouldEqual Some(account1)
             await(service.findAccountByTypeAndExternalId(account2.getId)) shouldEqual Some(account2)
-            await(service.findAccountByTypeAndExternalId(account3.getId)) shouldEqual Some(account3)
           }
 
           "save and list by user" in {
-            val account1 = Account("type3", "ext1", "user2", "XXX4")
-            val account2 = Account("type4", "ext1", "user2", "XXX5")
-            val account3 = Account("type3", "ext2", "user3", "XXX6")
+            val user1 = User("user2", 1)
+            val user2 = User("user3", 2)
 
-            await(service.listAccountsByUserId(account1.userId)) shouldEqual Seq()
-            await(service.listAccountsByUserId(account3.userId)) shouldEqual Seq()
+            await(service.saveUser(user1))
+            await(service.saveUser(user2))
+
+            await(service.listAccountsByUserId(user1.id)) shouldEqual Seq()
+            await(service.listAccountsByUserId(user2.id)) shouldEqual Seq()
+
+            val account1 = Account("type3", "ext1", user1.id, "XXX4")
+            val account2 = Account("type4", "ext1", user1.id, "XXX5")
+            val account3 = Account("type3", "ext2", user2.id, "XXX6")
 
             await(service.saveAccount(account1))
             await(service.saveAccount(account2))
             await(service.saveAccount(account3))
 
-            await(service.listAccountsByUserId(account1.userId)) shouldEqual Seq(account1, account2)
-            await(service.listAccountsByUserId(account3.userId)) shouldEqual Seq(account3)
+            await(service.listAccountsByUserId(user1.id)) shouldEqual Seq(account1, account2)
+            await(service.listAccountsByUserId(user2.id)) shouldEqual Seq(account3)
           }
 
           "updateCustomData" in {
-            val account1 = Account("type5", "ext1", "user2", "XXX")
-            val account2 = Account("type5", "ext2", "user2", "XXX")
+            val user     = User("user4", 1)
+            val account1 = Account("type5", "ext1", user.id, "XXX")
+            val account2 = Account("type6", "ext1", user.id, "XXX")
+
+            await(service.saveUser(user))
             await(service.saveAccount(account1))
             await(service.saveAccount(account2))
 
@@ -106,17 +136,15 @@ class DatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUtil wi
           "deleteUserWithAccountsById" in {
             val user1    = User("id3", 1)
             val user2    = User("id4", 2)
-            val account1 = Account("type6", "ext1", user1.id, "XXX4")
+            val account1 = Account("type6", "ext2", user1.id, "XXX4")
             val account2 = Account("type7", "ext1", user1.id, "XXX5")
-            val account3 = Account("type6", "ext2", user2.id, "XXX6")
+            val account3 = Account("type6", "ext3", user2.id, "XXX6")
 
-            await(for {
-              _ <- service.saveUser(user1)
-              _ <- service.saveUser(user2)
-              _ <- service.saveAccount(account1)
-              _ <- service.saveAccount(account2)
-              _ <- service.saveAccount(account3)
-            } yield ())
+            await(service.saveUser(user1))
+            await(service.saveUser(user2))
+            await(service.saveAccount(account1))
+            await(service.saveAccount(account2))
+            await(service.saveAccount(account3))
 
             await(service.deleteUserWithAccountsById(user1.id))
 
@@ -134,15 +162,13 @@ class DatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUtil wi
             val account2 = Account("type11", "ext1", user1.id, "XXX5")
             val account3 = Account("type11", "ext2", user2.id, "XXX6")
 
-            await(for {
-              _ <- service.saveUser(user1)
-              _ <- service.saveUser(user2)
-              _ <- service.saveAccount(account1)
-              _ <- service.saveAccount(account2)
-              _ <- service.saveAccount(account3)
-            } yield ())
+            await(service.saveUser(user1))
+            await(service.saveUser(user2))
+            await(service.saveAccount(account1))
+            await(service.saveAccount(account2))
+            await(service.saveAccount(account3))
 
-            await(service.deleteAccountByUserAndType(user1.id, "type11"))
+            await(service.deleteAccountByUserAndType(user1.id, account2.authType))
 
             await(service.listAccountsByUserId(user1.id)) shouldEqual Seq(account1)
             await(service.listAccountsByUserId(user2.id)) shouldEqual Seq(account3)

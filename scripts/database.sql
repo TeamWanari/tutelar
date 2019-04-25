@@ -8,5 +8,6 @@ CREATE TABLE IF NOT EXISTS accounts (
   external_id VARCHAR(1000) NOT NULL,
   user_id     VARCHAR(36)   NOT NULL,
   custom_data TEXT          NOT NULL,
-  PRIMARY KEY(auth_type, external_id)
+  PRIMARY KEY (auth_type, external_id),
+  FOREIGN KEY (user_id) REFERENCES users (id)
 );

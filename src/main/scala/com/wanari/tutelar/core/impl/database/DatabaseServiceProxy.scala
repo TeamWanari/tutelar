@@ -53,5 +53,6 @@ object DatabaseServiceProxy {
   object DatabaseServiceProxyConfig {
     val MEMORY   = "memory"
     val POSTGRES = "postgres"
+    val MONGO    = "mongo"
   }
 }

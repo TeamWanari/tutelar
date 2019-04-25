@@ -72,6 +72,7 @@ lazy val core = (project in file("."))
         "io.opentracing"       % "opentracing-util"         % "0.32.0",
         "io.opentracing"       % "opentracing-noop"         % "0.32.0",
         "io.jaegertracing"     % "jaeger-client"            % "0.34.0",
+        "org.reactivemongo"    %% "reactivemongo"           % "0.16.5",
         "org.scalatest"        %% "scalatest"               % "3.0.7" % "it,test",
         "org.mockito"          % "mockito-core"             % "2.27.0" % "it,test",
         "org.mockito"          %% "mockito-scala"           % "1.3.1" % "it,test"

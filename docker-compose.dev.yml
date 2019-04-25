@@ -8,6 +8,10 @@ services:
     - 5432:5432
     volumes:
     - ./scripts/database.sql:/docker-entrypoint-initdb.d/database.sql:ro
+  mongo:
+    image: mongo:4.0.9
+    ports:
+      - 27017:27017
   ldap:
     image: osixia/openldap:1.2.2
     environment:
