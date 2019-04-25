@@ -1,7 +1,7 @@
 version: '3'
 services:
   db:
-    image: postgres:11.0
+    image: postgres:11.2
     environment:
       POSTGRES_PASSWORD: "postgres"
     ports:
@@ -13,7 +13,7 @@ services:
     ports:
       - 27017:27017
   ldap:
-    image: osixia/openldap:1.2.2
+    image: osixia/openldap:1.2.4
     environment:
       LDAP_ORGANISATION: "Wanari"
       LDAP_DOMAIN: "wanari.com"
