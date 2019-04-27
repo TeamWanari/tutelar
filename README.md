@@ -23,9 +23,13 @@
 
 `sbt run`: start tutelar (port 9000)
 
-[OPEN](https://lvh.me:9443/index.html) `https://lvh.me:9443/index.html`
+[TEST PAGE](https://lvh.me:9443/index.html) `https://lvh.me:9443/index.html`
+
+---
 
 [JAEGER](http://jaeger.lvh.me:8080) `http://jaeger.lvh.me:8080`
+
+[MAILHOG](http://mailhog.lvh.me:8080) `http://mailhog.lvh.me:8080`
 
 ### for docs
 ```
