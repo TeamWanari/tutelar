@@ -18,6 +18,8 @@
 | Jaeger        | 16686 |
 | Jaeger        | 14268 |
 | Jaeger        |  9411 |
+| RabbitMQ UI   | 15672 |
+| RabbitMQ      |  5672 |
 
 `sbt test it:test`: run all test
 
@@ -30,6 +32,8 @@
 [JAEGER](http://jaeger.lvh.me:8080) `http://jaeger.lvh.me:8080`
 
 [MAILHOG](http://mailhog.lvh.me:8080) `http://mailhog.lvh.me:8080`
+
+[RABBITMQ](http://rabbitmq.lvh.me:8080) `http://rabbitmq.lvh.me:8080`
 
 ### for docs
 ```
