@@ -9,7 +9,7 @@ import com.wanari.tutelar.core.healthcheck.{HealthCheckService, HealthCheckServi
 import com.wanari.tutelar.core.impl.database.DatabaseServiceProxy.DatabaseServiceProxyConfig
 import com.wanari.tutelar.core.impl.database._
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl
-import com.wanari.tutelar.core.impl.{AuthServiceImpl, CsrfServiceNotChecked, HookServiceImpl}
+import com.wanari.tutelar.core.impl.{AuthServiceImpl, CsrfServiceNotChecked, HookServiceImpl, RabbitMqServiceImpl}
 import com.wanari.tutelar.providers.oauth2.{FacebookService, GithubService, GoogleService}
 import com.wanari.tutelar.providers.userpass.{PasswordDifficultyChecker, PasswordDifficultyCheckerImpl}
 import com.wanari.tutelar.providers.userpass.basic.{BasicProviderService, BasicProviderServiceImpl}
@@ -54,6 +54,7 @@ trait Services[F[_]] {
       _ <- initialize(tracerService, "tracer")
       _ <- initialize(databaseService, "database")
       _ <- initialize(jwtService, "jwt")
+      _ <- initializeIfEnabled(rabbitMqService, "rabbitmq")
       _ <- initializeIfEnabled(ldapService, "ldap")
     } yield ()
   }
@@ -96,5 +97,6 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
   implicit lazy val totpService: TotpService[Future]                = new TotpServiceImpl[Future]()
   implicit lazy val passwordDifficultyChecker: PasswordDifficultyChecker[Future] =
     new PasswordDifficultyCheckerImpl[Future]
-  implicit lazy val tracerService = new TracerService[Future]()
+  implicit lazy val tracerService: TracerService[Future]         = new TracerService[Future]()
+  override implicit val rabbitMqService: RabbitMqService[Future] = new RabbitMqServiceImpl[Future]()
 }
