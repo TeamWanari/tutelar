@@ -2,7 +2,6 @@ package com.wanari.tutelar.providers.userpass.email
 
 import cats.MonadError
 import com.wanari.tutelar.TestBase
-import com.wanari.tutelar.providers.userpass.email.EmailProviderService.EmailProviderConfig
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.NonEmptyPasswordChecker
 import org.mindrot.jbcrypt.BCrypt
@@ -21,8 +20,7 @@ class EmailProviderServiceSpec extends TestBase {
     override lazy val authType        = "EMAIL"
     override lazy val savedCustomData = BCrypt.hashpw("secretpw", BCrypt.gensalt())
 
-    implicit val configF      = () => Success(EmailProviderConfig("", "", ""))
-    implicit val emailService = mock[EmailServiceImpl[Try]]
+    implicit val emailService = mock[EmailServiceHttpImpl[Try]]
 
     implicit val passwordChecker = new NonEmptyPasswordChecker[Try]
 

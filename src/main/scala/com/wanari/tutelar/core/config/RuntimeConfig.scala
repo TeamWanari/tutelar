@@ -8,7 +8,7 @@ import com.wanari.tutelar.core.impl.database.DatabaseServiceProxy.DatabaseServic
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
-import com.wanari.tutelar.providers.userpass.email.EmailProviderService.EmailProviderConfig
+import com.wanari.tutelar.providers.userpass.email.EmailServiceHttpImpl.EmailServiceHttpConfig
 import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
 import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl.TotpConfig
 
@@ -16,7 +16,7 @@ trait RuntimeConfig[F[_]] {
   implicit val callbackConfig: () => F[CallbackConfig]
   implicit val jwtConfig: () => F[JwtConfig]
   implicit val hookConfig: () => F[HookConfig]
-  implicit val emailServiceConfig: () => F[EmailProviderConfig]
+  implicit val emailServiceHttpConfig: () => F[EmailServiceHttpConfig]
   implicit val totpConfig: () => F[TotpConfig]
   implicit val databaseProxyConfig: () => F[DatabaseServiceProxyConfig]
   implicit val tracerServiceConfig: () => F[TracerServiceConfig]

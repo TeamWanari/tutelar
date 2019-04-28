@@ -10,7 +10,7 @@ import com.wanari.tutelar.core.impl.database.DatabaseServiceProxy.DatabaseServic
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
-import com.wanari.tutelar.providers.userpass.email.EmailProviderService.EmailProviderConfig
+import com.wanari.tutelar.providers.userpass.email.EmailServiceHttpImpl.EmailServiceHttpConfig
 import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
 import com.wanari.tutelar.providers.userpass.token.OTP.OTPAlgorithm
 import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl.TotpConfig
@@ -25,13 +25,13 @@ class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String)
 
   lazy val getRootUrl: F[String] = conf.getString("rootUrl").pure
 
-  implicit val jwtConfig: () => F[JwtConfig]                            = readJwtConfig _
-  implicit val callbackConfig: () => F[CallbackConfig]                  = readCallbackConfig _
-  implicit val hookConfig: () => F[HookConfig]                          = readHookConfig _
-  implicit val emailServiceConfig: () => F[EmailProviderConfig]         = readEmailServiceConfig _
-  implicit val passwordSettings: () => F[PasswordSettings]              = readPasswordSettings _
-  implicit val databaseProxyConfig: () => F[DatabaseServiceProxyConfig] = readDatabaseProxyConfig _
-  implicit val tracerServiceConfig: () => F[TracerServiceConfig]        = readTracerServiceConfig _
+  implicit val jwtConfig: () => F[JwtConfig]                                   = readJwtConfig _
+  implicit val callbackConfig: () => F[CallbackConfig]                         = readCallbackConfig _
+  implicit val hookConfig: () => F[HookConfig]                                 = readHookConfig _
+  implicit val emailServiceHttpConfig: () => F[EmailServiceHttpConfig]         = readEmailServiceConfig _
+  implicit val passwordSettings: () => F[PasswordSettings]                     = readPasswordSettings _
+  implicit val databaseProxyConfig: () => F[DatabaseServiceProxyConfig]        = readDatabaseProxyConfig _
+  implicit val tracerServiceConfig: () => F[TracerServiceConfig]               = readTracerServiceConfig _
 
   val facebookConfig: () => F[OAuth2Config]    = () => readOauth2Config("oauth2.facebook")
   val githubConfig: () => F[OAuth2Config]      = () => readOauth2Config("oauth2.github")
@@ -87,8 +87,8 @@ class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String)
   }.pure
 
   private def readEmailServiceConfig = {
-    val config = conf.getConfig("email")
-    EmailProviderConfig(
+    val config = conf.getConfig("email-http")
+    EmailServiceHttpConfig(
       config.getString("serviceUrl"),
       config.getString("serviceUsername"),
       config.getString("servicePassword")

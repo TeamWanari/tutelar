@@ -4,15 +4,14 @@ import akka.http.scaladsl.model.HttpMethods.POST
 import akka.http.scaladsl.model.headers.BasicHttpCredentials
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpRequest}
 import cats.MonadError
-import com.wanari.tutelar.providers.userpass.email.EmailProviderService.EmailProviderConfig
-import com.wanari.tutelar.providers.userpass.email.EmailServiceImpl.EmailRequestData
+import com.wanari.tutelar.providers.userpass.email.EmailServiceHttpImpl.{EmailRequestData, EmailServiceHttpConfig}
 import com.wanari.tutelar.util.HttpWrapper
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import spray.json._
 
-class EmailServiceImpl[F[_]: MonadError[?[_], Throwable]](
+class EmailServiceHttpImpl[F[_]: MonadError[?[_], Throwable]](
     implicit http: HttpWrapper[F],
-    configF: () => F[EmailProviderConfig]
+    configF: () => F[EmailServiceHttpConfig]
 ) extends EmailService[F] {
 
   override def sendRegisterUrl(email: String, token: String)(implicit ctx: LogContext): F[Unit] = {
@@ -46,8 +45,15 @@ class EmailServiceImpl[F[_]: MonadError[?[_], Throwable]](
   }
 }
 
-object EmailServiceImpl {
+object EmailServiceHttpImpl {
   import spray.json.DefaultJsonProtocol._
+
+  case class EmailServiceHttpConfig(
+      url: String,
+      username: String,
+      password: String
+  )
+
   protected case class EmailRequestData(
       email: String,
       templateId: String,

@@ -47,7 +47,7 @@ class ItTestServices(implicit ec: ExecutionContext) extends Services[Future] {
   override implicit lazy val ldapService: LdapService[Future] = null
 
   override implicit lazy val basicLoginService: BasicProviderService[Future] = new BasicProviderServiceImpl[Future]()
-  override implicit lazy val emailService: EmailService[Future]              = new EmailServiceImpl[Future]()
+  override implicit lazy val emailService: EmailService[Future]              = new EmailServiceHttpImpl[Future]()
   override implicit lazy val emailLoginService: EmailProviderService[Future] = new EmailProviderServiceImpl[Future]()
   override implicit lazy val totpService: TotpService[Future]                = new TotpServiceImpl[Future]()
   override implicit val passwordDifficultyChecker: PasswordDifficultyChecker[Future] =

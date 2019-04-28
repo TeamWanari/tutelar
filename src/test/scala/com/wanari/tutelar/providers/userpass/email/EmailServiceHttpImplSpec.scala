@@ -8,7 +8,7 @@ import akka.stream.ActorMaterializer
 import akka.testkit.TestKit
 import cats.MonadError
 import com.wanari.tutelar.TestBase
-import com.wanari.tutelar.providers.userpass.email.EmailProviderService.EmailProviderConfig
+import com.wanari.tutelar.providers.userpass.email.EmailServiceHttpImpl.EmailServiceHttpConfig
 import com.wanari.tutelar.util.HttpWrapper
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import org.mockito.ArgumentCaptor
@@ -18,7 +18,7 @@ import spray.json.{JsObject, JsString}
 
 import scala.util.{Failure, Success, Try}
 
-class EmailServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestBase {
+class EmailServiceHttpImplSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestBase {
   import cats.instances.try_._
 
   override def afterAll: Unit = {
@@ -31,13 +31,13 @@ class EmailServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with Test
     implicit lazy val e: MonadError[Try, Throwable] = implicitly
     implicit lazy val httpWrapper                   = mock[HttpWrapper[Try]]
     when(httpWrapper.singleRequest(any[HttpRequest])(any[LogContext])).thenReturn(Failure(new Exception))
-    implicit lazy val config: () => Try[EmailProviderConfig] = () => {
-      Success(EmailProviderConfig("_SERVICE_URL_", "_USER_", "_PASS_"))
+    implicit lazy val config: () => Try[EmailServiceHttpConfig] = () => {
+      Success(EmailServiceHttpConfig("_SERVICE_URL_", "_USER_", "_PASS_"))
     }
-    lazy val service = new EmailServiceImpl[Try]()
+    lazy val service = new EmailServiceHttpImpl[Try]()
   }
 
-  "EmailService" should {
+  "EmailServiceHttpImpl" should {
     "sendRegister" should {
       "call the email service with credentials" in new TestScope {
         service.sendRegisterUrl("", "")

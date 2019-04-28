@@ -13,11 +13,3 @@ trait EmailProviderService[F[_]] extends UserPassService[F] {
   ): F[Token]
   def sendResetPassword(email: String)(implicit ctx: LogContext): F[Unit]
 }
-
-object EmailProviderService {
-  case class EmailProviderConfig(
-      url: String,
-      username: String,
-      password: String
-  )
-}
