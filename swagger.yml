@@ -280,6 +280,33 @@ paths:
       responses:
         default:
           description: Redirect to GitHub login page
+    post:
+      description: Login with GitHub access token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                accessToken:
+                  type: string
+            examples:
+              '0':
+                value: '{"accessToken":"TOKEN"}'
+      responses:
+        '200':
+          description: User token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+              examples:
+                '0':
+                  value: >-
+                    {"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTM1Mjk4MjcsImlkIjoiODVhYjE4MjEtODVjYy00NTc5LTg2OWQtZDdkNjU1ODM5ZjhhIn0.TMwADN7addtQPo39KcbF9yVrk-CHv4eSsiA8wNJxfsk"}
   /github/callback:
     get:
       description: GitHub login callback
@@ -300,7 +327,34 @@ paths:
       description: Login with Facebook
       responses:
         default:
-          description: Redirect to GitHub login page
+          description: Redirect to Facebook login page
+    post:
+      description: Login with Facebook access token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                accessToken:
+                  type: string
+            examples:
+              '0':
+                value: '{"accessToken":"TOKEN"}'
+      responses:
+        '200':
+          description: User token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+              examples:
+                '0':
+                  value: >-
+                    {"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTM1Mjk4MjcsImlkIjoiODVhYjE4MjEtODVjYy00NTc5LTg2OWQtZDdkNjU1ODM5ZjhhIn0.TMwADN7addtQPo39KcbF9yVrk-CHv4eSsiA8wNJxfsk"}
   /facebook/callback:
     get:
       description: Facebook login callback
@@ -322,6 +376,33 @@ paths:
       responses:
         default:
           description: Redirect to Google login page
+    post:
+      description: Login with Google access token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                accessToken:
+                  type: string
+            examples:
+              '0':
+                value: '{"accessToken":"TOKEN"}'
+      responses:
+        '200':
+          description: User token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+              examples:
+                '0':
+                  value: >-
+                    {"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTM1Mjk4MjcsImlkIjoiODVhYjE4MjEtODVjYy00NTc5LTg2OWQtZDdkNjU1ODM5ZjhhIn0.TMwADN7addtQPo39KcbF9yVrk-CHv4eSsiA8wNJxfsk"}
   /google/callback:
     get:
       description: Google login callback
