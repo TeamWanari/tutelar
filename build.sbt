@@ -71,7 +71,7 @@ lazy val core = (project in file("."))
         "io.opentracing"       % "opentracing-api"          % "0.32.0",
         "io.opentracing"       % "opentracing-util"         % "0.32.0",
         "io.opentracing"       % "opentracing-noop"         % "0.32.0",
-        "io.jaegertracing"     % "jaeger-client"            % "0.34.0",
+        "io.jaegertracing"     % "jaeger-client"            % "0.35.1",
         "org.reactivemongo"    %% "reactivemongo"           % "0.16.5",
         "com.spingo"           %% "op-rabbit-core"          % "2.1.0",
         "org.scalatest"        %% "scalatest"               % "3.0.7" % "it,test",
@@ -88,7 +88,7 @@ enablePlugins(JavaAppPackaging)
 enablePlugins(BuildInfoPlugin)
 
 addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.10")
-addCompilerPlugin("io.tryp"        % "splain"          % "0.4.0" cross CrossVersion.patch)
+addCompilerPlugin("io.tryp"        % "splain"          % "0.4.1" cross CrossVersion.patch)
 
 cancelable in Global := true
 
