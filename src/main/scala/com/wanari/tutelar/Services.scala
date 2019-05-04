@@ -19,7 +19,8 @@ import com.wanari.tutelar.util._
 import org.slf4j.Logger
 import reactivemongo.api.MongoDriver
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.duration._
 
 trait Services[F[_]] {
   implicit val configService: ServerConfig[F]
@@ -86,7 +87,8 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
   implicit lazy val authService: AuthService[Future]                = new AuthServiceImpl[Future]
   implicit lazy val ldapService: LdapService[Future]                = new LdapServiceImpl
   implicit lazy val basicLoginService: BasicProviderService[Future] = new BasicProviderServiceImpl[Future]()
-  implicit lazy val emailService: EmailService[Future]              = new EmailServiceHttpImpl[Future]()
+  // TODO remove await
+  implicit lazy val emailService: EmailService[Future]              = Await.result(EmailServiceFactory.create[Future](), 1.second)
   implicit lazy val emailLoginService: EmailProviderService[Future] = new EmailProviderServiceImpl[Future]()
   implicit lazy val totpService: TotpService[Future]                = new TotpServiceImpl[Future]()
   implicit lazy val passwordDifficultyChecker: PasswordDifficultyChecker[Future] =

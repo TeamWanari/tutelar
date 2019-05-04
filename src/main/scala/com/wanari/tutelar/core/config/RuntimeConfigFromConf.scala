@@ -4,6 +4,7 @@ import cats.MonadError
 import com.typesafe.config.{Config, ConfigFactory}
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
+import com.wanari.tutelar.providers.userpass.email.EmailServiceFactory.EmailServiceFactoryConfig
 import com.wanari.tutelar.providers.userpass.email.EmailServiceHttpImpl.EmailServiceHttpConfig
 import com.wanari.tutelar.providers.userpass.email.EmailServiceRabbitMqImpl.EmailServiceRabbitMqConfig
 import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
@@ -16,6 +17,7 @@ class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String)
 
   private lazy val conf: Config = ConfigFactory.load(filepath)
 
+  implicit val emailServiceFactoryConfig: () => F[EmailServiceFactoryConfig]   = readEmailServiceFactoryConfig _
   implicit val emailServiceHttpConfig: () => F[EmailServiceHttpConfig]         = readEmailServiceConfig _
   implicit val emailServiceRabbitMqConfig: () => F[EmailServiceRabbitMqConfig] = readEmailServiceRabbitMqConfig _
   implicit val passwordSettings: () => F[PasswordSettings]                     = readPasswordSettings _
@@ -87,6 +89,13 @@ class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String)
     val config = conf.getConfig("userpass.passwordDifficulty")
     PasswordSettings(
       config.getString("pattern")
+    )
+  }.pure
+
+  private def readEmailServiceFactoryConfig = {
+    val config = conf.getConfig("userpass.email")
+    EmailServiceFactoryConfig(
+      config.getString("type")
     )
   }.pure
 }
