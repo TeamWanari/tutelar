@@ -9,23 +9,21 @@ import spray.json._
 
 import scala.concurrent.duration.Duration
 
-class JwtServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit jwtConfig: () => F[JwtConfig]) extends JwtService[F] {
+class JwtServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit config: JwtConfig) extends JwtService[F] {
 
   import cats.syntax.flatMap._
   import cats.syntax.functor._
   import com.wanari.tutelar.util.ApplicativeErrorSyntax._
 
   private def settings: F[Settings] = {
-    jwtConfig().flatMap { config =>
-      val expirationTime = config.expirationTime.toSeconds
-      JwtAlgorithm
-        .optionFromString(config.algorithm)
-        .collect {
-          case algo: JwtHmacAlgorithm       => Settings(algo, config.secret, config.secret, expirationTime)
-          case algo: JwtAsymmetricAlgorithm => Settings(algo, config.privateKey, config.publicKey, expirationTime)
-        }
-        .pureOrRaise(new Exception("Wrong jwt config: not supported algorithm"))
-    }
+    val expirationTime = config.expirationTime.toSeconds
+    JwtAlgorithm
+      .optionFromString(config.algorithm)
+      .collect {
+        case algo: JwtHmacAlgorithm       => Settings(algo, config.secret, config.secret, expirationTime)
+        case algo: JwtAsymmetricAlgorithm => Settings(algo, config.privateKey, config.publicKey, expirationTime)
+      }
+      .pureOrRaise(new Exception("Wrong jwt config: not supported algorithm"))
   }
 
   override def init: F[Unit] = {

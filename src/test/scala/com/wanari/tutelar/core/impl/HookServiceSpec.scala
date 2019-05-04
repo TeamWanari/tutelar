@@ -48,7 +48,7 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
       override def singleRequest(httpRequest: HttpRequest)(implicit ctx: LogContext): Future[HttpResponse] =
         httpMock.singleRequest(httpRequest)(ctx)
     }
-    implicit val config = () => Future.successful(HookConfig(baseUrl, BasicAuthConfig("user", "pass")))
+    implicit val config = HookConfig(baseUrl, BasicAuthConfig("user", "pass"))
     lazy val service    = new HookServiceImpl[Future]()
 
   }

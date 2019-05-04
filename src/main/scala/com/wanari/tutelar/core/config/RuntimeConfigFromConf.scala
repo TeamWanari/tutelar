@@ -1,13 +1,7 @@
 package com.wanari.tutelar.core.config
-import java.util.concurrent.TimeUnit
 
 import cats.MonadError
 import com.typesafe.config.{Config, ConfigFactory}
-import com.wanari.tutelar.core.HookService.{BasicAuthConfig, HookConfig}
-import com.wanari.tutelar.core.ProviderApi.CallbackConfig
-import com.wanari.tutelar.core.TracerService.TracerServiceConfig
-import com.wanari.tutelar.core.impl.database.DatabaseServiceProxy.DatabaseServiceProxyConfig
-import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
 import com.wanari.tutelar.providers.userpass.email.EmailServiceHttpImpl.EmailServiceHttpConfig
@@ -16,49 +10,21 @@ import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
 import com.wanari.tutelar.providers.userpass.token.OTP.OTPAlgorithm
 import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl.TotpConfig
 
-import scala.concurrent.duration.FiniteDuration
-
 class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String) extends RuntimeConfig[F] {
   import cats.syntax.applicative._
   import com.wanari.tutelar.util.ApplicativeErrorSyntax._
 
   private lazy val conf: Config = ConfigFactory.load(filepath)
 
-  lazy val getRootUrl: F[String] = conf.getString("rootUrl").pure
-
-  implicit val jwtConfig: () => F[JwtConfig]                                   = readJwtConfig _
-  implicit val callbackConfig: () => F[CallbackConfig]                         = readCallbackConfig _
-  implicit val hookConfig: () => F[HookConfig]                                 = readHookConfig _
   implicit val emailServiceHttpConfig: () => F[EmailServiceHttpConfig]         = readEmailServiceConfig _
   implicit val emailServiceRabbitMqConfig: () => F[EmailServiceRabbitMqConfig] = readEmailServiceRabbitMqConfig _
   implicit val passwordSettings: () => F[PasswordSettings]                     = readPasswordSettings _
-  implicit val databaseProxyConfig: () => F[DatabaseServiceProxyConfig]        = readDatabaseProxyConfig _
-  implicit val tracerServiceConfig: () => F[TracerServiceConfig]               = readTracerServiceConfig _
 
   val facebookConfig: () => F[OAuth2Config]    = () => readOauth2Config("oauth2.facebook")
   val githubConfig: () => F[OAuth2Config]      = () => readOauth2Config("oauth2.github")
   val googleConfig: () => F[OAuth2Config]      = () => readOauth2Config("oauth2.google")
   implicit val ldapConfig: () => F[LdapConfig] = readLdapConfig _
   implicit val totpConfig: () => F[TotpConfig] = readTOTPConfig _
-
-  private def readJwtConfig = {
-    val config = conf.getConfig("jwt")
-    JwtConfig(
-      FiniteDuration(config.getDuration("expirationTime").getSeconds, TimeUnit.SECONDS),
-      config.getString("algorithm"),
-      config.getString("secret"),
-      config.getString("privateKey"),
-      config.getString("publicKey")
-    )
-  }.pure
-
-  private def readCallbackConfig = {
-    val config = conf.getConfig("callback")
-    CallbackConfig(
-      config.getString("success"),
-      config.getString("failure")
-    )
-  }.pure
 
   private def readLdapConfig = {
     val config = conf.getConfig("ldap")
@@ -73,23 +39,8 @@ class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String)
     )
   }.pure
 
-  private def readHookConfig = {
-    val config = conf.getConfig("hook")
-    val authConfig = config.getString("authType") match {
-      case "basic" =>
-        BasicAuthConfig(
-          config.getString("basicAuth.username"),
-          config.getString("basicAuth.password")
-        )
-    }
-    HookConfig(
-      config.getString("baseUrl"),
-      authConfig
-    )
-  }.pure
-
   private def readEmailServiceConfig = {
-    val config = conf.getConfig("email-http")
+    val config = conf.getConfig("userpass.email.http")
     EmailServiceHttpConfig(
       config.getString("serviceUrl"),
       config.getString("serviceUsername"),
@@ -98,7 +49,7 @@ class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String)
   }.pure
 
   private def readEmailServiceRabbitMqConfig = {
-    val config = conf.getConfig("email-rabbit-mq")
+    val config = conf.getConfig("userpass.email.rabbit-mq")
     EmailServiceRabbitMqConfig(
       config.getString("queue")
     )
@@ -107,7 +58,7 @@ class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String)
   private def readOauth2Config(name: String) = {
     val config = conf.getConfig(name)
     OAuth2Config(
-      conf.getString("rootUrl"),
+      conf.getString("oauth2.rootUrl"),
       config.getString("clientId"),
       config.getString("clientSecret"),
       config.getString("scopes").split(",").toSeq
@@ -133,23 +84,9 @@ class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String)
   }
 
   private def readPasswordSettings = {
-    val config = conf.getConfig("passwordDifficulty")
+    val config = conf.getConfig("userpass.passwordDifficulty")
     PasswordSettings(
       config.getString("pattern")
-    )
-  }.pure
-
-  private def readDatabaseProxyConfig = {
-    val config = conf.getConfig("database")
-    DatabaseServiceProxyConfig(
-      config.getString("type")
-    )
-  }.pure
-
-  private def readTracerServiceConfig = {
-    val config = conf.getConfig("tracer")
-    TracerServiceConfig(
-      config.getString("client")
     )
   }.pure
 }

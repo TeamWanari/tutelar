@@ -10,14 +10,13 @@ import reactivemongo.bson.{BSONDocument, BSONDocumentHandler, BSONInteger, Macro
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class MongoDatabaseService(configF: => Future[MongoConfig])(implicit ec: ExecutionContext, driver: MongoDriver)
+class MongoDatabaseService(config: => MongoConfig)(implicit ec: ExecutionContext, driver: MongoDriver)
     extends DatabaseService[Future] {
   import MongoDatabaseService._
   import cats.instances.future._
 
   private lazy val usersCollection: Future[BSONCollection] = {
     val result = for {
-      config <- OptionT.liftF(configF)
       uri    <- OptionT.fromOption(MongoConnection.parseURI(config.uri).toOption)
       dbname <- OptionT.fromOption(uri.db)
       db     <- OptionT.liftF(driver.connection(uri).database(dbname))

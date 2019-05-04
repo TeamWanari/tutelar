@@ -11,7 +11,7 @@ import scala.concurrent.Future
 
 class BasicProviderApi(
     implicit val service: BasicProviderService[Future],
-    val callbackConfig: () => Future[CallbackConfig]
+    val callbackConfig: CallbackConfig
 ) extends UserPassApi {
   override val servicePath: String = "basic"
 

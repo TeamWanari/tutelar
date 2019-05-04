@@ -22,7 +22,7 @@ trait RouteTestBase extends TestBase with ScalatestRouteTest {
       when(googleService.TYPE) thenReturn "google"
     }
     implicit val logger   = LoggerFactory.getLogger("TEST")
-    lazy val route: Route = await(Api.createApi(services))
+    lazy val route: Route = Api.createApi(services)
   }
 
   override def afterAll(): Unit = {

@@ -8,19 +8,15 @@ import io.jaegertracing.Configuration.{ReporterConfiguration, SamplerConfigurati
 import io.opentracing.noop.NoopTracerFactory
 import io.opentracing.util.GlobalTracer
 
-class TracerService[F[_]: MonadError[?[_], Throwable]](implicit configF: () => F[TracerServiceConfig])
-    extends Initable[F] {
+class TracerService[F[_]: MonadError[?[_], Throwable]](implicit config: TracerServiceConfig) extends Initable[F] {
   import cats.syntax.applicative._
-  import cats.syntax.flatMap._
   import com.wanari.tutelar.util.ApplicativeErrorSyntax._
 
   override def init: F[Unit] = {
-    configF().flatMap { config =>
-      config.client.toLowerCase match {
-        case TracerService.OFF    => initNoop().pure
-        case TracerService.JAEGER => initJaeger().pure
-        case _                    => new Exception(s"Unsupported Tracer client: ${config.client}").raise
-      }
+    config.client.toLowerCase match {
+      case TracerService.OFF    => initNoop().pure
+      case TracerService.JAEGER => initJaeger().pure
+      case _                    => new Exception(s"Unsupported Tracer client: ${config.client}").raise
     }
   }
 

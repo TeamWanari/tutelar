@@ -13,11 +13,7 @@ import scala.concurrent.Future
 class ProviderApiSpec extends TestBase with ScalatestRouteTest {
 
   val api = new ProviderApi {
-    override val callbackConfig = () => {
-      Future.successful(
-        ProviderApi.CallbackConfig("loginCallback=<<TOKEN>>", "error=<<ERROR>>")
-      )
-    }
+    override val callbackConfig = ProviderApi.CallbackConfig("loginCallback=<<TOKEN>>", "error=<<ERROR>>")
     override def route(): Route = ???
   }
 

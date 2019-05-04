@@ -18,7 +18,6 @@ class HealthCheckItSpec extends RouteTestBase {
         responseAs[HealthCheckResult] shouldEqual HealthCheckResult(
           true,
           BuildInfo.version,
-          "ItTestHostName",
           true,
           BuildInfo.builtAtString,
           BuildInfo.builtAtMillis,

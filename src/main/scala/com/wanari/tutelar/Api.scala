@@ -15,7 +15,7 @@ import io.opentracing.Tracer
 import io.opentracing.util.GlobalTracer
 import org.slf4j.Logger
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 trait Api {
   private val tracer: Tracer                                    = GlobalTracer.get()
@@ -33,30 +33,27 @@ object Api {
       .fold(Api.emptyRoute)(_ ~ _)
   }
 
-  def createApi(services: Services[Future])(implicit ec: ExecutionContext, logger: Logger): Future[Route] = {
+  def createApi(services: Services[Future])(implicit logger: Logger): Route = {
     import com.wanari.tutelar.providers.oauth2.OAuth2Api._
     import services._
-    import services.configService.runtimeConfig._
+    import services.configService._
 
-    configService.getEnabledModules
-      .map { modules =>
-        logger.info(s"Load api for modules: ${modules.mkString(",")}")
-        modules.collect {
-          case "health"   => new HealthCheckApi()
-          case "github"   => new GithubApi()
-          case "facebook" => new FacebookApi()
-          case "google"   => new GoogleApi()
-          case "ldap"     => new LdapApi()
-          case "basic"    => new BasicProviderApi()
-          case "email"    => new EmailProviderApi()
-          case "totp"     => new TotpApi()
-        }
-      }
-      .map(_ :+ new CoreApi)
-      .map { api =>
-        cors() {
-          createRoute(api)
-        }
-      }
+    val modules = configService.getEnabledModules
+    logger.info(s"Load api for modules: ${modules.mkString(",")}")
+
+    val api = modules.collect {
+      case "health"   => new HealthCheckApi()
+      case "github"   => new GithubApi()
+      case "facebook" => new FacebookApi()
+      case "google"   => new GoogleApi()
+      case "ldap"     => new LdapApi()
+      case "basic"    => new BasicProviderApi()
+      case "email"    => new EmailProviderApi()
+      case "totp"     => new TotpApi()
+    } :+ new CoreApi
+
+    cors() {
+      createRoute(api)
+    }
   }
 }

@@ -4,7 +4,6 @@ import com.wanari.tutelar.providers.userpass.UserPassApi
 
 import scala.concurrent.Future
 
-class LdapApi(implicit val service: LdapService[Future], val callbackConfig: () => Future[CallbackConfig])
-    extends UserPassApi {
+class LdapApi(implicit val service: LdapService[Future], val callbackConfig: CallbackConfig) extends UserPassApi {
   override val servicePath: String = "ldap"
 }

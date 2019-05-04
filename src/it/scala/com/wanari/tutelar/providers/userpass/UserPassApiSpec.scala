@@ -18,7 +18,7 @@ class UserPassApiSpec extends RouteTestBase {
     override lazy val route = new UserPassApi {
       override val service        = serviceMock
       override val servicePath    = "testPath"
-      override val callbackConfig = services.configService.runtimeConfig.callbackConfig
+      override val callbackConfig = services.configService.getCallbackConfig
     }.route()
   }
 

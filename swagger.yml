@@ -431,8 +431,6 @@ paths:
                 properties:
                   database:
                     type: boolean
-                  hostname:
-                    type: string
                   success:
                     type: boolean
                   version:
@@ -440,4 +438,4 @@ paths:
               examples:
                 '0':
                   value: >-
-                    {"database":true,"hostname":"0b8a30b854b1","success":true,"version":"development"}
+                    {"database":true,"success":true,"version":"development"}

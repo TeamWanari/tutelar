@@ -19,27 +19,11 @@ class HealthCheckServiceSpec extends TestBase {
 
   "#getStatus" when {
     "ok" in new TestScope {
-      when(configService.getHostname).thenReturn(Success("TestHostnameMock"))
       when(databaseServiceMock.checkStatus()).thenReturn(Success(true))
 
       service.getStatus.get shouldEqual HealthCheckResult(
         true,
         BuildInfo.version,
-        "TestHostnameMock",
-        true,
-        BuildInfo.builtAtString,
-        BuildInfo.builtAtMillis,
-        BuildInfo.commitHash
-      )
-    }
-    "hostname failed" in new TestScope {
-      when(configService.getHostname).thenReturn(Failure(new Exception))
-      when(databaseServiceMock.checkStatus()).thenReturn(Success(true))
-
-      service.getStatus.get shouldEqual HealthCheckResult(
-        false,
-        BuildInfo.version,
-        "",
         true,
         BuildInfo.builtAtString,
         BuildInfo.builtAtMillis,
@@ -47,13 +31,11 @@ class HealthCheckServiceSpec extends TestBase {
       )
     }
     "db failed" in new TestScope {
-      when(configService.getHostname).thenReturn(Success("TestHostnameMock"))
       when(databaseServiceMock.checkStatus()).thenReturn(Success(false))
 
       service.getStatus.get shouldEqual HealthCheckResult(
         false,
         BuildInfo.version,
-        "TestHostnameMock",
         false,
         BuildInfo.builtAtString,
         BuildInfo.builtAtMillis,
@@ -61,13 +43,11 @@ class HealthCheckServiceSpec extends TestBase {
       )
     }
     "db check failed" in new TestScope {
-      when(configService.getHostname).thenReturn(Success("TestHostnameMock"))
       when(databaseServiceMock.checkStatus()).thenReturn(Failure(new Exception))
 
       service.getStatus.get shouldEqual HealthCheckResult(
         false,
         BuildInfo.version,
-        "TestHostnameMock",
         false,
         BuildInfo.builtAtString,
         BuildInfo.builtAtMillis,

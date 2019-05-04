@@ -15,7 +15,7 @@ class BasicProviderApiSpec extends RouteTestBase {
 
   trait TestScope extends BaseTestScope {
     implicit lazy val serviceMock    = mock[BasicProviderService[Future]]
-    implicit lazy val callbackConfig = services.configService.runtimeConfig.callbackConfig
+    implicit lazy val callbackConfig = services.configService.getCallbackConfig
     override lazy val route          = new BasicProviderApi().route()
   }
 

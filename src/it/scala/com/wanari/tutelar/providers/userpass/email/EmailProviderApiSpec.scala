@@ -16,7 +16,7 @@ class EmailProviderApiSpec extends RouteTestBase {
 
   trait TestScope extends BaseTestScope {
     implicit lazy val serviceMock    = mock[EmailProviderService[Future]]
-    implicit lazy val callbackConfig = services.configService.runtimeConfig.callbackConfig
+    implicit lazy val callbackConfig = services.configService.getCallbackConfig
     override lazy val route          = new EmailProviderApi().route()
   }
   "POST /email/login" should {

@@ -1,14 +1,12 @@
 package com.wanari.tutelar.core.config
 import com.wanari.tutelar.TestBase
-import com.wanari.tutelar.core.HookService.{BasicAuthConfig, HookConfig}
-import com.wanari.tutelar.core.impl.database.DatabaseServiceProxy.DatabaseServiceProxyConfig
-import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
+import com.wanari.tutelar.providers.userpass.email.EmailServiceHttpImpl.EmailServiceHttpConfig
+import com.wanari.tutelar.providers.userpass.email.EmailServiceRabbitMqImpl.EmailServiceRabbitMqConfig
 import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
 import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl.TotpConfig
 
-import concurrent.duration._
 import scala.util.Try
 
 class RuntimeConfigFromConfSpec extends TestBase {
@@ -18,12 +16,12 @@ class RuntimeConfigFromConfSpec extends TestBase {
   "reads the input file" in {
     val origin = new RuntimeConfigFromConf[Try](confFile)
     val dummy  = new RuntimeConfigFromConf[Try]("dummyconf.conf")
-    origin.callbackConfig().get.failure shouldEqual "url?e=<<ERROR>>"
-    dummy.callbackConfig().get.failure shouldEqual "denied"
+    origin.githubConfig().get.rootUrl shouldBe "https://lvh.me:9443"
+    dummy.githubConfig().get.rootUrl shouldBe "ROOR_URL_DUMMY"
   }
 
   "oauth2 related" should {
-    "#getFacebookConfig" in {
+    "#facebookConfig" in {
       val service = new RuntimeConfigFromConf[Try](confFile)
       service.facebookConfig().get shouldBe OAuth2Config(
         "https://lvh.me:9443",
@@ -32,7 +30,7 @@ class RuntimeConfigFromConfSpec extends TestBase {
         Seq("public_profile")
       )
     }
-    "#getGithubConfig" in {
+    "#githubConfig" in {
       val service = new RuntimeConfigFromConf[Try](confFile)
       service.githubConfig().get shouldBe OAuth2Config(
         "https://lvh.me:9443",
@@ -41,7 +39,7 @@ class RuntimeConfigFromConfSpec extends TestBase {
         Seq("read:user")
       )
     }
-    "#getGoogleConfig" in {
+    "#googleConfig" in {
       val service = new RuntimeConfigFromConf[Try](confFile)
       service.googleConfig().get shouldBe OAuth2Config(
         "https://lvh.me:9443",
@@ -51,32 +49,7 @@ class RuntimeConfigFromConfSpec extends TestBase {
       )
     }
   }
-  "#getJwtConfig" in {
-    val service = new RuntimeConfigFromConf[Try](confFile)
-    val config  = service.jwtConfig().get
-    config shouldBe JwtConfig(
-      1.day,
-      "HS256",
-      "secret",
-      "private",
-      "public"
-    )
-  }
-  "#getCallbackConfig" in {
-    val service = new RuntimeConfigFromConf[Try](confFile)
-    val config  = service.callbackConfig().get
-    config.success shouldEqual "url?t=<<TOKEN>>"
-    config.failure shouldEqual "url?e=<<ERROR>>"
-  }
-  "#getHookConfig" in {
-    val service = new RuntimeConfigFromConf[Try](confFile)
-    val config  = service.hookConfig().get
-    config shouldEqual HookConfig(
-      "https://backend/hook",
-      BasicAuthConfig("user", "pass")
-    )
-  }
-  "#getLdapConfig" in {
+  "#ldapConfig" in {
     val service = new RuntimeConfigFromConf[Try](confFile)
     val config  = service.ldapConfig().get
     config shouldBe LdapConfig(
@@ -89,7 +62,7 @@ class RuntimeConfigFromConfSpec extends TestBase {
       Seq("memberof")
     )
   }
-  "#getTotpConfig" in {
+  "#totpConfig" in {
     val service = new RuntimeConfigFromConf[Try](confFile)
     val config  = service.totpConfig().get
     config shouldBe TotpConfig(
@@ -100,18 +73,27 @@ class RuntimeConfigFromConfSpec extends TestBase {
       false
     )
   }
-  "#getPasswordSettings" in {
+  "#passwordSettings" in {
     val service = new RuntimeConfigFromConf[Try](confFile)
     val config  = service.passwordSettings().get
     config shouldBe PasswordSettings(
       "PATTERN"
     )
   }
-  "#getDatabaseProxyConfig" in {
+  "#emailServiceHttpConfig" in {
     val service = new RuntimeConfigFromConf[Try](confFile)
-    val config  = service.databaseProxyConfig().get
-    config shouldBe DatabaseServiceProxyConfig(
-      "DBTYPE"
+    val config  = service.emailServiceHttpConfig().get
+    config shouldBe EmailServiceHttpConfig(
+      "URL",
+      "USERNAME",
+      "SECRET"
+    )
+  }
+  "#emailServiceRabbitMqConfig" in {
+    val service = new RuntimeConfigFromConf[Try](confFile)
+    val config  = service.emailServiceRabbitMqConfig().get
+    config shouldBe EmailServiceRabbitMqConfig(
+      "QUEUE"
     )
   }
 }

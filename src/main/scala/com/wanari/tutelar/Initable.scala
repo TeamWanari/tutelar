@@ -11,7 +11,6 @@ trait Initable[F[_]] {
 object Initable {
   import cats.syntax.applicative._
   import cats.syntax.applicativeError._
-  import cats.syntax.flatMap._
 
   def initialize[F[_]: MonadError[?[_], Throwable]](initable: => Initable[F], name: String)(
       implicit logger: Logger
@@ -26,9 +25,7 @@ object Initable {
       initable: => Initable[F],
       name: String
   )(implicit conf: ServerConfig[F], logger: Logger): F[Unit] = {
-    conf.getEnabledModules.flatMap { modules =>
-      if (modules.contains(name)) initialize(initable, name)
-      else ().pure[F]
-    }
+    if (conf.getEnabledModules.contains(name)) initialize(initable, name)
+    else ().pure[F]
   }
 }

@@ -22,15 +22,14 @@ class DatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUtil wi
   private val postgresService = new PostgresDatabaseService(db)
 
   private implicit val mongoDriver = new MongoDriver()
-  private implicit val mongoConfig = Future.successful(MongoConfig("mongodb://localhost/tutelar", "users"))
+  private implicit val mongoConfig = MongoConfig("mongodb://localhost/tutelar", "users")
   private val mongoService         = new MongoDatabaseService(mongoConfig)
   private val mongoCollection = await({
     (for {
-      config <- OptionT.liftF(mongoConfig)
-      uri    <- OptionT.fromOption(MongoConnection.parseURI(config.uri).toOption)
+      uri    <- OptionT.fromOption(MongoConnection.parseURI(mongoConfig.uri).toOption)
       dbname <- OptionT.fromOption(uri.db)
       db     <- OptionT.liftF(mongoDriver.connection(uri).database(dbname))
-    } yield db.collection[BSONCollection](config.collection)).getOrElseF(Future.failed(new Exception("")))
+    } yield db.collection[BSONCollection](mongoConfig.collection)).getOrElseF(Future.failed(new Exception("")))
   })
 
   override def beforeAll(): Unit = truncateDb()

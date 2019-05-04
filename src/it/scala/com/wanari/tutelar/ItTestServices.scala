@@ -20,6 +20,7 @@ class ItTestServices(implicit ec: ExecutionContext) extends Services[Future] {
   import cats.instances.future._
   override implicit lazy val configService: ServerConfig[Future] = new ServerConfigImpl[Future]
   import configService.runtimeConfig._
+  import configService._
   override implicit lazy val healthCheckService: HealthCheckService[Future] = new HealthCheckServiceImpl[Future]
   override implicit lazy val databaseService: DatabaseService[Future]       = new MemoryDatabaseService[Future]
 

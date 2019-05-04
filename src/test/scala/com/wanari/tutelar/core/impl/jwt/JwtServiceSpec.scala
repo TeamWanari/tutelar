@@ -10,9 +10,8 @@ import scala.util.{Failure, Success, Try}
 
 class JwtServiceSpec extends TestBase {
 
-  def createServiceWithConf(config: JwtConfig): JwtService[Try] = {
+  def createServiceWithConf(implicit config: JwtConfig): JwtService[Try] = {
     import cats.instances.try_._
-    implicit val configService = () => Success(config)
     new JwtServiceImpl[Try]
   }
 

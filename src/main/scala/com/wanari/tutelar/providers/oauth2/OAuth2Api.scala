@@ -45,12 +45,10 @@ trait OAuth2Api extends ProviderApi {
 }
 
 object OAuth2Api {
-  class FacebookApi(implicit val service: FacebookService[Future], val callbackConfig: () => Future[CallbackConfig])
+  class FacebookApi(implicit val service: FacebookService[Future], val callbackConfig: CallbackConfig)
       extends OAuth2Api {}
-  class GithubApi(implicit val service: GithubService[Future], val callbackConfig: () => Future[CallbackConfig])
-      extends OAuth2Api {}
-  class GoogleApi(implicit val service: GoogleService[Future], val callbackConfig: () => Future[CallbackConfig])
-      extends OAuth2Api {}
+  class GithubApi(implicit val service: GithubService[Future], val callbackConfig: CallbackConfig) extends OAuth2Api {}
+  class GoogleApi(implicit val service: GoogleService[Future], val callbackConfig: CallbackConfig) extends OAuth2Api {}
 
   case class CodeAndState(code: String, state: String)
   case class AccessToken(accessToken: String)

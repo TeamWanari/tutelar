@@ -14,7 +14,7 @@ import scala.util.{Failure, Success}
 
 class TotpApi(
     implicit val service: TotpService[Future],
-    val callbackConfig: () => Future[CallbackConfig]
+    val callbackConfig: CallbackConfig
 ) extends UserPassApi {
   override val servicePath: String = "totp"
 

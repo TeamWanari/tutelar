@@ -9,7 +9,7 @@ import com.wanari.tutelar.util.HttpWrapper
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 
 class HookServiceImpl[F[_]: MonadError[?[_], Throwable]](
-    implicit hookConfig: () => F[HookConfig],
+    implicit config: HookConfig,
     http: HttpWrapper[F]
 ) extends HookService[F] {
   import cats.syntax.applicative._
@@ -75,19 +75,15 @@ class HookServiceImpl[F[_]: MonadError[?[_], Throwable]](
 
   private def sendHook(endpoint: String, data: JsValue)(implicit ctx: LogContext): F[HttpResponse] = {
     import com.wanari.tutelar.util.ApplicativeErrorSyntax._
-    hookConfig()
-      .flatMap { config =>
-        val baseUrl = config.baseUrl
-        if (baseUrl.isEmpty) {
-          HookDisabled().raise[F, HttpRequest]
-        } else {
-          val url     = baseUrl + endpoint
-          val entity  = HttpEntity(ContentTypes.`application/json`, data.compactPrint)
-          val request = HttpRequest(POST, url, entity = entity)
-          authenticator(config.authConfig, request)
-        }
-      }
-      .flatMap(http.singleRequest)
+    val baseUrl = config.baseUrl
+    if (baseUrl.isEmpty) {
+      HookDisabled().raise[F, HttpResponse]
+    } else {
+      val url     = baseUrl + endpoint
+      val entity  = HttpEntity(ContentTypes.`application/json`, data.compactPrint)
+      val request = HttpRequest(POST, url, entity = entity)
+      authenticator(config.authConfig, request)
+    }.flatMap(http.singleRequest)
   }
 
   private def authenticator(authConfig: AuthConfig, request: HttpRequest): F[HttpRequest] = {

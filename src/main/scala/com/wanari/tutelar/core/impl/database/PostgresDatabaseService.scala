@@ -112,5 +112,5 @@ class PostgresDatabaseService(db: Database)(implicit ec: ExecutionContext) exten
 
 object PostgresDatabaseService {
   //TODO this is an uncontrolled read from the config
-  def getDatabase: Database = Database.forConfig("database")
+  def getDatabase: Database = Database.forConfig("database.postgres")
 }

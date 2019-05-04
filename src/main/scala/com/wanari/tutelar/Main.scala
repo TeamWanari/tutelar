@@ -23,8 +23,8 @@ object Main extends App {
   val services = new RealServices()
 
   val starting = for {
-    _      <- services.init()
-    route  <- Api.createApi(services)
+    _ <- services.init()
+    route = Api.createApi(services)
     server <- Http().bindAndHandle(route, "0.0.0.0", 9000)
   } yield {
     setupShutdownHook(server)
