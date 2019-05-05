@@ -2,6 +2,7 @@ package com.wanari.tutelar.core.config
 
 import cats.MonadError
 import com.typesafe.config.{Config, ConfigFactory}
+import com.wanari.tutelar.core.Errors.WrongConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
 import com.wanari.tutelar.providers.userpass.email.EmailServiceFactory.EmailServiceFactoryConfig
@@ -73,7 +74,7 @@ class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String)
     OTPAlgorithm.algos
       .find(_.name == algo)
       .fold {
-        (new Exception).raise[F, TotpConfig]
+        WrongConfig(s"Unsupported TOTP algo: $algo").raise[F, TotpConfig]
       } { _ =>
         TotpConfig(
           algo,

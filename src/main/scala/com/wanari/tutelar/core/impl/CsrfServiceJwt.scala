@@ -1,7 +1,10 @@
 package com.wanari.tutelar.core.impl
 
+import java.time.Clock
+
 import cats.MonadError
 import com.wanari.tutelar.core.CsrfService
+import com.wanari.tutelar.core.Errors.InvalidCsrfToken
 import com.wanari.tutelar.core.impl.CsrfServiceJwt.CsrfJwtConfig
 import com.wanari.tutelar.util.DateTimeUtil
 import pdi.jwt.{JwtAlgorithm, JwtClaim, JwtSprayJson}
@@ -31,7 +34,7 @@ class CsrfServiceJwt[F[_]: MonadError[?[_], Throwable]: DateTimeUtil](implicit c
         .decodeJson(token, config.key, Seq(JwtAlgorithm.HS256))
         .fold(_.raise[F, JsObject], _.pure)
         .map(_.fields.get("auther").contains(JsString(auther)))
-        .flatMap(_.pureUnitOrRise(new Exception()))
+        .flatMap(_.pureUnitOrRise(InvalidCsrfToken()))
     }
   }
 

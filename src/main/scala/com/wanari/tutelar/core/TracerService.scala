@@ -3,6 +3,7 @@ package com.wanari.tutelar.core
 import cats.MonadError
 import com.wanari.tutelar.Initable
 import com.wanari.tutelar.core.TracerService.TracerServiceConfig
+import com.wanari.tutelar.core.Errors.WrongConfig
 import io.jaegertracing.Configuration
 import io.jaegertracing.Configuration.{ReporterConfiguration, SamplerConfiguration}
 import io.opentracing.noop.NoopTracerFactory
@@ -16,7 +17,7 @@ class TracerService[F[_]: MonadError[?[_], Throwable]](implicit config: TracerSe
     config.client.toLowerCase match {
       case TracerService.OFF    => initNoop().pure
       case TracerService.JAEGER => initJaeger().pure
-      case _                    => new Exception(s"Unsupported Tracer client: ${config.client}").raise
+      case _                    => WrongConfig(s"Unsupported Tracer client: ${config.client}").raise
     }
   }
 

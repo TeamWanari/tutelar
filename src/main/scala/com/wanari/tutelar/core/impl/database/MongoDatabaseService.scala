@@ -3,6 +3,7 @@ package com.wanari.tutelar.core.impl.database
 import cats.data.OptionT
 import com.wanari.tutelar.core.DatabaseService
 import com.wanari.tutelar.core.DatabaseService.{Account, AccountId, User}
+import com.wanari.tutelar.core.Errors.WrongConfig
 import com.wanari.tutelar.core.impl.database.MongoDatabaseService.MongoConfig
 import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.api.{MongoConnection, MongoDriver}
@@ -22,7 +23,7 @@ class MongoDatabaseService(config: => MongoConfig)(implicit ec: ExecutionContext
       db     <- OptionT.liftF(driver.connection(uri).database(dbname))
     } yield db.collection[BSONCollection](config.collection)
 
-    result.getOrElseF(Future.failed(new Exception("Wrong config")))
+    result.getOrElseF(Future.failed(WrongConfig("Can't connect to Mongo database!")))
   }
 
   override def init: Future[Unit] = {

@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit
 import cats.MonadError
 import com.typesafe.config.{Config, ConfigFactory}
 import com.wanari.tutelar.Initable
+import com.wanari.tutelar.core.Errors.WrongConfig
 import com.wanari.tutelar.core.HookService.{BasicAuthConfig, HookConfig}
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
 import com.wanari.tutelar.core.TracerService.TracerServiceConfig
@@ -49,7 +50,7 @@ class ServerConfigImpl[F[_]: MonadError[?[_], Throwable]]() extends ServerConfig
 
   override def init: F[Unit] = {
     import com.wanari.tutelar.util.ApplicativeErrorSyntax._
-    if (conf.isEmpty) new Exception("Config is empty!").raise
+    if (conf.isEmpty) WrongConfig("Config is empty!").raise
     else ().pure
   }
 

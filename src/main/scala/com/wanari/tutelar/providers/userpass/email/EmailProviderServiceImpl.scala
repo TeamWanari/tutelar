@@ -3,6 +3,7 @@ package com.wanari.tutelar.providers.userpass.email
 import cats.MonadError
 import com.wanari.tutelar.core.{AuthService, JwtService}
 import com.wanari.tutelar.core.AuthService.Token
+import com.wanari.tutelar.core.Errors.{InvalidEmailToken, UserNotFound}
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyChecker
 import com.wanari.tutelar.providers.userpass.basic.BasicProviderServiceImpl
 import com.wanari.tutelar.providers.userpass.email.EmailProviderServiceImpl.EmailToken
@@ -61,7 +62,7 @@ class EmailProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](
     for {
       tokenData  <- jwtService.validateAndDecode(registerToken)
       emailToken <- tokenData.convertToF[F, EmailToken]
-      _          <- (emailToken.`type` == `type`).pureUnitOrRise(new Exception)
+      _          <- (emailToken.`type` == `type`).pureUnitOrRise(InvalidEmailToken())
     } yield emailToken.email
   }
 
@@ -79,7 +80,7 @@ class EmailProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](
   }
 
   private def checkIsExists(email: String): F[Unit] = {
-    authService.findCustomData(authType, email).pureOrRaise(new Exception).map(_ => ())
+    authService.findCustomData(authType, email).pureOrRaise(UserNotFound()).map(_ => ())
   }
 }
 

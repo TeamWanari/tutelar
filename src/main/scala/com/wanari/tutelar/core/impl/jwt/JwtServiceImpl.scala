@@ -2,6 +2,7 @@ package com.wanari.tutelar.core.impl.jwt
 
 import cats.MonadError
 import com.wanari.tutelar.core.JwtService
+import com.wanari.tutelar.core.Errors.WrongConfig
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 import pdi.jwt.algorithms.{JwtAsymmetricAlgorithm, JwtHmacAlgorithm}
 import pdi.jwt.{JwtAlgorithm, JwtClaim, JwtSprayJson}
@@ -23,7 +24,7 @@ class JwtServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit config: JwtConf
         case algo: JwtHmacAlgorithm       => Settings(algo, config.secret, config.secret, expirationTime)
         case algo: JwtAsymmetricAlgorithm => Settings(algo, config.privateKey, config.publicKey, expirationTime)
       }
-      .pureOrRaise(new Exception("Wrong jwt config: not supported algorithm"))
+      .pureOrRaise(WrongConfig("Unsupported JWT algorithm"))
   }
 
   override def init: F[Unit] = {

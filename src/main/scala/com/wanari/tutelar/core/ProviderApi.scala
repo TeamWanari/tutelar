@@ -18,7 +18,7 @@ trait ProviderApi extends Api {
     extractExecutionContext { implicit executor =>
       val callbackUrl = token
         .map(generateCallbackUrl)
-        .recover { case _ => generateErrorCallbackUrl(Errors.AUTHENTICATION_FAILED) }
+        .recover { case _ => generateErrorCallbackUrl(ProviderApi.Errors.AUTHENTICATION_FAILED) }
 
       onSuccess(callbackUrl) { url =>
         redirect(url, StatusCodes.Found)
@@ -29,7 +29,7 @@ trait ProviderApi extends Api {
   def completeLoginFlowWithJson(token: Future[Token]): Route = {
     onComplete(token) {
       case Success(t) => complete(TokenData(t))
-      case Failure(_) => complete((StatusCodes.Unauthorized, ErrorData(Errors.AUTHENTICATION_FAILED)))
+      case Failure(_) => complete((StatusCodes.Unauthorized, ErrorData(ProviderApi.Errors.AUTHENTICATION_FAILED)))
     }
   }
 

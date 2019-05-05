@@ -3,6 +3,7 @@ import cats.MonadError
 import cats.data.OptionT
 import com.wanari.tutelar.core.AuthService
 import com.wanari.tutelar.core.AuthService.Token
+import com.wanari.tutelar.core.Errors.{AuthenticationFailed, UsernameUsed}
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyChecker
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.PasswordCryptor
@@ -25,7 +26,7 @@ class BasicProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](
     for {
       _                 <- passwordDifficultyChecker.validate(password)
       usernameIsNotUsed <- authService.findCustomData(authType, username).isEmpty
-      _                 <- usernameIsNotUsed.pureUnitOrRise(new Exception("Username is already used"))
+      _                 <- usernameIsNotUsed.pureUnitOrRise(UsernameUsed())
       token             <- authService.registerOrLogin(authType, username, encryptPassword(password), data.getOrElse(JsObject()))
     } yield token
   }
@@ -36,6 +37,6 @@ class BasicProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](
       token        <- OptionT.liftF(authService.registerOrLogin(authType, username, passwordHash, data.getOrElse(JsObject())))
     } yield token
 
-    result.pureOrRaise(new Exception())
+    result.pureOrRaise(AuthenticationFailed())
   }
 }

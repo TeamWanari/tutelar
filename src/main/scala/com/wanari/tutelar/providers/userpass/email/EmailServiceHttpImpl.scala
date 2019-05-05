@@ -4,6 +4,7 @@ import akka.http.scaladsl.model.HttpMethods.POST
 import akka.http.scaladsl.model.headers.BasicHttpCredentials
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpRequest}
 import cats.MonadError
+import com.wanari.tutelar.core.Errors.HttpClientError
 import com.wanari.tutelar.providers.userpass.email.EmailServiceHttpImpl.{EmailRequestData, EmailServiceHttpConfig}
 import com.wanari.tutelar.util.HttpWrapper
 import com.wanari.tutelar.util.LoggerUtil.LogContext
@@ -39,7 +40,7 @@ class EmailServiceHttpImpl[F[_]: MonadError[?[_], Throwable]](
     for {
       request  <- requestF
       response <- http.singleRequest(request)
-      result   <- response.status.isSuccess().pureUnitOrRise(new Exception())
+      result   <- response.status.isSuccess().pureUnitOrRise(HttpClientError(response))
     } yield result
 
   }

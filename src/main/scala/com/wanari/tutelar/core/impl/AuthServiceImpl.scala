@@ -4,6 +4,13 @@ import cats.MonadError
 import cats.data.OptionT
 import com.wanari.tutelar.core.AuthService.Token
 import com.wanari.tutelar.core.DatabaseService.{Account, User}
+import com.wanari.tutelar.core.Errors.{
+  AccountNotFound,
+  AccountUsed,
+  UserHadThisAccountType,
+  UserLastAccount,
+  UserNotFound
+}
 import com.wanari.tutelar.core.{AuthService, DatabaseService, HookService, JwtService}
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.{DateTimeUtil, IdGenerator}
@@ -43,7 +50,7 @@ class AuthServiceImpl[F[_]: MonadError[?[_], Throwable]](
   override def deleteUser(userId: String)(implicit ctx: LogContext): F[Unit] = {
     for {
       user <- databaseService.findUserById(userId)
-      _    <- user.nonEmpty.pureUnitOrRise(new Exception(s"User not found $userId"))
+      _    <- user.nonEmpty.pureUnitOrRise(UserNotFound())
       _    <- databaseService.deleteUserWithAccountsById(userId)
       _    <- hookService.delete(userId)
     } yield ()
@@ -68,10 +75,10 @@ class AuthServiceImpl[F[_]: MonadError[?[_], Throwable]](
     val account                = Account(authType, standardizedExternalId, userId, customData)
     for {
       accountO <- databaseService.findAccountByTypeAndExternalId((authType, standardizedExternalId))
-      _        <- accountO.isEmpty.pureUnitOrRise(new Exception("Account is already used"))
+      _        <- accountO.isEmpty.pureUnitOrRise(AccountUsed())
       accounts <- databaseService.listAccountsByUserId(userId)
-      _        <- accounts.nonEmpty.pureUnitOrRise(new Exception("User not found"))
-      _        <- accounts.exists(_.authType != authType).pureUnitOrRise(new Exception("User already has this type account"))
+      _        <- accounts.nonEmpty.pureUnitOrRise(UserNotFound())
+      _        <- accounts.exists(_.authType != authType).pureUnitOrRise(UserHadThisAccountType())
       _        <- databaseService.saveAccount(account)
       _        <- hookService.link(userId, standardizedExternalId, authType, providedData)
     } yield ()
@@ -80,8 +87,8 @@ class AuthServiceImpl[F[_]: MonadError[?[_], Throwable]](
   override def unlink(userId: String, authType: String)(implicit ctx: LogContext): F[Unit] = {
     for {
       accounts <- databaseService.listAccountsByUserId(userId)
-      _        <- (accounts.size > 1).pureUnitOrRise(new Exception("Can not unlink the last account"))
-      account  <- accounts.find(_.authType == authType).pureOrRaise(new Exception("Account not found"))
+      _        <- (accounts.size > 1).pureUnitOrRise(UserLastAccount())
+      account  <- accounts.find(_.authType == authType).pureOrRaise(AccountNotFound())
       _        <- databaseService.deleteAccountByUserAndType(userId, authType)
       _        <- hookService.unlink(userId, account.externalId, authType)
     } yield ()
