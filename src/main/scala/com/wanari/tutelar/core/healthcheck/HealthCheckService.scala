@@ -13,7 +13,7 @@ object HealthCheckService {
       version: String,
       database: Boolean,
       buildAtString: String,
-      buildAtMilis: Long,
+      buildAtMillis: Long,
       commitHash: Option[String]
   )
   implicit val healthCheckResultFormat = jsonFormat6(HealthCheckResult)

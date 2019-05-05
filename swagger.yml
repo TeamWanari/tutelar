@@ -435,7 +435,13 @@ paths:
                     type: boolean
                   version:
                     type: string
+                  buildAtString:
+                    type: string
+                  buildAtMillis:
+                    type: number
+                  commitHash:
+                    type: string
               examples:
                 '0':
                   value: >-
-                    {"database":true,"success":true,"version":"development"}
+                    {"database":true,"success":true,"version":"development","buildAtString":"2019-05-05 08:07:09.309","buildAtMillis":1557043629309,"commitHash":"7919619d80b76ff5804e30880bea696cd605a635"}
