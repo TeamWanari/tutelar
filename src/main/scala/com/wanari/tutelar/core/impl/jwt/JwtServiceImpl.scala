@@ -1,9 +1,13 @@
 package com.wanari.tutelar.core.impl.jwt
 
+import java.security.Security
+import java.time.Clock
+
 import cats.MonadError
 import com.wanari.tutelar.core.JwtService
-import com.wanari.tutelar.core.Errors.WrongConfig
+import com.wanari.tutelar.core.Errors.{InvalidJwt, WrongConfig}
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
+import org.bouncycastle.jce.provider.BouncyCastleProvider
 import pdi.jwt.algorithms.{JwtAsymmetricAlgorithm, JwtHmacAlgorithm}
 import pdi.jwt.{JwtAlgorithm, JwtClaim, JwtSprayJson}
 import spray.json._
@@ -15,6 +19,8 @@ class JwtServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit config: JwtConf
   import cats.syntax.flatMap._
   import cats.syntax.functor._
   import com.wanari.tutelar.util.ApplicativeErrorSyntax._
+
+  protected implicit val clock = Clock.systemDefaultZone()
 
   private def settings: F[Settings] = {
     val expirationTime = config.expirationTime.toSeconds
@@ -28,6 +34,7 @@ class JwtServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit config: JwtConf
   }
 
   override def init: F[Unit] = {
+    Security.addProvider(new BouncyCastleProvider)
     settings.map(_ => ())
   }
 
@@ -50,7 +57,7 @@ class JwtServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit config: JwtConf
 
   override def validateAndDecode(token: String): F[JsObject] = {
     for {
-      _    <- validate(token).map(_.pureUnitOrRise(new Exception("Invalid token")))
+      _    <- validate(token).map(_.pureUnitOrRise(InvalidJwt()))
       data <- decode(token)
     } yield data
   }

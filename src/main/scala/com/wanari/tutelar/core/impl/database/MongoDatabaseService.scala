@@ -18,9 +18,10 @@ class MongoDatabaseService(config: => MongoConfig)(implicit ec: ExecutionContext
 
   private lazy val usersCollection: Future[BSONCollection] = {
     val result = for {
-      uri    <- OptionT.fromOption(MongoConnection.parseURI(config.uri).toOption)
-      dbname <- OptionT.fromOption(uri.db)
-      db     <- OptionT.liftF(driver.connection(uri).database(dbname))
+      uri        <- OptionT.fromOption(MongoConnection.parseURI(config.uri).toOption)
+      dbname     <- OptionT.fromOption(uri.db)
+      connection <- OptionT.fromOption(driver.connection(config.uri).toOption)
+      db         <- OptionT.liftF(connection.database(dbname))
     } yield db.collection[BSONCollection](config.collection)
 
     result.getOrElseF(Future.failed(WrongConfig("Can't connect to Mongo database!")))

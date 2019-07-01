@@ -20,6 +20,8 @@ class CsrfServiceJwt[F[_]: MonadError[?[_], Throwable]: DateTimeUtil](implicit c
   import com.wanari.tutelar.util.ApplicativeErrorSyntax._
   import com.wanari.tutelar.util.SpraySyntax._
 
+  protected implicit val clock = Clock.systemDefaultZone()
+
   def getCsrfToken(auther: String, data: JsObject = JsObject.empty): F[String] = {
     csrfJwtConfig().map { config =>
       val claim =

@@ -1,4 +1,4 @@
-FROM hseeberger/scala-sbt:8u181_2.12.8_1.2.8 as builder
+FROM hseeberger/scala-sbt:11.0.2_2.12.8_1.2.8 as builder
 COPY build.sbt /app/build.sbt
 COPY project /app/project
 WORKDIR /app
@@ -7,7 +7,7 @@ COPY . .
 RUN sbt compile test stage
 
 
-FROM openjdk:8
+FROM openjdk:11
 WORKDIR /app
 COPY --from=builder /app/target/universal/stage /app
 USER root
