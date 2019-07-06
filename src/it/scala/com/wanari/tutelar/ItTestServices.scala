@@ -4,7 +4,6 @@ import com.wanari.tutelar.core._
 import com.wanari.tutelar.core.config.{ServerConfig, ServerConfigImpl}
 import com.wanari.tutelar.core.healthcheck.{HealthCheckService, HealthCheckServiceImpl}
 import com.wanari.tutelar.core.impl.database.MemoryDatabaseService
-import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl
 import com.wanari.tutelar.core.impl.{AuthServiceImpl, HookServiceImpl}
 import com.wanari.tutelar.providers.oauth2.{FacebookService, GithubService, GoogleService, OAuth2Service}
 import com.wanari.tutelar.providers.userpass.{PasswordDifficultyChecker, PasswordDifficultyCheckerImpl}
@@ -23,8 +22,6 @@ class ItTestServices(implicit ec: ExecutionContext) extends Services[Future] {
   import configService._
   override implicit lazy val healthCheckService: HealthCheckService[Future] = new HealthCheckServiceImpl[Future]
   override implicit lazy val databaseService: DatabaseService[Future]       = new MemoryDatabaseService[Future]
-
-  override implicit lazy val jwtService: JwtService[Future] = new JwtServiceImpl
 
   override implicit lazy val idGenerator: IdGenerator[Future]      = new IdGeneratorCounterImpl[Future]
   override implicit lazy val dateTimeService: DateTimeUtil[Future] = new DateTimeUtilCounterImpl[Future]

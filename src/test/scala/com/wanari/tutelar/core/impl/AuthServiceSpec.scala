@@ -1,8 +1,10 @@
 package com.wanari.tutelar.core.impl
 
 import com.wanari.tutelar.TestBase
+import com.wanari.tutelar.core.AuthService.TokenData
 import com.wanari.tutelar.core.DatabaseService.{Account, User}
 import com.wanari.tutelar.core.impl.database.MemoryDatabaseService
+import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.core.{HookService, JwtService}
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.{DateTimeUtilCounterImpl, IdGeneratorCounterImpl}
@@ -27,16 +29,18 @@ class AuthServiceSpec extends TestBase {
 
   trait TestScope {
 
-    implicit val databaseService = new MemoryDatabaseService[Try]
-    implicit val idGenerator     = new IdGeneratorCounterImpl[Try]
-    implicit val timeService     = new DateTimeUtilCounterImpl[Try]
-    implicit val jwtService      = mock[JwtService[Try]]
-    implicit val hookService     = mock[HookService[Try]]
+    implicit val databaseService           = new MemoryDatabaseService[Try]
+    implicit val idGenerator               = new IdGeneratorCounterImpl[Try]
+    implicit val timeService               = new DateTimeUtilCounterImpl[Try]
+    implicit val longTermTokenServiceMock  = mock[JwtService[Try]]
+    implicit val shortTermTokenServiceMock = mock[JwtService[Try]]
+    implicit val hookService               = mock[HookService[Try]]
 
     databaseService.saveUser(savedUser)
     databaseService.saveAccount(savedAccount)
 
-    when(jwtService.encode(any[JsObject], any[Option[Duration]])).thenReturn(Success("JWT"))
+    when(longTermTokenServiceMock.encode(any[JsObject], any[Option[Duration]])).thenReturn(Success("JWT_LONG"))
+    when(shortTermTokenServiceMock.encode(any[JsObject], any[Option[Duration]])).thenReturn(Success("JWT"))
     when(hookService.register(any[String], any[String], any[String], any[JsObject])(any[LogContext]))
       .thenReturn(Success(hookResponseRegister))
     when(hookService.login(any[String], any[String], any[String], any[JsObject])(any[LogContext]))
@@ -46,17 +50,25 @@ class AuthServiceSpec extends TestBase {
       .thenReturn(Success(hookResponseLogin))
     when(hookService.unlink(any[String], any[String], any[String])(any[LogContext])).thenReturn(Success(()))
 
-    val service = new AuthServiceImpl[Try]()
+    implicit def dummyConfigFunction(name: String): JwtConfig = null
+
+    val service = new AuthServiceImpl[Try]() {
+      override protected val longTermTokenService: JwtService[Try]  = longTermTokenServiceMock
+      override protected val shortTermTokenService: JwtService[Try] = shortTermTokenServiceMock
+    }
   }
 
   "#registerOrLogin" when {
     "register" should {
       "return the token" in new TestScope {
-        service.registerOrLogin(authType, externalId, customData, providedData) shouldEqual Success("JWT")
+        service.registerOrLogin(authType, externalId, customData, providedData) shouldEqual Success(
+          TokenData("JWT", "JWT_LONG")
+        )
       }
-      "create token with the userid and hook response" in new TestScope {
+      "create tokens with the userid and hook response" in new TestScope {
         service.registerOrLogin(authType, externalId, customData, providedData).get
-        verify(jwtService).encode(JsObject("id" -> JsString("1"), "group" -> JsString("reg")))
+        verify(longTermTokenServiceMock).encode(JsObject("id"  -> JsString("1"), "group" -> JsString("reg")))
+        verify(shortTermTokenServiceMock).encode(JsObject("id" -> JsString("1"), "group" -> JsString("reg")))
       }
       "create new user" in new TestScope {
         service.registerOrLogin(authType, externalId, customData, providedData).get
@@ -74,12 +86,13 @@ class AuthServiceSpec extends TestBase {
     "login" should {
       "return the token" in new TestScope {
         service.registerOrLogin(savedAccount.authType, savedAccount.externalId, customData, providedData) shouldEqual Success(
-          "JWT"
+          TokenData("JWT", "JWT_LONG")
         )
       }
-      "create token with the userid and hook response" in new TestScope {
+      "create tokens with the userid and hook response" in new TestScope {
         service.registerOrLogin(savedAccount.authType, savedAccount.externalId, customData, providedData).get
-        verify(jwtService).encode(JsObject("id" -> JsString(savedUser.id), "group" -> JsString("log")))
+        verify(longTermTokenServiceMock).encode(JsObject("id"  -> JsString(savedUser.id), "group" -> JsString("log")))
+        verify(shortTermTokenServiceMock).encode(JsObject("id" -> JsString(savedUser.id), "group" -> JsString("log")))
       }
       "update account custom data" in new TestScope {
         service.registerOrLogin(savedAccount.authType, savedAccount.externalId, customData, providedData).get
@@ -104,7 +117,9 @@ class AuthServiceSpec extends TestBase {
       "be standardized and lowercased" in new TestScope {
         val externalId  = "SPEC_EXT_ID_\u0065\u0301"
         val standarized = "spec_ext_id_\u00e9"
-        service.registerOrLogin(authType, externalId, customData, providedData) shouldEqual Success("JWT")
+        service.registerOrLogin(authType, externalId, customData, providedData) shouldEqual Success(
+          TokenData("JWT", "JWT_LONG")
+        )
         databaseService.users("1") shouldEqual User("1", 1)
         verify(hookService).register(eqTo("1"), eqTo(standarized), eqTo(authType), eqTo(providedData))(any[LogContext])
       }
@@ -160,14 +175,16 @@ class AuthServiceSpec extends TestBase {
     }
   }
 
-  "#findUserIdInToken" when {
+  "#findUserIdInShortTermToken" when {
     "good token" in new TestScope {
-      when(jwtService.validateAndDecode(any[String])).thenReturn(Success(JsObject("id" -> JsString("ID"))))
-      service.findUserIdInToken("TOKEN").value shouldEqual Success(Some("ID"))
+      when(shortTermTokenServiceMock.validateAndDecode(any[String]))
+        .thenReturn(Success(JsObject("id" -> JsString("ID"))))
+      service.findUserIdInShortTermToken("TOKEN").value shouldEqual Success(Some("ID"))
     }
     "wrong token if not contains id" in new TestScope {
-      when(jwtService.validateAndDecode(any[String])).thenReturn(Success(JsObject("notid" -> JsString("ID"))))
-      service.findUserIdInToken("TOKEN").value shouldBe Success(None)
+      when(shortTermTokenServiceMock.validateAndDecode(any[String]))
+        .thenReturn(Success(JsObject("notid" -> JsString("ID"))))
+      service.findUserIdInShortTermToken("TOKEN").value shouldBe Success(None)
     }
   }
 

@@ -2,7 +2,7 @@ package com.wanari.tutelar.providers.oauth2
 
 import akka.http.scaladsl.model._
 import cats.{Applicative, MonadError}
-import com.wanari.tutelar.core.AuthService.Token
+import com.wanari.tutelar.core.AuthService.TokenData
 import com.wanari.tutelar.core.Errors.{InvalidProfileDataMissingKey, InvalidProfileDataNotJsonObject}
 import com.wanari.tutelar.core.{AuthService, CsrfService}
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.{
@@ -50,7 +50,7 @@ trait OAuth2Service[F[_]] {
   def authenticateWithCallback(
       code: String,
       state: String
-  )(implicit me: MonadError[F, Throwable], ctx: LogContext): F[Token] = {
+  )(implicit me: MonadError[F, Throwable], ctx: LogContext): F[TokenData] = {
     import cats.syntax.flatMap._
     import cats.syntax.functor._
 
@@ -76,7 +76,7 @@ trait OAuth2Service[F[_]] {
 
   def authenticateWithAccessToken(
       accessToken: String
-  )(implicit me: MonadError[F, Throwable], ctx: LogContext): F[Token] = {
+  )(implicit me: MonadError[F, Throwable], ctx: LogContext): F[TokenData] = {
     import cats.syntax.flatMap._
     import cats.syntax.functor._
 

@@ -7,20 +7,19 @@ import com.wanari.tutelar.core._
 import com.wanari.tutelar.core.config.{ServerConfig, ServerConfigImpl}
 import com.wanari.tutelar.core.healthcheck.{HealthCheckService, HealthCheckServiceImpl}
 import com.wanari.tutelar.core.impl.database._
-import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl
 import com.wanari.tutelar.core.impl.{AuthServiceImpl, CsrfServiceNotChecked, HookServiceImpl, RabbitMqServiceImpl}
 import com.wanari.tutelar.providers.oauth2.{FacebookService, GithubService, GoogleService}
-import com.wanari.tutelar.providers.userpass.{PasswordDifficultyChecker, PasswordDifficultyCheckerImpl}
 import com.wanari.tutelar.providers.userpass.basic.{BasicProviderService, BasicProviderServiceImpl}
 import com.wanari.tutelar.providers.userpass.email._
 import com.wanari.tutelar.providers.userpass.ldap.{LdapService, LdapServiceImpl}
 import com.wanari.tutelar.providers.userpass.token.{TotpService, TotpServiceImpl}
+import com.wanari.tutelar.providers.userpass.{PasswordDifficultyChecker, PasswordDifficultyCheckerImpl}
 import com.wanari.tutelar.util._
 import org.slf4j.Logger
 import reactivemongo.api.MongoDriver
 
-import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 trait Services[F[_]] {
   implicit val configService: ServerConfig[F]
@@ -29,7 +28,6 @@ trait Services[F[_]] {
   implicit val githubService: GithubService[F]
   implicit val googleService: GoogleService[F]
   implicit val databaseService: DatabaseService[F]
-  implicit val jwtService: JwtService[F]
   implicit val idGenerator: IdGenerator[F]
   implicit val dateTimeService: DateTimeUtil[F]
   implicit val hookService: HookService[F]
@@ -44,17 +42,19 @@ trait Services[F[_]] {
   implicit val rabbitMqService: RabbitMqService[F]
 
   def init()(implicit logger: Logger, ev: MonadError[F, Throwable]): F[Unit] = {
+    import Initable._
     import cats.syntax.flatMap._
     import cats.syntax.functor._
-    import Initable._
 
     logger.info("Init services")
     for {
       _ <- initialize(configService, "config")
       _ <- initialize(tracerService, "tracer")
       _ <- initialize(databaseService, "database")
-      _ <- initialize(jwtService, "jwt")
+      _ <- initialize(authService, "auth_service")
       _ <- initializeIfEnabled(rabbitMqService, "rabbitmq")
+      _ <- initializeIfEnabled(emailLoginService, "email")
+      _ <- initializeIfEnabled(totpService, "totp")
       _ <- initializeIfEnabled(ldapService, "ldap")
     } yield ()
   }
@@ -66,8 +66,8 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
   import cats.instances.future._
 
   implicit lazy val configService: ServerConfig[Future] = new ServerConfigImpl[Future]
-  import configService.runtimeConfig._
   import configService._
+  import configService.runtimeConfig._
 
   implicit lazy val healthCheckService: HealthCheckService[Future] = new HealthCheckServiceImpl[Future]
   implicit lazy val mongoDriver: MongoDriver                       = new MongoDriver()
@@ -80,7 +80,6 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
     new GithubService[Future](configService.runtimeConfig.githubConfig)
   implicit lazy val googleService: GoogleService[Future] =
     new GoogleService[Future](configService.runtimeConfig.googleConfig)
-  implicit lazy val jwtService: JwtService[Future]                  = new JwtServiceImpl[Future]
   implicit lazy val idGenerator: IdGenerator[Future]                = new IdGeneratorImpl[Future]
   implicit lazy val dateTimeService: DateTimeUtil[Future]           = new DateTimeUtilImpl[Future]
   implicit lazy val hookService: HookService[Future]                = new HookServiceImpl[Future]

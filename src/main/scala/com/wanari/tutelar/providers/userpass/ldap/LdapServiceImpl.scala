@@ -3,7 +3,7 @@ package com.wanari.tutelar.providers.userpass.ldap
 import java.util.Properties
 
 import com.wanari.tutelar.core.AuthService
-import com.wanari.tutelar.core.AuthService.Token
+import com.wanari.tutelar.core.AuthService.TokenData
 import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import javax.naming.Context
@@ -26,7 +26,7 @@ class LdapServiceImpl(
 
   override def login(username: String, password: String, data: Option[JsObject])(
       implicit ctx: LogContext
-  ): Future[Token] = {
+  ): Future[TokenData] = {
     for {
       user       <- findUser(username)
       _          <- getUserInitialDirContext(user.getNameInNamespace, password)

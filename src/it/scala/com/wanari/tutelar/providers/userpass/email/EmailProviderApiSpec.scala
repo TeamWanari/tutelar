@@ -2,9 +2,10 @@ package com.wanari.tutelar.providers.userpass.email
 
 import akka.http.scaladsl.model.{HttpEntity, MediaTypes, StatusCodes}
 import com.wanari.tutelar.RouteTestBase
-import com.wanari.tutelar.core.ProviderApi.{ErrorData, TokenData}
+import com.wanari.tutelar.core.ProviderApi._
 import spray.json._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import com.wanari.tutelar.core.AuthService.TokenData
 import com.wanari.tutelar.providers.userpass.email.EmailProviderApi.{EmailData, EmailLoginData, RegisterData}
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import org.mockito.ArgumentMatchersSugar._
@@ -28,17 +29,17 @@ class EmailProviderApiSpec extends RouteTestBase {
 
     "forward the username, password and extra data to service" in new TestScope {
       when(serviceMock.login(any[String], any[String], any[Option[JsObject]])(any[LogContext])) thenReturn Future
-        .successful("TOKEN")
+        .successful(TokenData("TOKEN", "REFRESH_TOKEN"))
       postLoginRequest ~> route ~> check {
         verify(serviceMock).login(eqTo("email"), eqTo("pw"), eqTo(Some(JsObject("hello" -> JsTrue))))(any[LogContext])
       }
     }
     "return redirect with callback" in new TestScope {
       when(serviceMock.login(any[String], any[String], any[Option[JsObject]])(any[LogContext])) thenReturn Future
-        .successful("TOKEN")
+        .successful(TokenData("TOKEN", "REFRESH_TOKEN"))
       postLoginRequest ~> route ~> check {
         status shouldEqual StatusCodes.OK
-        responseAs[TokenData] shouldEqual TokenData("TOKEN")
+        responseAs[TokenData] shouldEqual TokenData("TOKEN", "REFRESH_TOKEN")
       }
     }
     "return redirect with error" in new TestScope {
@@ -59,7 +60,7 @@ class EmailProviderApiSpec extends RouteTestBase {
 
     "forward the username, password and extra data to service" in new TestScope {
       when(serviceMock.register(any[String], any[String], any[Option[JsObject]])(any[LogContext])) thenReturn Future
-        .successful("TOKEN")
+        .successful(TokenData("TOKEN", "REFRESH_TOKEN"))
       postRegisterRequest ~> route ~> check {
         verify(serviceMock).register(eqTo("registerToken"), eqTo("pw"), eqTo(Some(JsObject("hello" -> JsTrue))))(
           any[LogContext]
@@ -68,10 +69,10 @@ class EmailProviderApiSpec extends RouteTestBase {
     }
     "return redirect with callback" in new TestScope {
       when(serviceMock.register(any[String], any[String], any[Option[JsObject]])(any[LogContext])) thenReturn Future
-        .successful("TOKEN")
+        .successful(TokenData("TOKEN", "REFRESH_TOKEN"))
       postRegisterRequest ~> route ~> check {
         status shouldEqual StatusCodes.OK
-        responseAs[TokenData] shouldEqual TokenData("TOKEN")
+        responseAs[TokenData] shouldEqual TokenData("TOKEN", "REFRESH_TOKEN")
       }
     }
     "return redirect with error" in new TestScope {

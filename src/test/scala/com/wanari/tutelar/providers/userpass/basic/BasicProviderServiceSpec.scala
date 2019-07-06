@@ -28,7 +28,7 @@ class BasicProviderServiceSpec extends TestBase {
   "#login" should {
     "successful" in new TestScope {
       initDb()
-      service.login(savedAccount.externalId, "secretpw", None) shouldBe Success(jwtTokenResponse)
+      service.login(savedAccount.externalId, "secretpw", None) shouldBe Success(authenticateResponse)
     }
     "send extra data via hook" in new TestScope {
       initDb()
@@ -52,7 +52,7 @@ class BasicProviderServiceSpec extends TestBase {
   }
   "#register" should {
     "successful" in new TestScope {
-      service.register("newuser", "pw", None) shouldBe Success(jwtTokenResponse)
+      service.register("newuser", "pw", None) shouldBe Success(authenticateResponse)
 
       val newUserData = databaseService.accounts.get(authType -> "newuser")
       newUserData shouldBe a[Some[_]]

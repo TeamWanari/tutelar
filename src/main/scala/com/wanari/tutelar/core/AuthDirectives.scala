@@ -11,7 +11,7 @@ trait AuthDirectives {
   type AsyncAuthenticator[T] = Credentials ⇒ Future[Option[T]]
 
   protected def userAuthenticator: AsyncAuthenticator[String] = {
-    case Credentials.Provided(token) => authService.findUserIdInToken(token).value
+    case Credentials.Provided(token) => authService.findUserIdInShortTermToken(token).value
     case _                           => Future.successful(None)
   }
 

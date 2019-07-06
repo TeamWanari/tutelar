@@ -34,14 +34,14 @@ class AuthDirectivesSpec extends TestBase with ScalatestRouteTest with BeforeAnd
   "AuthDirectives" should {
     "#userAuth" should {
       "pass the bearer token to auth service" in new TestScope {
-        when(authServiceMock.findUserIdInToken(any[String])).thenReturn(OptionT.some("ID"))
+        when(authServiceMock.findUserIdInShortTermToken(any[String])).thenReturn(OptionT.some("ID"))
         Get() ~> addCredentials(OAuth2BearerToken("TOKEN")) ~> route ~> check {
           responseAs[String] shouldEqual "ID"
         }
-        verify(authServiceMock).findUserIdInToken("TOKEN")
+        verify(authServiceMock).findUserIdInShortTermToken("TOKEN")
       }
       "reject if auth service get token failed" in new TestScope {
-        when(authServiceMock.findUserIdInToken(any[String])).thenReturn(OptionT.none[Future, String])
+        when(authServiceMock.findUserIdInShortTermToken(any[String])).thenReturn(OptionT.none[Future, String])
         Get() ~> addCredentials(OAuth2BearerToken("TOKEN")) ~> route ~> check {
           rejection shouldBe a[AuthenticationFailedRejection]
         }
@@ -50,7 +50,7 @@ class AuthDirectivesSpec extends TestBase with ScalatestRouteTest with BeforeAnd
         Get() ~> route ~> check {
           rejection shouldBe a[AuthenticationFailedRejection]
         }
-        verify(authServiceMock, never).findUserIdInToken(any[String])
+        verify(authServiceMock, never).findUserIdInShortTermToken(any[String])
       }
     }
   }

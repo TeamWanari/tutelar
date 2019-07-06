@@ -12,7 +12,7 @@ class JwtServiceSpec extends TestBase {
 
   def createServiceWithConf(implicit config: JwtConfig): JwtService[Try] = {
     import cats.instances.try_._
-    val service = new JwtServiceImpl[Try]
+    val service = new JwtServiceImpl[Try](config)
     service.init.get
     service
   }

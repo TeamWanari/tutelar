@@ -3,6 +3,7 @@ package com.wanari.tutelar.providers.oauth2
 import akka.http.scaladsl.model._
 import akka.stream.ActorMaterializer
 import com.wanari.tutelar.TestBase
+import com.wanari.tutelar.core.AuthService.TokenData
 import com.wanari.tutelar.core.{AuthService, CsrfService}
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.{
   OAuth2Config,
@@ -16,7 +17,7 @@ import org.mockito.ArgumentMatchersSugar._
 import org.mockito.Mockito._
 import spray.json.{JsObject, JsTrue}
 
-import scala.util.{Failure, Try}
+import scala.util.{Failure, Success, Try}
 
 class OAuth2ServiceSpec extends TestBase {
 
@@ -113,21 +114,21 @@ class OAuth2ServiceSpec extends TestBase {
     "authenticateWithCallback correctly" in new Scope {
       when(service.csrfService.checkCsrfToken("dummy", "state")) thenReturn Try({})
       when(service.authService.registerOrLogin("dummy", "id", "token", JsObject("raw" -> JsTrue))) thenReturn Try(
-        "ultimateUri"
+        TokenData("ToKeN", "refresh")
       )
       when(service.http.singleRequest(any[HttpRequest])(any[LogContext])) thenReturn Try(HttpResponse())
       when(service.http.unmarshalEntityTo[TokenResponseHelper](HttpResponse())) thenReturn Try(
         TokenResponseHelper("token")
       )
 
-      service.authenticateWithCallback("code", "state").get shouldBe "ultimateUri"
+      service.authenticateWithCallback("code", "state") shouldBe Success(TokenData("ToKeN", "refresh"))
     }
 
     "authenticateWithAccessToken correctly" in new Scope {
       when(service.authService.registerOrLogin("dummy", "id", "token", JsObject("raw" -> JsTrue))) thenReturn Try(
-        "ultimateUri"
+        TokenData("ToKeN", "refresh")
       )
-      service.authenticateWithAccessToken("token").get shouldBe "ultimateUri"
+      service.authenticateWithAccessToken("token") shouldBe Success(TokenData("ToKeN", "refresh"))
     }
   }
 

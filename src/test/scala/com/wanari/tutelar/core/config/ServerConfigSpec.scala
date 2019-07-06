@@ -42,9 +42,9 @@ class ServerConfigSpec extends TestBase {
     )
   }
 
-  "#getJwtConfig" in {
+  "#getShortTermJwtConfig" in {
     val service = new ServerConfigImpl[Try]()
-    val config  = service.getJwtConfig
+    val config  = service.getJwtConfigByName("example")
     config shouldBe JwtConfig(
       1.day,
       "HS256",
@@ -57,7 +57,7 @@ class ServerConfigSpec extends TestBase {
   "#getCallbackConfig" in {
     val service = new ServerConfigImpl[Try]()
     val config  = service.getCallbackConfig
-    config.success shouldEqual "url?t=<<TOKEN>>"
+    config.success shouldEqual "url?t=<<TOKEN>>&rt=<<REFRESH_TOKEN>>"
     config.failure shouldEqual "url?e=<<ERROR>>"
   }
 

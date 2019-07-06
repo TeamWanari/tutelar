@@ -11,6 +11,7 @@ import org.mockito.ArgumentMatchersSugar.{any, eqTo}
 import org.mockito.Mockito.{verify, when}
 import spray.json._
 
+import scala.concurrent.duration.Duration
 import scala.util.{Failure, Success, Try}
 
 class TotpServiceSpec extends TestBase {
@@ -26,14 +27,20 @@ class TotpServiceSpec extends TestBase {
     implicit val configF = () => Success(TotpConfig("SHA1", 1, 30000, 6, true))
     val random           = mock[SecureRandom]
 
+    val jwtServiceMock = mock[JwtService[Try]]
+
     lazy val service = new TotpServiceImpl[Try]() {
       protected override def now: Long                  = 0
       protected override val secureRandom: SecureRandom = random
+
+      protected override val jwtService = jwtServiceMock
     }
   }
 
   "qrCodeData" should {
     "generate a valid token with url" in new TestScope {
+      when(jwtServiceMock.encode(any[JsObject], any[Option[Duration]])).thenReturn(Success("JWT"))
+
       service.qrCodeData shouldBe Success(
         QRData(
           "JWT",
@@ -52,10 +59,10 @@ class TotpServiceSpec extends TestBase {
       )
     }
     "successful" in new TestScope {
-      initMock(jwtService)
+      initMock(jwtServiceMock)
 
       service.register("newuser", "token", "755224", None)
-      verify(jwtService).validateAndDecode("token")
+      verify(jwtServiceMock).validateAndDecode("token")
 
       val newuserData = databaseService.accounts.get(authType -> "newuser")
       newuserData shouldBe a[Some[_]]
@@ -63,7 +70,7 @@ class TotpServiceSpec extends TestBase {
     }
 
     "sends extra data via hook" in new TestScope {
-      initMock(jwtService)
+      initMock(jwtServiceMock)
       service.register("newuser", "token", "755224", Some(JsObject("hello" -> JsTrue)))
 
       verify(hookService).register(any[String], eqTo("newuser"), eqTo("TOTP"), eqTo(JsObject("hello" -> JsTrue)))(
@@ -77,12 +84,12 @@ class TotpServiceSpec extends TestBase {
         service.register(savedAccount.externalId, "token", "755224", None) shouldBe a[Failure[_]]
       }
       "the incoming token is not valid" in new TestScope {
-        when(jwtService.validateAndDecode(any[String])).thenReturn(Failure(new Exception))
+        when(jwtServiceMock.validateAndDecode(any[String])).thenReturn(Failure(new Exception))
         service.register("newuser", "token", "755224", None) shouldBe a[Failure[_]]
       }
 
       "the token + pass pair not match" in new TestScope {
-        initMock(jwtService)
+        initMock(jwtServiceMock)
         service.register("newuser", "token", "755225", None) shouldBe a[Failure[_]]
       }
     }
@@ -90,7 +97,7 @@ class TotpServiceSpec extends TestBase {
     "#login" should {
       "successful" in new TestScope {
         initDb()
-        service.login(savedAccount.externalId, "755224", None) shouldBe Success(jwtTokenResponse)
+        service.login(savedAccount.externalId, "755224", None) shouldBe Success(authenticateResponse)
       }
       "send extra data via hook" in new TestScope {
         initDb()

@@ -2,16 +2,12 @@ package com.wanari.tutelar.core.impl
 
 import cats.MonadError
 import cats.data.OptionT
-import com.wanari.tutelar.core.AuthService.Token
+import com.wanari.tutelar.core.AuthService.{LongTermToken, ShortTermToken, TokenData}
 import com.wanari.tutelar.core.DatabaseService.{Account, User}
-import com.wanari.tutelar.core.Errors.{
-  AccountNotFound,
-  AccountUsed,
-  UserHadThisAccountType,
-  UserLastAccount,
-  UserNotFound
-}
-import com.wanari.tutelar.core.{AuthService, DatabaseService, HookService, JwtService}
+import com.wanari.tutelar.core.Errors._
+import com.wanari.tutelar.core._
+import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl
+import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.{DateTimeUtil, IdGenerator}
 import spray.json.{JsObject, JsString}
@@ -21,24 +17,34 @@ class AuthServiceImpl[F[_]: MonadError[?[_], Throwable]](
     hookService: HookService[F],
     idGenerator: IdGenerator[F],
     timeService: DateTimeUtil[F],
-    jwtService: JwtService[F]
+    getJwtConfig: String => JwtConfig
 ) extends AuthService[F] {
   import cats.syntax.applicative._
   import cats.syntax.flatMap._
   import cats.syntax.functor._
   import com.wanari.tutelar.util.ApplicativeErrorSyntax._
 
+  protected val longTermTokenService: JwtService[F]  = new JwtServiceImpl[F](getJwtConfig("longTerm"))
+  protected val shortTermTokenService: JwtService[F] = new JwtServiceImpl[F](getJwtConfig("shortTerm"))
+
+  override def init: F[Unit] = {
+    for {
+      _ <- longTermTokenService.init
+      _ <- shortTermTokenService.init
+    } yield ()
+  }
+
   override def registerOrLogin(
       authType: String,
       externalId: String,
       customData: String,
       providedData: JsObject
-  )(implicit ctx: LogContext): F[Token] = {
+  )(implicit ctx: LogContext): F[TokenData] = {
     val standardizedExternalId = convertToStandardizedLowercase(externalId)
     for {
       account_hookresponse <- createOrUpdateAccount(authType, standardizedExternalId, customData, providedData)
       (account, hookResponse) = account_hookresponse
-      token <- createJwt(account, hookResponse)
+      token <- createTokenData(account, hookResponse)
     } yield token
   }
 
@@ -56,9 +62,9 @@ class AuthServiceImpl[F[_]: MonadError[?[_], Throwable]](
     } yield ()
   }
 
-  override def findUserIdInToken(token: String): OptionT[F, String] = {
+  override def findUserIdInShortTermToken(token: ShortTermToken): OptionT[F, String] = {
     OptionT(for {
-      decoded <- jwtService.validateAndDecode(token)
+      decoded <- shortTermTokenService.validateAndDecode(token)
     } yield {
       decoded.fields.get("id").collect { case JsString(id) => id }
     })
@@ -137,11 +143,14 @@ class AuthServiceImpl[F[_]: MonadError[?[_], Throwable]](
     } yield (account, data)
   }
 
-  private def createJwt(account: Account, extraData: JsObject): F[String] = {
+  private def createTokenData(account: Account, extraData: JsObject): F[TokenData] = {
     for {
-      data <- createJwtData(account, extraData)
-      jwt  <- jwtService.encode(data)
-    } yield jwt
+      data      <- createJwtData(account, extraData)
+      shortTerm <- shortTermTokenService.encode(data)
+      longTerm  <- longTermTokenService.encode(data)
+    } yield {
+      TokenData(shortTerm, longTerm)
+    }
   }
 
   private def createJwtData(account: Account, extraData: JsObject): F[JsObject] = {
@@ -152,5 +161,17 @@ class AuthServiceImpl[F[_]: MonadError[?[_], Throwable]](
   private def convertToStandardizedLowercase(s: String): String = {
     import java.text.Normalizer
     Normalizer.normalize(s, Normalizer.Form.NFC).toLowerCase
+  }
+
+  override def refreshToken(token: LongTermToken): OptionT[F, TokenData] = {
+    for {
+      decoded   <- OptionT.liftF(longTermTokenService.validateAndDecode(token))
+      userId    <- OptionT.fromOption(decoded.fields.get("id").collect { case JsString(id) => id })
+      _         <- OptionT(databaseService.findUserById(userId))
+      shortTerm <- OptionT.liftF(shortTermTokenService.encode(decoded))
+      longTerm  <- OptionT.liftF(longTermTokenService.encode(decoded))
+    } yield {
+      TokenData(shortTerm, longTerm)
+    }
   }
 }

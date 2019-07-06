@@ -7,21 +7,23 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import com.wanari.tutelar.TestBase
 import com.wanari.tutelar.core.ProviderApi._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import com.wanari.tutelar.core.AuthService.TokenData
 
 import scala.concurrent.Future
 
 class ProviderApiSpec extends TestBase with ScalatestRouteTest {
 
   val api = new ProviderApi {
-    override val callbackConfig = ProviderApi.CallbackConfig("loginCallback=<<TOKEN>>", "error=<<ERROR>>")
+    override val callbackConfig =
+      ProviderApi.CallbackConfig("loginCallback=<<TOKEN>>|<<REFRESH_TOKEN>>", "error=<<ERROR>>")
     override def route(): Route = ???
   }
 
   "#completeLoginFlowWithRedirect" when {
     "successful token" in {
-      Get() ~> api.completeLoginFlowWithRedirect(Future.successful("ToKeN")) ~> check {
+      Get() ~> api.completeLoginFlowWithRedirect(Future.successful(TokenData("ToKeN", "ReFrEsH"))) ~> check {
         status shouldEqual StatusCodes.Found
-        headers should contain(Location(Uri("loginCallback=ToKeN")))
+        headers should contain(Location(Uri("loginCallback=ToKeN|ReFrEsH")))
       }
     }
 
@@ -35,9 +37,9 @@ class ProviderApiSpec extends TestBase with ScalatestRouteTest {
 
   "#completeLoginFlowWithJson" when {
     "successful token" in {
-      Get() ~> api.completeLoginFlowWithJson(Future.successful("ToKeN")) ~> check {
+      Get() ~> api.completeLoginFlowWithJson(Future.successful(TokenData("ToKeN", "ReFrEsH"))) ~> check {
         status shouldEqual StatusCodes.OK
-        responseAs[TokenData] shouldEqual TokenData("ToKeN")
+        responseAs[TokenData] shouldEqual TokenData("ToKeN", "ReFrEsH")
       }
     }
 

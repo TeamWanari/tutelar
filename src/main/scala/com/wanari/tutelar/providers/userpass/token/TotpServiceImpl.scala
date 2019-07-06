@@ -4,7 +4,9 @@ import java.security.SecureRandom
 
 import cats.MonadError
 import cats.data.OptionT
-import com.wanari.tutelar.core.AuthService.Token
+import com.wanari.tutelar.core.AuthService.TokenData
+import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl
+import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.core.{AuthService, JwtService}
 import com.wanari.tutelar.providers.userpass.token.OTP.{OTPAlgorithm, OTPKey, TOTP}
 import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl.TotpConfig
@@ -16,7 +18,7 @@ import scala.util.Try
 class TotpServiceImpl[F[_]: MonadError[?[_], Throwable]](
     implicit authService: AuthService[F],
     totpConfig: () => F[TotpConfig],
-    jwtService: JwtService[F]
+    getJwtConfig: String => JwtConfig
 ) extends TotpService[F] {
   import TotpServiceImpl._
   import cats.implicits._
@@ -26,6 +28,12 @@ class TotpServiceImpl[F[_]: MonadError[?[_], Throwable]](
   protected val authType                   = "TOTP"
   protected def now: Long                  = System.currentTimeMillis / 1000
   protected val secureRandom: SecureRandom = OTPKey.defaultPRNG
+
+  protected val jwtService: JwtService[F] = new JwtServiceImpl[F](getJwtConfig("totpProvider"))
+
+  override def init: F[Unit] = {
+    jwtService.init
+  }
 
   override def qrCodeData: F[QRData] = {
     val result = for {
@@ -45,7 +53,7 @@ class TotpServiceImpl[F[_]: MonadError[?[_], Throwable]](
 
   override def register(userName: String, registerToken: String, password: String, data: Option[JsObject])(
       implicit ctx: LogContext
-  ): F[Token] = {
+  ): F[TokenData] = {
     val result = for {
       config           <- OptionT.liftF(totpConfig())
       totpDataAsString <- OptionT.liftF(decodeToken(registerToken))
@@ -59,8 +67,10 @@ class TotpServiceImpl[F[_]: MonadError[?[_], Throwable]](
     result.pureOrRaise(new Exception())
   }
 
-  override def login(username: String, password: String, data: Option[JsObject])(implicit ctx: LogContext): F[Token] = {
-    val result: OptionT[F, Token] = for {
+  override def login(username: String, password: String, data: Option[JsObject])(
+      implicit ctx: LogContext
+  ): F[TokenData] = {
+    val result: OptionT[F, TokenData] = for {
       config    <- OptionT.liftF(totpConfig())
       savedData <- authService.findCustomData(authType, username)
       _         <- checkPassword(savedData, password, config.window)

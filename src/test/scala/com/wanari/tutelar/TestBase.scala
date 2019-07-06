@@ -2,17 +2,19 @@ package com.wanari.tutelar
 
 import akka.actor.ActorSystem
 import cats.MonadError
+import com.wanari.tutelar.core.AuthService.TokenData
 import com.wanari.tutelar.core.DatabaseService.{Account, User}
 import com.wanari.tutelar.core.impl.AuthServiceImpl
 import com.wanari.tutelar.core.impl.database.MemoryDatabaseService
+import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.core.{AuthService, HookService, JwtService}
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.{DateTimeUtilCounterImpl, IdGeneratorCounterImpl}
 import io.opentracing.noop.NoopTracerFactory
 import org.mockito.ArgumentMatchersSugar.any
 import org.mockito.Mockito.when
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
+import org.scalatestplus.mockito.MockitoSugar
 import spray.json.{JsObject, JsString}
 
 import scala.concurrent.duration._
@@ -52,25 +54,32 @@ trait TestBase extends WordSpecLike with Matchers with MockitoSugar with BeforeA
     lazy val hookResponseLogin    = JsObject("group" -> JsString("log"))
     lazy val hookResponseRegister = JsObject("group" -> JsString("reg"))
 
-    implicit lazy val databaseService = new MemoryDatabaseService[F]
-    implicit lazy val idGenerator     = new IdGeneratorCounterImpl[F]
-    implicit lazy val timeService     = new DateTimeUtilCounterImpl[F]
-    implicit lazy val jwtService      = mock[JwtService[F]]
-    implicit lazy val hookService     = mock[HookService[F]]
+    implicit lazy val databaseService           = new MemoryDatabaseService[F]
+    implicit lazy val idGenerator               = new IdGeneratorCounterImpl[F]
+    implicit lazy val timeService               = new DateTimeUtilCounterImpl[F]
+    implicit lazy val shortTermTokenServiceMock = mock[JwtService[F]]
+    implicit lazy val longTermTokenServiceMock  = mock[JwtService[F]]
+    implicit lazy val hookService               = mock[HookService[F]]
 
     def initDb(): F[Unit] = {
       databaseService.saveUser(savedUser)
       databaseService.saveAccount(savedAccount)
     }
 
-    val jwtTokenResponse = "JWT"
-    when(jwtService.encode(any[JsObject], any[Option[Duration]])).thenReturn(jwtTokenResponse.pure[F])
+    val authenticateResponse = TokenData("token", "refresh_token")
+    when(shortTermTokenServiceMock.encode(any[JsObject], any[Option[Duration]])).thenReturn("token".pure[F])
+    when(longTermTokenServiceMock.encode(any[JsObject], any[Option[Duration]])).thenReturn("refresh_token".pure[F])
+
     when(hookService.register(any[String], any[String], any[String], any[JsObject])(any[LogContext]))
       .thenReturn(hookResponseRegister.pure[F])
     when(hookService.login(any[String], any[String], any[String], any[JsObject])(any[LogContext]))
       .thenReturn(hookResponseLogin.pure[F])
 
-    implicit lazy val jwtServiceF                 = jwtService.pure[F]
-    implicit lazy val authService: AuthService[F] = new AuthServiceImpl[F]()
+    implicit def dummyConfigFunction(name: String): JwtConfig = null
+
+    implicit lazy val authService: AuthService[F] = new AuthServiceImpl[F]() {
+      override protected val longTermTokenService: JwtService[F]  = longTermTokenServiceMock
+      override protected val shortTermTokenService: JwtService[F] = shortTermTokenServiceMock
+    }
   }
 }

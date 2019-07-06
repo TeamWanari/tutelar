@@ -14,7 +14,7 @@ import spray.json._
 
 import scala.concurrent.duration.Duration
 
-class JwtServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit config: JwtConfig) extends JwtService[F] {
+class JwtServiceImpl[F[_]: MonadError[?[_], Throwable]](config: JwtConfig) extends JwtService[F] {
 
   import cats.syntax.flatMap._
   import cats.syntax.functor._

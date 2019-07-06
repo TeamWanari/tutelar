@@ -25,7 +25,7 @@ trait ServerConfig[F[_]] extends Initable[F] {
 
   implicit def getTracerServiceConfig: TracerServiceConfig
 
-  implicit def getJwtConfig: JwtConfig
+  implicit def getJwtConfigByName(name: String): JwtConfig
 
   implicit def getCallbackConfig: CallbackConfig
 
@@ -76,8 +76,8 @@ class ServerConfigImpl[F[_]: MonadError[?[_], Throwable]]() extends ServerConfig
     )
   }
 
-  override implicit def getJwtConfig: JwtConfig = {
-    val config = conf.getConfig("jwt")
+  override implicit def getJwtConfigByName(name: String): JwtConfig = {
+    val config = conf.getConfig(s"jwt.$name")
     JwtConfig(
       FiniteDuration(config.getDuration("expirationTime").getSeconds, TimeUnit.SECONDS),
       config.getString("algorithm"),

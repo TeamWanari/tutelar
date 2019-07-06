@@ -2,6 +2,7 @@ package com.wanari.tutelar.providers.userpass.email
 
 import cats.MonadError
 import com.wanari.tutelar.TestBase
+import com.wanari.tutelar.core.JwtService
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.NonEmptyPasswordChecker
 import org.mindrot.jbcrypt.BCrypt
@@ -24,14 +25,19 @@ class EmailProviderServiceSpec extends TestBase {
 
     implicit val passwordChecker = new NonEmptyPasswordChecker[Try]
 
-    lazy val service = new EmailProviderServiceImpl[Try]()
+    val jwtServiceMock = mock[JwtService[Try]]
+    when(jwtServiceMock.encode(any[JsObject], any[Option[Duration]])).thenReturn(Success("email_token"))
+
+    lazy val service = new EmailProviderServiceImpl[Try]() {
+      override protected val jwtService = jwtServiceMock
+    }
   }
 
   "EmailProviderService" should {
     "#login" should {
       "successful" in new TestScope {
         initDb()
-        service.login(savedAccount.externalId, "secretpw", None) shouldBe Success(jwtTokenResponse)
+        service.login(savedAccount.externalId, "secretpw", None) shouldBe Success(authenticateResponse)
       }
       "send extra data via hook" in new TestScope {
         initDb()
@@ -55,7 +61,7 @@ class EmailProviderServiceSpec extends TestBase {
     }
     "#register" should {
       "successful" in new TestScope {
-        when(jwtService.validateAndDecode(any[String])).thenReturn(
+        when(jwtServiceMock.validateAndDecode(any[String])).thenReturn(
           Success(
             JsObject(
               "email" -> JsString("new@user"),
@@ -63,16 +69,16 @@ class EmailProviderServiceSpec extends TestBase {
             )
           )
         )
-        service.register("emailRegisterToken", "pw", None) shouldBe Success(jwtTokenResponse)
+        service.register("emailRegisterToken", "pw", None) shouldBe Success(authenticateResponse)
 
-        verify(jwtService).validateAndDecode("emailRegisterToken")
+        verify(jwtServiceMock).validateAndDecode("emailRegisterToken")
 
         val newUserData = databaseService.accounts.get(authType -> "new@user")
         newUserData shouldBe a[Some[_]]
         BCrypt.checkpw("pw", newUserData.get.customData) shouldBe true
       }
       "send extra data via hook" in new TestScope {
-        when(jwtService.validateAndDecode(any[String])).thenReturn(
+        when(jwtServiceMock.validateAndDecode(any[String])).thenReturn(
           Success(
             JsObject(
               "email" -> JsString("new@user"),
@@ -89,7 +95,7 @@ class EmailProviderServiceSpec extends TestBase {
       "failure" when {
         "password is weak" in new TestScope {
 
-          when(jwtService.validateAndDecode(any[String])).thenReturn(
+          when(jwtServiceMock.validateAndDecode(any[String])).thenReturn(
             Success(
               JsObject(
                 "email" -> JsString("new@user"),
@@ -101,12 +107,12 @@ class EmailProviderServiceSpec extends TestBase {
         }
         "username is already used" in new TestScope {
           initDb()
-          when(jwtService.validateAndDecode(any[String]))
+          when(jwtServiceMock.validateAndDecode(any[String]))
             .thenReturn(Success(JsObject("email" -> JsString(savedAccount.externalId))))
           service.register(savedAccount.externalId, "", None) shouldBe a[Failure[_]]
         }
         "token is not for register" in new TestScope {
-          when(jwtService.validateAndDecode(any[String])).thenReturn(
+          when(jwtServiceMock.validateAndDecode(any[String])).thenReturn(
             Success(
               JsObject(
                 "email" -> JsString("new@user"),
@@ -117,7 +123,7 @@ class EmailProviderServiceSpec extends TestBase {
           service.register("", "pw", Some(JsObject("hello" -> JsTrue))) shouldBe a[Failure[_]]
         }
         "token is wrong" in new TestScope {
-          when(jwtService.validateAndDecode(any[String])).thenReturn(Failure(new Exception))
+          when(jwtServiceMock.validateAndDecode(any[String])).thenReturn(Failure(new Exception))
           service.register("", "pw", Some(JsObject("hello" -> JsTrue))) shouldBe a[Failure[_]]
         }
       }
@@ -130,11 +136,13 @@ class EmailProviderServiceSpec extends TestBase {
       }
       "create token with the email address and type" in new TestScope {
         service.sendRegister("test@email")
-        verify(jwtService).encode(JsObject("email" -> JsString("test@email"), "type" -> JsString("register")))
+        verify(jwtServiceMock).encode(
+          JsObject("email" -> JsString("test@email"), "type" -> JsString("register"))
+        )
       }
       "call send service" in new TestScope {
         when(emailService.sendRegisterUrl(any[String], any[String])(any[LogContext])).thenReturn(Success(()))
-        when(jwtService.encode(any[JsObject], any[Option[Duration]])).thenReturn(Success("REG_TOKEN"))
+        when(jwtServiceMock.encode(any[JsObject], any[Option[Duration]])).thenReturn(Success("REG_TOKEN"))
         service.sendRegister("")
         verify(emailService).sendRegisterUrl(any[String], eqTo("REG_TOKEN"))(any[LogContext])
       }
@@ -146,7 +154,7 @@ class EmailProviderServiceSpec extends TestBase {
   }
   "#reset-password" should {
     trait ResetPasswordScope extends TestScope {
-      when(jwtService.validateAndDecode(any[String])).thenReturn(
+      when(jwtServiceMock.validateAndDecode(any[String])).thenReturn(
         Success(
           JsObject(
             "email" -> JsString(savedExternalId),
@@ -158,12 +166,12 @@ class EmailProviderServiceSpec extends TestBase {
 
     "successful" in new ResetPasswordScope {
       initDb()
-      service.resetPassword("resetToken", "pw", None) shouldBe Success(jwtTokenResponse)
-      verify(jwtService).validateAndDecode("resetToken")
+      service.resetPassword("resetToken", "pw", None) shouldBe Success(authenticateResponse)
+      verify(jwtServiceMock).validateAndDecode("resetToken")
     }
     "change the password" in new ResetPasswordScope {
       initDb()
-      service.resetPassword("resetToken", "new_secret", None) shouldBe Success(jwtTokenResponse)
+      service.resetPassword("resetToken", "new_secret", None) shouldBe Success(authenticateResponse)
 
       val userData = databaseService.accounts.get(authType -> savedExternalId)
       userData shouldBe a[Some[_]]
@@ -185,7 +193,7 @@ class EmailProviderServiceSpec extends TestBase {
       }
       "wrong token" in new TestScope {
         initDb()
-        when(jwtService.validateAndDecode(any[String])).thenReturn(
+        when(jwtServiceMock.validateAndDecode(any[String])).thenReturn(
           Success(
             JsObject(
               "email" -> JsString(savedExternalId),
@@ -197,7 +205,7 @@ class EmailProviderServiceSpec extends TestBase {
       }
       "token is wrong" in new TestScope {
         initDb()
-        when(jwtService.validateAndDecode(any[String])).thenReturn(Failure(new Exception))
+        when(jwtServiceMock.validateAndDecode(any[String])).thenReturn(Failure(new Exception))
         service.resetPassword("", "pw", None) shouldBe a[Failure[_]]
       }
     }
@@ -216,12 +224,12 @@ class EmailProviderServiceSpec extends TestBase {
     "create token with the email address and type" in new TestScope {
       initDb()
       service.sendResetPassword(savedExternalId)
-      verify(jwtService).encode(JsObject("email" -> JsString(savedExternalId), "type" -> JsString("reset")))
+      verify(jwtServiceMock).encode(JsObject("email" -> JsString(savedExternalId), "type" -> JsString("reset")))
     }
     "and call send service" in new TestScope {
       initDb()
       when(emailService.sendResetPasswordUrl(any[String], any[String])(any[LogContext])).thenReturn(Success(()))
-      when(jwtService.encode(any[JsObject], any[Option[Duration]])).thenReturn(Success("RESET_TOKEN"))
+      when(jwtServiceMock.encode(any[JsObject], any[Option[Duration]])).thenReturn(Success("RESET_TOKEN"))
       service.sendResetPassword(savedExternalId)
       verify(emailService).sendResetPasswordUrl(any[String], eqTo("RESET_TOKEN"))(any[LogContext])
     }

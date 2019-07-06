@@ -1,9 +1,11 @@
 package com.wanari.tutelar.providers.userpass.email
 
 import cats.MonadError
-import com.wanari.tutelar.core.{AuthService, JwtService}
-import com.wanari.tutelar.core.AuthService.Token
+import com.wanari.tutelar.core.AuthService.TokenData
 import com.wanari.tutelar.core.Errors.{InvalidEmailToken, UserNotFound}
+import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl
+import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
+import com.wanari.tutelar.core.{AuthService, JwtService}
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyChecker
 import com.wanari.tutelar.providers.userpass.basic.BasicProviderServiceImpl
 import com.wanari.tutelar.providers.userpass.email.EmailProviderServiceImpl.EmailToken
@@ -14,7 +16,7 @@ class EmailProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](
     implicit emailService: EmailService[F],
     authService: AuthService[F],
     passwordDifficultyChecker: PasswordDifficultyChecker[F],
-    jwtService: JwtService[F]
+    getJwtConfig: String => JwtConfig
 ) extends BasicProviderServiceImpl
     with EmailProviderService[F] {
 
@@ -24,9 +26,15 @@ class EmailProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](
 
   override protected val authType = "EMAIL"
 
+  protected val jwtService: JwtService[F] = new JwtServiceImpl[F](getJwtConfig("emailProvider"))
+
+  override def init: F[Unit] = {
+    jwtService.init
+  }
+
   override def register(registerToken: String, password: String, data: Option[JsObject])(
       implicit ctx: LogContext
-  ): F[Token] = {
+  ): F[TokenData] = {
     for {
       email <- decodeToken(registerToken, EmailToken.RegisterType)
       token <- super.register(email, password, data)
@@ -42,7 +50,7 @@ class EmailProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](
 
   override def resetPassword(resetPasswordToken: String, password: String, data: Option[JsObject])(
       implicit ctx: LogContext
-  ): F[Token] = {
+  ): F[TokenData] = {
     for {
       email <- decodeToken(resetPasswordToken, EmailToken.ResetPasswordType)
       token <- changePasswordAndLogin(email, password, data)
@@ -72,7 +80,7 @@ class EmailProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](
 
   private def changePasswordAndLogin(email: String, password: String, data: Option[JsObject])(
       implicit ctx: LogContext
-  ): F[Token] = {
+  ): F[TokenData] = {
     for {
       _     <- checkIsExists(email)
       token <- authService.registerOrLogin(authType, email, encryptPassword(password), data.getOrElse(JsObject()))
