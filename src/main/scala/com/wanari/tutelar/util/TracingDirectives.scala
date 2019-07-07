@@ -12,7 +12,7 @@ trait TracingDirectives {
 
   def trace(tracer: Tracer, operationName: String): Directive1[Span] = extractRequest.flatMap { req =>
     val parent = Try {
-      import scala.collection.JavaConverters._
+      import scala.jdk.CollectionConverters._
       val headers = req.headers.map(h => (h.name(), h.value())).toMap.asJava
       // This method will throw an IllegalArgumentException for a bad
       // tracer header, or return null for no header. Handle both cases as None

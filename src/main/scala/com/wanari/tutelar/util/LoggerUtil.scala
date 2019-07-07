@@ -26,7 +26,7 @@ object LoggerUtil {
     span.setTag("requestId", requestId)
 
     def getInjectHeaders: immutable.Seq[HttpHeader] = {
-      import scala.collection.JavaConverters._
+      import scala.jdk.CollectionConverters._
       val collector = new java.util.HashMap[String, String]()
       tracer.inject(span.context(), Format.Builtin.HTTP_HEADERS, new TextMapAdapter(collector))
       immutable.Seq(collector.asScala.map(t => RawHeader(t._1, t._2)).toSeq: _*)

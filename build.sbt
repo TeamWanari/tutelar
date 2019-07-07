@@ -1,7 +1,7 @@
 import org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings
 
 lazy val commonSettings = Seq(
-  scalaVersion := "2.12.8",
+  scalaVersion := "2.13.0",
   organization := "com.wanari",
   scalafmtOnCompile := true,
   version := "0.1.0"
@@ -39,7 +39,6 @@ lazy val core = (project in file("."))
       "-language:higherKinds",
       "-language:implicitConversions",
       "-language:postfixOps",
-      "-Ypartial-unification",
       "-Ywarn-dead-code",
       "-Xlint"
     ),

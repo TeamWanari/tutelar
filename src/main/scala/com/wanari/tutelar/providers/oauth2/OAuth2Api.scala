@@ -33,7 +33,7 @@ trait OAuth2Api extends ProviderApi {
             }
         } ~
           path("callback") {
-            parameters(('code.as[String], 'state.as[String])).as(CodeAndState) { codeAndState =>
+            parameters((Symbol("code").as[String], Symbol("state").as[String])).as(CodeAndState) { codeAndState =>
               withTrace(s"Callback_${service.TYPE.toLowerCase}") { implicit ctx =>
                 completeLoginFlowWithRedirect(service.authenticateWithCallback(codeAndState.code, codeAndState.state))
               }

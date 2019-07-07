@@ -24,7 +24,7 @@ object OTP {
     }
 
     def generate(counter: Long, lookAheadWindow: Int): Map[Long, String] = {
-      generateForCounter(this, aheadRange(counter, lookAheadWindow)).mapValues(intToDigits(_, digits))
+      generateForCounter(this, aheadRange(counter, lookAheadWindow)).view.mapValues(intToDigits(_, digits)).toMap
     }
 
     def validate(counter: Long)(code: String): Boolean =
@@ -60,7 +60,7 @@ object OTP {
       generateForCounter(
         this,
         symmetricRange(calculateTimeCounter(period, timestamp, initialTimestamp), window)
-      ).mapValues(intToDigits(_, digits))
+      ).view.mapValues(intToDigits(_, digits)).toMap
     }
 
     def validate(timestamp: Long)(code: String): Boolean =

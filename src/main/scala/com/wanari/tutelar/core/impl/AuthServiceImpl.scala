@@ -168,7 +168,7 @@ class AuthServiceImpl[F[_]: MonadError[?[_], Throwable]](
       decoded   <- OptionT.liftF(longTermTokenService.validateAndDecode(token))
       userId    <- OptionT.fromOption(decoded.fields.get("id").collect { case JsString(id) => id })
       _         <- OptionT(databaseService.findUserById(userId))
-      tokenData <- OptionT.some(JsObject(decoded.fields.filterKeys(_ != "exp")))
+      tokenData <- OptionT.some(JsObject(decoded.fields.view.filterKeys(_ != "exp").toList: _*))
       shortTerm <- OptionT.liftF(shortTermTokenService.encode(tokenData))
       longTerm  <- OptionT.liftF(longTermTokenService.encode(tokenData))
     } yield {

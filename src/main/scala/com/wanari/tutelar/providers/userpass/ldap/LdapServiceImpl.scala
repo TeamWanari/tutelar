@@ -37,7 +37,7 @@ class LdapServiceImpl(
 
   private def attributesConvertToMap(attributes: Attributes): Future[Map[String, JsValue]] = {
     ldapConfig().map { config =>
-      import collection.JavaConverters._
+      import scala.jdk.CollectionConverters._
       val arrayAttributes = config.userSearchReturnArrayAttributes.map(_.toLowerCase)
       attributes.getAll.asScala.map { attribute =>
         val jsValue = if (arrayAttributes.contains(attribute.getID.toLowerCase)) {

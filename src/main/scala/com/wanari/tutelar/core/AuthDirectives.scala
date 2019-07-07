@@ -8,7 +8,7 @@ import scala.concurrent.Future
 trait AuthDirectives {
   val authService: AuthService[Future]
 
-  type AsyncAuthenticator[T] = Credentials ⇒ Future[Option[T]]
+  type AsyncAuthenticator[T] = Credentials => Future[Option[T]]
 
   protected def userAuthenticator: AsyncAuthenticator[String] = {
     case Credentials.Provided(token) => authService.findUserIdInShortTermToken(token).value
