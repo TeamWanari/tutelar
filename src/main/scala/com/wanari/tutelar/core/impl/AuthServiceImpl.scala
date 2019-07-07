@@ -163,13 +163,14 @@ class AuthServiceImpl[F[_]: MonadError[?[_], Throwable]](
     Normalizer.normalize(s, Normalizer.Form.NFC).toLowerCase
   }
 
-  override def refreshToken(token: LongTermToken): OptionT[F, TokenData] = {
+  override def refreshToken(token: LongTermToken)(implicit ctx: LogContext): OptionT[F, TokenData] = {
     for {
       decoded   <- OptionT.liftF(longTermTokenService.validateAndDecode(token))
       userId    <- OptionT.fromOption(decoded.fields.get("id").collect { case JsString(id) => id })
       _         <- OptionT(databaseService.findUserById(userId))
-      shortTerm <- OptionT.liftF(shortTermTokenService.encode(decoded))
-      longTerm  <- OptionT.liftF(longTermTokenService.encode(decoded))
+      tokenData <- OptionT.some(JsObject(decoded.fields.filterKeys(_ != "exp")))
+      shortTerm <- OptionT.liftF(shortTermTokenService.encode(tokenData))
+      longTerm  <- OptionT.liftF(longTermTokenService.encode(tokenData))
     } yield {
       TokenData(shortTerm, longTerm)
     }

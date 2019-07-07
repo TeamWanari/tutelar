@@ -11,6 +11,19 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+  schemas:
+    TokenData:
+      type: object
+      properties:
+        token:
+          type: string
+        refreshToken:
+          type: string
+      example:
+        {
+          "token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTM1Mjk4MjcsImlkIjoiODVhYjE4MjEtODVjYy00NTc5LTg2OWQtZDdkNjU1ODM5ZjhhIn0.TMwADN7addtQPo39KcbF9yVrk-CHv4eSsiA8wNJxfsk",
+          "refreshToken":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTM1Mjk4MjcsImlkIjoiODVhYjE4MjEtODVjYy00NTc5LTg2OWQtZDdkNjU1ODM5ZjhhIn0.TMwADN7addtQPo39KcbF9yVrk-CHv4eSsiA8wNJxfsk"
+        }
 paths:
   /core/delete:
     post:
@@ -40,6 +53,28 @@ paths:
       responses:
         '200':
           description: Success
+  /core/refresh-token:
+    post:
+      description: Get new tokens by refresh token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+            examples:
+              '0':
+                value: >-
+                  {"refreshToken":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTM1Mjk4MjcsImlkIjoiODVhYjE4MjEtODVjYy00NTc5LTg2OWQtZDdkNjU1ODM5ZjhhIn0.TMwADN7addtQPo39KcbF9yVrk-CHv4eSsiA8wNJxfsk"}
+      responses:
+        '200':
+          description: User tokens
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenData'
   /basic/register:
     post:
       description: Simple user-pass register
@@ -58,22 +93,14 @@ paths:
             examples:
               '0':
                 value: >-
-                  {"username":"bob","password":"pw","data":{"fullname":"Bob
-                  Name"}}
+                  {"username":"bob","password":"pw","data":{"fullname":"Bob Name"}}
       responses:
         '200':
-          description: User token
+          description: User tokens
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-              examples:
-                '0':
-                  value: >-
-                    {"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTM1Mjk3MTcsImlkIjoiZjg2ZWQyNjktODNjYi00NWYxLWI5ODctYjkzOTEyYTQyMWY2In0.PjDhREKneBmGzAWRR0bwz9m9bqcg4DJLAihIyzMJ1AQ"}
+                $ref: '#/components/schemas/TokenData'
   /basic/login:
     post:
       description: Simple user-pass login
@@ -92,22 +119,14 @@ paths:
             examples:
               '0':
                 value: >-
-                  {"username":"bob","password":"pw","data":{"fullname":"Bob
-                  Name"}}
+                  {"username":"bob","password":"pw","data":{"fullname":"Bob  Name"}}
       responses:
         '200':
-          description: User token
+          description: User tokens
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-              examples:
-                '0':
-                  value: >-
-                    {"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTM1Mjk3NTAsImlkIjoiZjg2ZWQyNjktODNjYi00NWYxLWI5ODctYjkzOTEyYTQyMWY2In0.IIq1p79F08SYhUgQanqkBKQfjiKsLB-Hw32wsfVALc8"}
+                $ref: '#/components/schemas/TokenData'
   /email/send-register:
     post:
       description: Email-pass send register email
@@ -147,18 +166,11 @@ paths:
                   "password": "pw", "data": {"fullname": "Bob Name"}}
       responses:
         '200':
-          description: User token
+          description: User tokens
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-              examples:
-                '0':
-                  value: >-
-                    {"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTM1MzAwMDUsImlkIjoiN2I5MzYxMDYtZmIwYy00N2IxLWFlOTMtZjhjZjA0ODcxZDU0In0.w1urqr14EfxxaUbmw7JROScwM8b2Rgw5ei-jOJh5730"}
+                $ref: '#/components/schemas/TokenData'
   /email/login:
     post:
       description: Email-pass login
@@ -181,18 +193,11 @@ paths:
                   {"fullname": "Bob Name"}}
       responses:
         '200':
-          description: User token
+          description: User tokens
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-              examples:
-                '0':
-                  value: >-
-                    {"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTM1MzAxMjQsImlkIjoiN2I5MzYxMDYtZmIwYy00N2IxLWFlOTMtZjhjZjA0ODcxZDU0In0.-vUJxaYUnz0FJZQ15rjCZ3WF4tMCLXBnxEzue5LHmRs"}
+                $ref: '#/components/schemas/TokenData'
   /email/send-reset-password:
     post:
       description: Email-pass send reset password email
@@ -232,18 +237,11 @@ paths:
                   "password": "newpw", "data": {"fullname": "Bob Name"}}
       responses:
         '200':
-          description: User token
+          description: User tokens
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-              examples:
-                '0':
-                  value: >-
-                    {"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTM1MzAzMzEsImlkIjoiN2I5MzYxMDYtZmIwYy00N2IxLWFlOTMtZjhjZjA0ODcxZDU0In0.a5LRx6kMDjdnm4GxAW-Jvf2Lk6oniMZIBDZPo69mpEI"}
+                $ref: '#/components/schemas/TokenData'
   /ldap/login:
     post:
       description: LDAP login
@@ -262,18 +260,11 @@ paths:
                 value: '{"username":"bob","password":"bobpw"}'
       responses:
         '200':
-          description: User token
+          description: User tokens
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-              examples:
-                '0':
-                  value: >-
-                    {"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTM1Mjk4MjcsImlkIjoiODVhYjE4MjEtODVjYy00NTc5LTg2OWQtZDdkNjU1ODM5ZjhhIn0.TMwADN7addtQPo39KcbF9yVrk-CHv4eSsiA8wNJxfsk"}
+                $ref: '#/components/schemas/TokenData'
   /github/login:
     get:
       description: Login with GitHub
@@ -295,18 +286,11 @@ paths:
                 value: '{"accessToken":"TOKEN"}'
       responses:
         '200':
-          description: User token
+          description: User tokens
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-              examples:
-                '0':
-                  value: >-
-                    {"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTM1Mjk4MjcsImlkIjoiODVhYjE4MjEtODVjYy00NTc5LTg2OWQtZDdkNjU1ODM5ZjhhIn0.TMwADN7addtQPo39KcbF9yVrk-CHv4eSsiA8wNJxfsk"}
+                $ref: '#/components/schemas/TokenData'
   /github/callback:
     get:
       description: GitHub login callback
@@ -343,18 +327,11 @@ paths:
                 value: '{"accessToken":"TOKEN"}'
       responses:
         '200':
-          description: User token
+          description: User tokens
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-              examples:
-                '0':
-                  value: >-
-                    {"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTM1Mjk4MjcsImlkIjoiODVhYjE4MjEtODVjYy00NTc5LTg2OWQtZDdkNjU1ODM5ZjhhIn0.TMwADN7addtQPo39KcbF9yVrk-CHv4eSsiA8wNJxfsk"}
+                $ref: '#/components/schemas/TokenData'
   /facebook/callback:
     get:
       description: Facebook login callback
@@ -391,18 +368,11 @@ paths:
                 value: '{"accessToken":"TOKEN"}'
       responses:
         '200':
-          description: User token
+          description: User tokens
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-              examples:
-                '0':
-                  value: >-
-                    {"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTM1Mjk4MjcsImlkIjoiODVhYjE4MjEtODVjYy00NTc5LTg2OWQtZDdkNjU1ODM5ZjhhIn0.TMwADN7addtQPo39KcbF9yVrk-CHv4eSsiA8wNJxfsk"}
+                $ref: '#/components/schemas/TokenData'
   /google/callback:
     get:
       description: Google login callback

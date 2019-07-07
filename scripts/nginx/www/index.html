@@ -37,14 +37,52 @@
             }
         }
 
-        function login(token) {
+        function login(token, refreshToken) {
             try {
                 localStorage.userid = getJwtData(token).id;
                 localStorage.token = token;
+                localStorage.refreshtoken = refreshToken;
             } catch (e) {
                 errorNotification('WRONG TOKEN');
             } finally {
                 window.location.replace('https://lvh.me:9443/index.html');
+            }
+        }
+
+        function refreshToken() {
+            var data = {
+                refreshToken: localStorage.refreshtoken
+            };
+            $.ajax({
+                type: 'POST',
+                url: '/core/refresh-token',
+                data: JSON.stringify(data),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                success: function (data) {
+                    localStorage.token = data.token;
+                    localStorage.refreshtoken = data.refreshToken;
+                    refreshTokenDisplay();
+                }
+            }).fail(function (data) {
+                try {
+                    errorNotification(data.responseJSON.error);
+                } catch (e) {
+                    errorNotification('Unknown error');
+                }
+            });
+        }
+
+        function refreshTokenDisplay() {
+            try {
+                $('#tokendata').text(JSON.stringify(getJwtData(localStorage.token)));
+            } catch (e) {
+                $('#tokendata').text("ERROR");
+            }
+            try {
+                $('#refreshtokendata').text(JSON.stringify(getJwtData(localStorage.refreshtoken)));
+            } catch (e) {
+                $('#refreshtokendata').text("ERROR");
             }
         }
 
@@ -199,6 +237,7 @@
         function logout() {
             localStorage.removeItem('userid');
             localStorage.removeItem('token');
+            localStorage.removeItem('refreshtoken');
             window.location.replace('https://lvh.me:9443/index.html');
         }
 
@@ -254,14 +293,15 @@
             $('#reset_password_email').click(resetPasswordWithEmail);
             $('#generate_qr').click(getTOTPData);
             $('#delete').click(deleteAccount);
+            $('#refreshtoken').click(refreshToken);
         }
 
         function handleCallbackLogin() {
             if (params.has('error')) {
                 errorNotification(params.get('error'));
             }
-            if (params.has('token')) {
-                login(params.get('token'));
+            if (params.has('token') && params.has('refresh_token')) {
+                login(params.get('token'), params.get('refresh_token'));
             }
             if (params.has('registerToken')) {
                 var email = getJwtData(params.get('registerToken')).email;
@@ -291,6 +331,7 @@
 
             if (!!localStorage.userid) {
                 $('#userid').text(localStorage.userid);
+                refreshTokenDisplay();
                 $('#authenticated').show();
             } else {
                 $('#login').show();
@@ -344,6 +385,9 @@
         #delete {
             background-color: red;
         }
+        #refreshtoken {
+            background-color: lightgreen;
+        }
         #qrcode {
             float:right;
         }
@@ -389,7 +433,10 @@
 <div id="authenticated" style="display: none">
     Hello <b><span id="userid"></span></b>!<br/>
     <button id="logout">Logout</button>
-    <button id="delete">Delete Account</button>
+    <button id="delete">Delete Account</button><br/><br/>
+    <button id="refreshtoken">Refresh Token</button>
+    <pre id="tokendata">{}</pre>
+    <pre id="refreshtokendata">{}</pre>
 </div>
 
 <div id="error" style="display: none"></div>

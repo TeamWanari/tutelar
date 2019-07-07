@@ -10,7 +10,7 @@ import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.{DateTimeUtilCounterImpl, IdGeneratorCounterImpl}
 import org.mockito.ArgumentMatchersSugar._
 import org.mockito.Mockito.{verify, when}
-import spray.json.{JsObject, JsString}
+import spray.json.{JsNumber, JsObject, JsString}
 
 import scala.concurrent.duration.Duration
 import scala.util.{Failure, Success, Try}
@@ -234,11 +234,45 @@ class AuthServiceSpec extends TestBase {
       service.unlink(savedUser.id, account.authType) shouldBe Success(())
       databaseService.listAccountsByUserId(savedUser.id) shouldEqual Success(Seq(savedAccount))
     }
-    "call hook servicet " in new TestScope {
+    "call hook service " in new TestScope {
       val account = Account("new_type", "some_ext_id", savedUser.id, "somedata")
       databaseService.saveAccount(account)
       service.unlink(savedUser.id, account.authType) shouldBe Success(())
       verify(hookService).unlink(eqTo(savedUser.id), eqTo(account.externalId), eqTo(account.authType))(any[LogContext])
+    }
+  }
+
+  "#refresh-token" when {
+    "validate as long term token" in new TestScope {
+      when(longTermTokenServiceMock.validateAndDecode(any[String]))
+        .thenReturn(Success(JsObject("id" -> JsString(savedUser.id))))
+      service.refreshToken("long_term_token").value.toOption
+      verify(longTermTokenServiceMock).validateAndDecode("long_term_token")
+    }
+    "create new token with the previous token data without exp" in new TestScope {
+      val originalTokenData =
+        JsObject("id" -> JsString(savedUser.id), "exp" -> JsNumber(111), "randomData" -> JsString("data"))
+      val withoutExp = JsObject("id" -> JsString(savedUser.id), "randomData" -> JsString("data"))
+      when(longTermTokenServiceMock.validateAndDecode(any[String])).thenReturn(Success(originalTokenData))
+
+      service.refreshToken("long_term_token").value.toOption
+      verify(longTermTokenServiceMock).encode(withoutExp)
+      verify(shortTermTokenServiceMock).encode(withoutExp)
+    }
+    "return with new token data" in new TestScope {
+      when(longTermTokenServiceMock.validateAndDecode(any[String]))
+        .thenReturn(Success(JsObject("id" -> JsString(savedUser.id))))
+      service.refreshToken("long_term_token").value shouldBe Success(Some(TokenData("JWT", "JWT_LONG")))
+    }
+    "fail if not contains id" in new TestScope {
+      when(longTermTokenServiceMock.validateAndDecode(any[String]))
+        .thenReturn(Success(JsObject("notid" -> JsString(savedUser.id))))
+      service.refreshToken("long_term_token").value shouldBe Success(None)
+    }
+    "fail if user not found" in new TestScope {
+      when(longTermTokenServiceMock.validateAndDecode(any[String]))
+        .thenReturn(Success(JsObject("id" -> JsString("random_id"))))
+      service.refreshToken("long_term_token").value shouldBe Success(None)
     }
   }
 

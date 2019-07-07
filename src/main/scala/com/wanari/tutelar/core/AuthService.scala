@@ -17,7 +17,7 @@ trait AuthService[F[_]] extends Initable[F] {
       implicit ctx: LogContext
   ): F[Unit]
   def unlink(userId: String, authType: String)(implicit ctx: LogContext): F[Unit]
-  def refreshToken(token: LongTermToken): OptionT[F, TokenData]
+  def refreshToken(token: LongTermToken)(implicit ctx: LogContext): OptionT[F, TokenData]
 }
 
 object AuthService {
