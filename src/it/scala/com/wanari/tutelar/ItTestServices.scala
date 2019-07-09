@@ -52,4 +52,5 @@ class ItTestServices(implicit ec: ExecutionContext) extends Services[Future] {
     new PasswordDifficultyCheckerImpl[Future]
   override implicit val tracerService: TracerService[Future]     = new TracerService[Future]()
   override implicit val rabbitMqService: RabbitMqService[Future] = null
+  override implicit val amqpService: AmqpService[Future]         = null
 }

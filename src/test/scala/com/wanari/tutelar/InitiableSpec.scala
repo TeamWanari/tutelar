@@ -1,5 +1,6 @@
 package com.wanari.tutelar
 
+import com.wanari.tutelar.core.AmqpService
 import com.wanari.tutelar.core.HookService.HookConfig
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
 import com.wanari.tutelar.core.TracerService.TracerServiceConfig
@@ -34,6 +35,7 @@ class InitiableSpec extends TestBase {
       override def getJwtConfigByName(name: String): JwtServiceImpl.JwtConfig = ???
       override def getCallbackConfig: CallbackConfig                          = ???
       override def getHookConfig: HookConfig                                  = ???
+      override def getAmqpConfig: AmqpService.AmqpConfig                      = ???
     }
   }
   import cats.instances.try_._

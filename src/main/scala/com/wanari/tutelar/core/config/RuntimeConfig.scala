@@ -1,6 +1,7 @@
 package com.wanari.tutelar.core.config
 import cats.MonadError
 import com.typesafe.config.Config
+import com.wanari.tutelar.core.AmqpService.AmqpQueueConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
 import com.wanari.tutelar.providers.userpass.email.EmailServiceFactory.EmailServiceFactoryConfig
@@ -14,6 +15,7 @@ trait RuntimeConfig[F[_]] {
   implicit val emailServiceHttpConfig: () => F[EmailServiceHttpConfig]
   implicit val emailServiceRabbitMqConfig: () => F[EmailServiceRabbitMqConfig]
   implicit val totpConfig: () => F[TotpConfig]
+  implicit def getAmqpQueueConfig(name: String): F[AmqpQueueConfig]
 
   val facebookConfig: () => F[OAuth2Config]
   val githubConfig: () => F[OAuth2Config]

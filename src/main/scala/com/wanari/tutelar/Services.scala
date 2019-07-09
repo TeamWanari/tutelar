@@ -7,7 +7,7 @@ import com.wanari.tutelar.core._
 import com.wanari.tutelar.core.config.{ServerConfig, ServerConfigImpl}
 import com.wanari.tutelar.core.healthcheck.{HealthCheckService, HealthCheckServiceImpl}
 import com.wanari.tutelar.core.impl.database._
-import com.wanari.tutelar.core.impl.{AuthServiceImpl, CsrfServiceNotChecked, HookServiceImpl, RabbitMqServiceImpl}
+import com.wanari.tutelar.core.impl._
 import com.wanari.tutelar.providers.oauth2.{FacebookService, GithubService, GoogleService}
 import com.wanari.tutelar.providers.userpass.basic.{BasicProviderService, BasicProviderServiceImpl}
 import com.wanari.tutelar.providers.userpass.email._
@@ -40,6 +40,7 @@ trait Services[F[_]] {
   implicit val passwordDifficultyChecker: PasswordDifficultyChecker[F]
   implicit val tracerService: TracerService[F]
   implicit val rabbitMqService: RabbitMqService[F]
+  implicit val amqpService: AmqpService[F]
 
   def init()(implicit logger: Logger, ev: MonadError[F, Throwable]): F[Unit] = {
     import Initable._
@@ -53,6 +54,7 @@ trait Services[F[_]] {
       _ <- initialize(databaseService, "database")
       _ <- initialize(authService, "auth_service")
       _ <- initializeIfEnabled(rabbitMqService, "rabbitmq")
+      _ <- initializeIfEnabled(amqpService, "ampq")
       _ <- initializeIfEnabled(emailLoginService, "email")
       _ <- initializeIfEnabled(totpService, "totp")
       _ <- initializeIfEnabled(ldapService, "ldap")
@@ -92,6 +94,7 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
   implicit lazy val totpService: TotpService[Future]                = new TotpServiceImpl[Future]()
   implicit lazy val passwordDifficultyChecker: PasswordDifficultyChecker[Future] =
     new PasswordDifficultyCheckerImpl[Future]
-  implicit lazy val tracerService: TracerService[Future]         = new TracerService[Future]()
-  override implicit val rabbitMqService: RabbitMqService[Future] = new RabbitMqServiceImpl[Future]()
+  implicit lazy val tracerService: TracerService[Future] = new TracerService[Future]()
+  implicit val rabbitMqService: RabbitMqService[Future]  = new RabbitMqServiceImpl[Future]()
+  implicit val amqpService: AmqpService[Future]          = new AmqpServiceImpl[Future]()
 }

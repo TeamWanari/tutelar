@@ -1,5 +1,6 @@
 package com.wanari.tutelar.core.config
 import com.wanari.tutelar.TestBase
+import com.wanari.tutelar.core.AmqpService.AmqpQueueConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
 import com.wanari.tutelar.providers.userpass.email.EmailServiceFactory.EmailServiceFactoryConfig
@@ -8,7 +9,7 @@ import com.wanari.tutelar.providers.userpass.email.EmailServiceRabbitMqImpl.Emai
 import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
 import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl.TotpConfig
 
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 class RuntimeConfigFromConfSpec extends TestBase {
   import cats.instances.try_._
@@ -103,5 +104,10 @@ class RuntimeConfigFromConfSpec extends TestBase {
     config shouldBe EmailServiceFactoryConfig(
       "TYPE"
     )
+  }
+  "#getAmqpQueueConfig" in {
+    val service = new RuntimeConfigFromConf[Try](confFile)
+    service.getAmqpQueueConfig("email_service") shouldBe Success(AmqpQueueConfig(Some("RK"), Some("EX"), 777))
+    service.getAmqpQueueConfig("random") shouldBe a[Failure[_]]
   }
 }

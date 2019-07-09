@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit
 import cats.MonadError
 import com.typesafe.config.{Config, ConfigFactory}
 import com.wanari.tutelar.Initable
+import com.wanari.tutelar.core.AmqpService.AmqpConfig
 import com.wanari.tutelar.core.Errors.WrongConfig
 import com.wanari.tutelar.core.HookService.{BasicAuthConfig, HookConfig}
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
@@ -30,6 +31,8 @@ trait ServerConfig[F[_]] extends Initable[F] {
   implicit def getCallbackConfig: CallbackConfig
 
   implicit def getHookConfig: HookConfig
+
+  implicit def getAmqpConfig: AmqpConfig
 }
 
 class ServerConfigImpl[F[_]: MonadError[?[_], Throwable]]() extends ServerConfig[F] {
@@ -107,6 +110,13 @@ class ServerConfigImpl[F[_]: MonadError[?[_], Throwable]]() extends ServerConfig
     HookConfig(
       config.getString("baseUrl"),
       authConfig
+    )
+  }
+
+  override implicit def getAmqpConfig: AmqpConfig = {
+    val config = conf.getConfig("amqp")
+    AmqpConfig(
+      config.getString("uri")
     )
   }
 }

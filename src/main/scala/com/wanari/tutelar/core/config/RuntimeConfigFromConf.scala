@@ -2,6 +2,7 @@ package com.wanari.tutelar.core.config
 
 import cats.MonadError
 import com.typesafe.config.{Config, ConfigFactory}
+import com.wanari.tutelar.core.AmqpService.AmqpQueueConfig
 import com.wanari.tutelar.core.Errors.WrongConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
@@ -14,6 +15,7 @@ import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl.TotpConfig
 
 class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String) extends RuntimeConfig[F] {
   import cats.syntax.applicative._
+  import cats.syntax.functor._
   import com.wanari.tutelar.util.ApplicativeErrorSyntax._
 
   private lazy val conf: Config = ConfigFactory.load(filepath)
@@ -28,6 +30,16 @@ class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String)
   val googleConfig: () => F[OAuth2Config]      = () => readOauth2Config("oauth2.google")
   implicit val ldapConfig: () => F[LdapConfig] = readLdapConfig _
   implicit val totpConfig: () => F[TotpConfig] = readTOTPConfig _
+
+  implicit def getAmqpQueueConfig(name: String): F[AmqpQueueConfig] = {
+    val pathF: F[String] = name match {
+      case "email_service" => "userpass.email.amqp".pure[F]
+      case _               => new IllegalArgumentException(s"$name unknown AMQP type.").raise
+    }
+    pathF
+      .map(conf.getConfig)
+      .map(AmqpQueueConfig(_))
+  }
 
   private def readLdapConfig = {
     val config = conf.getConfig("ldap")
