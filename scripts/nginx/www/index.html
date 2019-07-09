@@ -108,7 +108,7 @@
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
                 success: function (data) {
-                    login(data.token);
+                    login(data.token, data.refreshToken);
                 }
             }).fail(function (data) {
                 try {
@@ -132,7 +132,7 @@
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
                 success: function (data) {
-                    login(data.token);
+                    login(data.token, data.refreshToken);
                 }
             }).fail(function (data) {
                 try {
@@ -193,7 +193,7 @@
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
                 success: function (data) {
-                    login(data.token);
+                    login(data.token, data.refreshToken);
                 }
             }).fail(function (data) {
                 try {
