@@ -8,7 +8,6 @@ import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
 import com.wanari.tutelar.providers.userpass.email.EmailServiceFactory.EmailServiceFactoryConfig
 import com.wanari.tutelar.providers.userpass.email.EmailServiceHttpImpl.EmailServiceHttpConfig
-import com.wanari.tutelar.providers.userpass.email.EmailServiceRabbitMqImpl.EmailServiceRabbitMqConfig
 import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
 import com.wanari.tutelar.providers.userpass.token.OTP.OTPAlgorithm
 import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl.TotpConfig
@@ -20,10 +19,9 @@ class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String)
 
   private lazy val conf: Config = ConfigFactory.load(filepath)
 
-  implicit val emailServiceFactoryConfig: () => F[EmailServiceFactoryConfig]   = readEmailServiceFactoryConfig _
-  implicit val emailServiceHttpConfig: () => F[EmailServiceHttpConfig]         = readEmailServiceConfig _
-  implicit val emailServiceRabbitMqConfig: () => F[EmailServiceRabbitMqConfig] = readEmailServiceRabbitMqConfig _
-  implicit val passwordSettings: () => F[PasswordSettings]                     = readPasswordSettings _
+  implicit val emailServiceFactoryConfig: () => F[EmailServiceFactoryConfig] = readEmailServiceFactoryConfig _
+  implicit val emailServiceHttpConfig: () => F[EmailServiceHttpConfig]       = readEmailServiceConfig _
+  implicit val passwordSettings: () => F[PasswordSettings]                   = readPasswordSettings _
 
   val facebookConfig: () => F[OAuth2Config]    = () => readOauth2Config("oauth2.facebook")
   val githubConfig: () => F[OAuth2Config]      = () => readOauth2Config("oauth2.github")
@@ -60,13 +58,6 @@ class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String)
       config.getString("serviceUrl"),
       config.getString("serviceUsername"),
       config.getString("servicePassword")
-    )
-  }.pure
-
-  private def readEmailServiceRabbitMqConfig = {
-    val config = conf.getConfig("userpass.email.rabbit-mq")
-    EmailServiceRabbitMqConfig(
-      config.getString("queue")
     )
   }.pure
 

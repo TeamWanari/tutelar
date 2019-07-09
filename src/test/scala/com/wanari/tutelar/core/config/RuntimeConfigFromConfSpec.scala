@@ -5,7 +5,6 @@ import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
 import com.wanari.tutelar.providers.userpass.email.EmailServiceFactory.EmailServiceFactoryConfig
 import com.wanari.tutelar.providers.userpass.email.EmailServiceHttpImpl.EmailServiceHttpConfig
-import com.wanari.tutelar.providers.userpass.email.EmailServiceRabbitMqImpl.EmailServiceRabbitMqConfig
 import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
 import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl.TotpConfig
 
@@ -89,13 +88,6 @@ class RuntimeConfigFromConfSpec extends TestBase {
       "URL",
       "USERNAME",
       "SECRET"
-    )
-  }
-  "#emailServiceRabbitMqConfig" in {
-    val service = new RuntimeConfigFromConf[Try](confFile)
-    val config  = service.emailServiceRabbitMqConfig().get
-    config shouldBe EmailServiceRabbitMqConfig(
-      "QUEUE"
     )
   }
   "#emailServiceFactoryConfig" in {

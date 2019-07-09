@@ -39,7 +39,6 @@ trait Services[F[_]] {
   implicit val totpService: TotpService[F]
   implicit val passwordDifficultyChecker: PasswordDifficultyChecker[F]
   implicit val tracerService: TracerService[F]
-  implicit val rabbitMqService: RabbitMqService[F]
   implicit val amqpService: AmqpService[F]
 
   def init()(implicit logger: Logger, ev: MonadError[F, Throwable]): F[Unit] = {
@@ -53,7 +52,6 @@ trait Services[F[_]] {
       _ <- initialize(tracerService, "tracer")
       _ <- initialize(databaseService, "database")
       _ <- initialize(authService, "auth_service")
-      _ <- initializeIfEnabled(rabbitMqService, "rabbitmq")
       _ <- initializeIfEnabled(amqpService, "ampq")
       _ <- initializeIfEnabled(emailLoginService, "email")
       _ <- initializeIfEnabled(totpService, "totp")
@@ -95,6 +93,5 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
   implicit lazy val passwordDifficultyChecker: PasswordDifficultyChecker[Future] =
     new PasswordDifficultyCheckerImpl[Future]
   implicit lazy val tracerService: TracerService[Future] = new TracerService[Future]()
-  implicit val rabbitMqService: RabbitMqService[Future]  = new RabbitMqServiceImpl[Future]()
   implicit val amqpService: AmqpService[Future]          = new AmqpServiceImpl[Future]()
 }
