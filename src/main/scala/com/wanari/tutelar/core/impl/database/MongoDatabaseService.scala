@@ -1,6 +1,6 @@
 package com.wanari.tutelar.core.impl.database
 
-import cats.data.OptionT
+import cats.data.{EitherT, OptionT}
 import com.wanari.tutelar.core.DatabaseService
 import com.wanari.tutelar.core.DatabaseService.{Account, AccountId, User}
 import com.wanari.tutelar.core.Errors.WrongConfig
@@ -17,18 +17,18 @@ class MongoDatabaseService(config: => MongoConfig)(implicit ec: ExecutionContext
   import cats.instances.future._
 
   private lazy val usersCollection: Future[BSONCollection] = {
-    val result = for {
-      uri        <- OptionT.fromOption(MongoConnection.parseURI(config.uri).toOption)
-      dbname     <- OptionT.fromOption(uri.db)
-      connection <- OptionT.fromOption(driver.connection(config.uri).toOption)
-      db         <- OptionT.liftF(connection.database(dbname))
+    val result: EitherT[Future, Throwable, BSONCollection] = for {
+      uri        <- EitherT.fromEither(MongoConnection.parseURI(config.uri).toEither)
+      dbname     <- EitherT.fromOption(uri.db, WrongConfig("Database name not found!"))
+      connection <- EitherT.fromEither(driver.connection(config.uri).toEither)
+      db         <- EitherT.right(connection.database(dbname))
     } yield db.collection[BSONCollection](config.collection)
 
-    result.getOrElseF(Future.failed(WrongConfig("Can't connect to Mongo database!")))
+    result.foldF(Future.failed, Future.successful)
   }
 
   override def init: Future[Unit] = {
-    checkStatus().map(_ => ())
+    usersCollection.map(_ => ())
   }
 
   override def checkStatus(): Future[Boolean] = {

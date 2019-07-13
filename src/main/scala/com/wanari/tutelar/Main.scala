@@ -5,6 +5,7 @@ import akka.actor.{ActorSystem, CoordinatedShutdown}
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import com.wanari.tutelar.util.LoggerUtil
+import io.opentracing.util.GlobalTracer
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.duration._
@@ -34,6 +35,7 @@ object Main extends App {
     case Success(_) => logger.info("LoginService started")
     case Failure(ex) =>
       logger.error("LoginService starting failed", ex)
+      GlobalTracer.get().close()
       system.terminate()
   }
 
