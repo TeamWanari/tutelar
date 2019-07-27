@@ -14,6 +14,8 @@ import com.wanari.tutelar.core.impl.database.MongoDatabaseService.MongoConfig
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 
 import scala.concurrent.duration.FiniteDuration
+import scala.io.Source
+import scala.util.Try
 
 trait ServerConfig[F[_]] extends Initable[F] {
   def getEnabledModules: Seq[String]
@@ -60,7 +62,7 @@ class ServerConfigImpl[F[_]: MonadError[?[_], Throwable]]() extends ServerConfig
   override implicit def getMongoConfig: MongoConfig = {
     val config = conf.getConfig("database.mongo")
     MongoConfig(
-      config.getString("uri"),
+      readFromFileOrConf(config, "uri"),
       config.getString("collection")
     )
   }
@@ -84,9 +86,9 @@ class ServerConfigImpl[F[_]: MonadError[?[_], Throwable]]() extends ServerConfig
     JwtConfig(
       FiniteDuration(config.getDuration("expirationTime").getSeconds, TimeUnit.SECONDS),
       config.getString("algorithm"),
-      config.getString("secret"),
-      config.getString("privateKey"),
-      config.getString("publicKey")
+      readFromFileOrConf(config, "secret"),
+      readFromFileOrConf(config, "privateKey"),
+      readFromFileOrConf(config, "publicKey")
     )
   }
 
@@ -104,7 +106,7 @@ class ServerConfigImpl[F[_]: MonadError[?[_], Throwable]]() extends ServerConfig
       case "basic" =>
         BasicAuthConfig(
           config.getString("basicAuth.username"),
-          config.getString("basicAuth.password")
+          readFromFileOrConf(config, "basicAuth.password")
         )
     }
     HookConfig(
@@ -116,7 +118,11 @@ class ServerConfigImpl[F[_]: MonadError[?[_], Throwable]]() extends ServerConfig
   override implicit def getAmqpConfig: AmqpConfig = {
     val config = conf.getConfig("amqp")
     AmqpConfig(
-      config.getString("uri")
+      readFromFileOrConf(config, "uri")
     )
+  }
+
+  private def readFromFileOrConf(config: Config, key: String): String = {
+    Try(Source.fromFile(config.getString(s"${key}File")).mkString).getOrElse(config.getString(key))
   }
 }

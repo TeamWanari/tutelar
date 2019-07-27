@@ -20,7 +20,7 @@ class MongoDatabaseService(config: => MongoConfig)(implicit ec: ExecutionContext
     val result: EitherT[Future, Throwable, BSONCollection] = for {
       uri        <- EitherT.fromEither(MongoConnection.parseURI(config.uri).toEither)
       dbname     <- EitherT.fromOption(uri.db, WrongConfig("Database name not found!"))
-      connection <- EitherT.fromEither(driver.connection(config.uri).toEither)
+      connection <- EitherT.fromEither(driver.connection(uri, None, strictUri = false).toEither)
       db         <- EitherT.right(connection.database(dbname))
     } yield db.collection[BSONCollection](config.collection)
 
