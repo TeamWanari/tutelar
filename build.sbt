@@ -43,7 +43,7 @@ lazy val core = (project in file("."))
       "-Xlint"
     ),
     libraryDependencies ++= {
-      val akkaHttpV = "10.1.8"
+      val akkaHttpV = "10.1.9"
       val akkaV     = "2.5.23"
       val slickV    = "3.3.2"
       val jwtV      = "3.1.0"
@@ -65,18 +65,18 @@ lazy val core = (project in file("."))
         "com.pauldijou"        %% "jwt-core"                 % jwtV,
         "com.pauldijou"        %% "jwt-spray-json"           % jwtV,
         "org.mindrot"          % "jbcrypt"                   % "0.4",
-        "commons-codec"        % "commons-codec"             % "1.12",
+        "commons-codec"        % "commons-codec"             % "1.13",
         "ch.megard"            %% "akka-http-cors"           % "0.4.1",
         "io.opentracing"       % "opentracing-api"           % "0.33.0",
         "io.opentracing"       % "opentracing-util"          % "0.33.0",
         "io.opentracing"       % "opentracing-noop"          % "0.33.0",
         "io.jaegertracing"     % "jaeger-client"             % "0.35.5",
-        "org.reactivemongo"    %% "reactivemongo"            % "0.18.1",
+        "org.reactivemongo"    %% "reactivemongo"            % "0.18.3",
         "com.lightbend.akka"   %% "akka-stream-alpakka-amqp" % "1.1.0",
         "org.bouncycastle"     % "bcprov-jdk15on"            % "1.62",
         "org.scalatest"        %% "scalatest"                % "3.0.8" % "it,test",
         "org.mockito"          % "mockito-core"              % "3.0.0" % "it,test",
-        "org.mockito"          %% "mockito-scala"            % "1.5.11" % "it,test"
+        "org.mockito"          %% "mockito-scala"            % "1.5.12" % "it,test"
       )
     }
   )
