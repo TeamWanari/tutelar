@@ -12,6 +12,9 @@ import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
 import com.wanari.tutelar.providers.userpass.token.OTP.OTPAlgorithm
 import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl.TotpConfig
 
+import scala.io.Source
+import scala.util.Try
+
 class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String) extends RuntimeConfig[F] {
   import cats.syntax.applicative._
   import cats.syntax.functor._
@@ -44,7 +47,7 @@ class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String)
     LdapConfig(
       config.getString("url"),
       config.getString("readonlyUserWithNamespace"),
-      config.getString("readonlyUserPassword"),
+      readFromFileOrConf(config, "readonlyUserPassword"),
       config.getString("userSearchBaseDomain"),
       config.getString("userSearchAttribute"),
       config.getString("userSearchReturnAttributes").split(",").toSeq,
@@ -57,7 +60,7 @@ class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String)
     EmailServiceHttpConfig(
       config.getString("serviceUrl"),
       config.getString("serviceUsername"),
-      config.getString("servicePassword")
+      readFromFileOrConf(config, "servicePassword")
     )
   }.pure
 
@@ -66,7 +69,7 @@ class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String)
     OAuth2Config(
       conf.getString("oauth2.rootUrl"),
       config.getString("clientId"),
-      config.getString("clientSecret"),
+      readFromFileOrConf(config, "clientSecret"),
       config.getString("scopes").split(",").toSeq
     )
   }.pure
@@ -102,4 +105,8 @@ class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String)
       config.getString("type")
     )
   }.pure
+
+  private def readFromFileOrConf(config: Config, key: String): String = {
+    Try(Source.fromFile(config.getString(s"${key}File")).mkString).getOrElse(config.getString(key))
+  }
 }
