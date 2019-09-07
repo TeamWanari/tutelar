@@ -10,7 +10,7 @@ import com.wanari.tutelar.util.HttpWrapper
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import spray.json._
 
-class EmailServiceHttpImpl[F[_]: MonadError[?[_], Throwable]](
+class EmailServiceHttpImpl[F[_]: MonadError[*[_], Throwable]](
     implicit http: HttpWrapper[F],
     configF: () => F[EmailServiceHttpConfig]
 ) extends EmailService[F] {

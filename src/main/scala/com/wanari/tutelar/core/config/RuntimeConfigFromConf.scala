@@ -15,7 +15,7 @@ import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl.TotpConfig
 import scala.io.Source
 import scala.util.Try
 
-class RuntimeConfigFromConf[F[_]: MonadError[?[_], Throwable]](filepath: String) extends RuntimeConfig[F] {
+class RuntimeConfigFromConf[F[_]: MonadError[*[_], Throwable]](filepath: String) extends RuntimeConfig[F] {
   import cats.syntax.applicative._
   import cats.syntax.functor._
   import com.wanari.tutelar.util.ApplicativeErrorSyntax._

@@ -8,7 +8,7 @@ import com.wanari.tutelar.core.HookService._
 import com.wanari.tutelar.util.HttpWrapper
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 
-class HookServiceImpl[F[_]: MonadError[?[_], Throwable]](
+class HookServiceImpl[F[_]: MonadError[*[_], Throwable]](
     implicit config: HookConfig,
     http: HttpWrapper[F]
 ) extends HookService[F] {

@@ -12,7 +12,7 @@ import spray.json.{JsObject, JsString}
 
 import scala.concurrent.duration.Duration
 
-class CsrfServiceJwt[F[_]: MonadError[?[_], Throwable]: DateTimeUtil](implicit csrfJwtConfig: () => F[CsrfJwtConfig])
+class CsrfServiceJwt[F[_]: MonadError[*[_], Throwable]: DateTimeUtil](implicit csrfJwtConfig: () => F[CsrfJwtConfig])
     extends CsrfService[F] {
   import cats.syntax.applicative._
   import cats.syntax.flatMap._

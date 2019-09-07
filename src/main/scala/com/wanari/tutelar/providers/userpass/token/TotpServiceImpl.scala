@@ -15,7 +15,7 @@ import spray.json.RootJsonFormat
 
 import scala.util.Try
 
-class TotpServiceImpl[F[_]: MonadError[?[_], Throwable]](
+class TotpServiceImpl[F[_]: MonadError[*[_], Throwable]](
     implicit authService: AuthService[F],
     totpConfig: () => F[TotpConfig],
     getJwtConfig: String => JwtConfig

@@ -9,7 +9,7 @@ import com.wanari.tutelar.util.HttpWrapper
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import spray.json.RootJsonReader
 
-class FacebookService[F[_]: MonadError[?[_], Throwable]](
+class FacebookService[F[_]: MonadError[*[_], Throwable]](
     val oAuth2config: () => F[OAuth2Config]
 )(
     implicit

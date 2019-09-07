@@ -8,7 +8,7 @@ import com.wanari.tutelar.core.{AuthService, CsrfService}
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 
-class GoogleService[F[_]: MonadError[?[_], Throwable]](val oAuth2config: () => F[OAuth2Config])(
+class GoogleService[F[_]: MonadError[*[_], Throwable]](val oAuth2config: () => F[OAuth2Config])(
     implicit
     val authService: AuthService[F],
     val csrfService: CsrfService[F],

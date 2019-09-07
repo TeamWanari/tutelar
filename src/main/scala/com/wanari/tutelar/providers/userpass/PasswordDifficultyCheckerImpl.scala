@@ -4,7 +4,7 @@ import cats.MonadError
 import com.wanari.tutelar.core.Errors.WeakPassword
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
 
-class PasswordDifficultyCheckerImpl[F[_]: MonadError[?[_], Throwable]](implicit config: () => F[PasswordSettings])
+class PasswordDifficultyCheckerImpl[F[_]: MonadError[*[_], Throwable]](implicit config: () => F[PasswordSettings])
     extends PasswordDifficultyChecker[F] {
   import cats.syntax.flatMap._
   import cats.syntax.functor._

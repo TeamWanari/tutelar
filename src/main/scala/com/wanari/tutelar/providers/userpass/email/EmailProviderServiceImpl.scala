@@ -12,7 +12,7 @@ import com.wanari.tutelar.providers.userpass.email.EmailProviderServiceImpl.Emai
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import spray.json._
 
-class EmailProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](
+class EmailProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
     implicit emailService: EmailService[F],
     authService: AuthService[F],
     passwordDifficultyChecker: PasswordDifficultyChecker[F],

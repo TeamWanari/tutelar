@@ -23,7 +23,7 @@ trait RuntimeConfig[F[_]] {
 }
 
 object RuntimeConfig {
-  def apply[F[_]: MonadError[?[_], Throwable]](confTypeString: String, configConf: Config): RuntimeConfig[F] = {
+  def apply[F[_]: MonadError[*[_], Throwable]](confTypeString: String, configConf: Config): RuntimeConfig[F] = {
     confTypeString match {
       case "conf" => new RuntimeConfigFromConf[F](configConf.getString("file"))
     }

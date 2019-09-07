@@ -9,7 +9,7 @@ import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.PasswordCryptor
 import spray.json.JsObject
 
-class BasicProviderServiceImpl[F[_]: MonadError[?[_], Throwable]](
+class BasicProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
     implicit authService: AuthService[F],
     passwordDifficultyChecker: PasswordDifficultyChecker[F]
 ) extends BasicProviderService[F]

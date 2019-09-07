@@ -12,7 +12,7 @@ object Initable {
   import cats.syntax.applicative._
   import cats.syntax.applicativeError._
 
-  def initialize[F[_]: MonadError[?[_], Throwable]](initable: => Initable[F], name: String)(
+  def initialize[F[_]: MonadError[*[_], Throwable]](initable: => Initable[F], name: String)(
       implicit logger: Logger
   ): F[Unit] = {
     logger.debug(s"Init $name")
@@ -21,7 +21,7 @@ object Initable {
     }
   }
 
-  def initializeIfEnabled[F[_]: MonadError[?[_], Throwable]](
+  def initializeIfEnabled[F[_]: MonadError[*[_], Throwable]](
       initable: => Initable[F],
       name: String
   )(implicit conf: ServerConfig[F], logger: Logger): F[Unit] = {

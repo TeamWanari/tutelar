@@ -10,7 +10,7 @@ import com.wanari.tutelar.util.LoggerUtil.LogContext
 import spray.json.RootJsonReader
 
 // https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/
-class GithubService[F[_]: MonadError[?[_], Throwable]](val oAuth2config: () => F[OAuth2Config])(
+class GithubService[F[_]: MonadError[*[_], Throwable]](val oAuth2config: () => F[OAuth2Config])(
     implicit
     val authService: AuthService[F],
     val csrfService: CsrfService[F],

@@ -9,7 +9,7 @@ import io.jaegertracing.Configuration.{ReporterConfiguration, SamplerConfigurati
 import io.opentracing.noop.NoopTracerFactory
 import io.opentracing.util.GlobalTracer
 
-class TracerService[F[_]: MonadError[?[_], Throwable]](implicit config: TracerServiceConfig) extends Initable[F] {
+class TracerService[F[_]: MonadError[*[_], Throwable]](implicit config: TracerServiceConfig) extends Initable[F] {
   import cats.syntax.applicative._
   import com.wanari.tutelar.util.ApplicativeErrorSyntax._
 

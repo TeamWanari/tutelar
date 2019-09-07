@@ -41,7 +41,7 @@ trait TestBase extends WordSpecLike with Matchers with MockitoSugar with BeforeA
     }
   }
 
-  abstract class ProviderTestScope[F[_]: MonadError[?[_], Throwable]]() {
+  abstract class ProviderTestScope[F[_]: MonadError[*[_], Throwable]]() {
     val authType: String
 
     import cats.syntax.applicative._

@@ -10,7 +10,7 @@ import com.wanari.tutelar.util.HttpWrapper
 object EmailServiceFactory {
   import DatabaseConfig._
 
-  def create[F[_]: MonadError[?[_], Throwable]]()(
+  def create[F[_]: MonadError[*[_], Throwable]]()(
       implicit configF: () => F[EmailServiceFactoryConfig],
       http: HttpWrapper[F],
       httpConfigF: () => F[EmailServiceHttpConfig],

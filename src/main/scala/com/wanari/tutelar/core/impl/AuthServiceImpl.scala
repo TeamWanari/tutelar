@@ -12,7 +12,7 @@ import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.{DateTimeUtil, IdGenerator}
 import spray.json.{JsObject, JsString}
 
-class AuthServiceImpl[F[_]: MonadError[?[_], Throwable]](
+class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
     implicit databaseService: DatabaseService[F],
     hookService: HookService[F],
     idGenerator: IdGenerator[F],
