@@ -1,7 +1,7 @@
 package com.wanari.tutelar.core.impl
 
 import cats.MonadError
-import cats.data.OptionT
+import cats.data.{EitherT, OptionT}
 import com.wanari.tutelar.core.AuthService.{LongTermToken, ShortTermToken, TokenData}
 import com.wanari.tutelar.core.DatabaseService.{Account, User}
 import com.wanari.tutelar.core.Errors._
@@ -22,7 +22,6 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
   import cats.syntax.applicative._
   import cats.syntax.flatMap._
   import cats.syntax.functor._
-  import com.wanari.tutelar.util.ApplicativeErrorSyntax._
 
   protected val longTermTokenService: JwtService[F]  = new JwtServiceImpl[F](getJwtConfig("longTerm"))
   protected val shortTermTokenService: JwtService[F] = new JwtServiceImpl[F](getJwtConfig("shortTerm"))
@@ -39,13 +38,14 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
       externalId: String,
       customData: String,
       providedData: JsObject
-  )(implicit ctx: LogContext): F[TokenData] = {
+  )(implicit ctx: LogContext): ErrorOr[F, TokenData] = {
     val standardizedExternalId = convertToStandardizedLowercase(externalId)
-    for {
+    val result = for {
       account_hookresponse <- createOrUpdateAccount(authType, standardizedExternalId, customData, providedData)
       (account, hookResponse) = account_hookresponse
       token <- createTokenData(account, hookResponse)
     } yield token
+    EitherT.right(result)
   }
 
   override def findCustomData(authType: String, externalId: String): OptionT[F, String] = {
@@ -53,21 +53,19 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
     OptionT(databaseService.findAccountByTypeAndExternalId((authType, standardizedExternalId))).map(_.customData)
   }
 
-  override def deleteUser(userId: String)(implicit ctx: LogContext): F[Unit] = {
+  override def deleteUser(userId: String)(implicit ctx: LogContext): ErrorOr[F, Unit] = {
     for {
-      user <- databaseService.findUserById(userId)
-      _    <- user.nonEmpty.pureUnitOrRise(UserNotFound())
-      _    <- databaseService.deleteUserWithAccountsById(userId)
-      _    <- hookService.delete(userId)
+      _ <- EitherT.fromOptionF(databaseService.findUserById(userId), UserNotFound())
+      _ <- EitherT.right(databaseService.deleteUserWithAccountsById(userId))
+      _ <- EitherT.right(hookService.delete(userId))
     } yield ()
   }
 
   override def findUserIdInShortTermToken(token: ShortTermToken): OptionT[F, String] = {
-    OptionT(for {
-      decoded <- shortTermTokenService.validateAndDecode(token)
-    } yield {
-      decoded.fields.get("id").collect { case JsString(id) => id }
-    })
+    for {
+      decoded <- shortTermTokenService.validateAndDecode(token).toOption
+      id      <- OptionT.fromOption(decoded.fields.get("id").collect { case JsString(id) => id })
+    } yield id
   }
 
   override def link(
@@ -76,27 +74,30 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
       externalId: String,
       customData: String,
       providedData: JsObject
-  )(implicit ctx: LogContext): F[Unit] = {
+  )(implicit ctx: LogContext): ErrorOr[F, Unit] = {
     val standardizedExternalId = convertToStandardizedLowercase(externalId)
     val account                = Account(authType, standardizedExternalId, userId, customData)
     for {
-      accountO <- databaseService.findAccountByTypeAndExternalId((authType, standardizedExternalId))
-      _        <- accountO.isEmpty.pureUnitOrRise(AccountUsed())
-      accounts <- databaseService.listAccountsByUserId(userId)
-      _        <- accounts.nonEmpty.pureUnitOrRise(UserNotFound())
-      _        <- accounts.exists(_.authType != authType).pureUnitOrRise(UserHadThisAccountType())
-      _        <- databaseService.saveAccount(account)
-      _        <- hookService.link(userId, standardizedExternalId, authType, providedData)
+      _ <- EitherT
+        .right(databaseService.findAccountByTypeAndExternalId((authType, standardizedExternalId)))
+        .ensure(AccountUsed())(_.isEmpty)
+      _ <- EitherT
+        .right(databaseService.listAccountsByUserId(userId))
+        .ensure(UserNotFound())(_.nonEmpty)
+        .ensure(UserHadThisAccountType())(_.forall(_.authType != authType))
+      _ <- EitherT.right(databaseService.saveAccount(account))
+      _ <- EitherT.right(hookService.link(userId, standardizedExternalId, authType, providedData))
     } yield ()
   }
 
-  override def unlink(userId: String, authType: String)(implicit ctx: LogContext): F[Unit] = {
+  override def unlink(userId: String, authType: String)(implicit ctx: LogContext): ErrorOr[F, Unit] = {
     for {
-      accounts <- databaseService.listAccountsByUserId(userId)
-      _        <- (accounts.size > 1).pureUnitOrRise(UserLastAccount())
-      account  <- accounts.find(_.authType == authType).pureOrRaise(AccountNotFound())
-      _        <- databaseService.deleteAccountByUserAndType(userId, authType)
-      _        <- hookService.unlink(userId, account.externalId, authType)
+      accounts <- EitherT
+        .right(databaseService.listAccountsByUserId(userId))
+        .ensure(UserLastAccount())(_.size > 1)
+      account <- EitherT.fromOption(accounts.find(_.authType == authType), AccountNotFound())
+      _       <- EitherT.right(databaseService.deleteAccountByUserAndType(userId, authType))
+      _       <- EitherT.right(hookService.unlink(userId, account.externalId, authType))
     } yield ()
   }
 
@@ -163,14 +164,17 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
     Normalizer.normalize(s, Normalizer.Form.NFC).toLowerCase
   }
 
-  override def refreshToken(token: LongTermToken)(implicit ctx: LogContext): OptionT[F, TokenData] = {
+  override def refreshToken(token: LongTermToken)(implicit ctx: LogContext): ErrorOr[F, TokenData] = {
     for {
-      decoded   <- OptionT.liftF(longTermTokenService.validateAndDecode(token))
-      userId    <- OptionT.fromOption(decoded.fields.get("id").collect { case JsString(id) => id })
-      _         <- OptionT(databaseService.findUserById(userId))
-      tokenData <- OptionT.some(JsObject(decoded.fields.view.filterKeys(_ != "exp").toList: _*))
-      shortTerm <- OptionT.liftF(shortTermTokenService.encode(tokenData))
-      longTerm  <- OptionT.liftF(longTermTokenService.encode(tokenData))
+      decoded <- longTermTokenService.validateAndDecode(token)
+      userId <- EitherT.fromOption(
+        decoded.fields.get("id").collect { case JsString(id) => id },
+        InvalidTokenMissingId()
+      )
+      _         <- EitherT.fromOptionF(databaseService.findUserById(userId), UserNotFound())
+      tokenData <- EitherT.rightT(JsObject(decoded.fields.view.filterKeys(_ != "exp").toList: _*))
+      shortTerm <- EitherT.right(shortTermTokenService.encode(tokenData))
+      longTerm  <- EitherT.right(longTermTokenService.encode(tokenData))
     } yield {
       TokenData(shortTerm, longTerm)
     }

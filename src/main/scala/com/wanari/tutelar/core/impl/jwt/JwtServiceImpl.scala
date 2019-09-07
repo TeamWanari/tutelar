@@ -4,8 +4,9 @@ import java.security.Security
 import java.time.Clock
 
 import cats.MonadError
+import cats.data.{EitherT, OptionT}
+import com.wanari.tutelar.core.Errors.{AppError, ErrorOr, InvalidJwt, WrongConfig}
 import com.wanari.tutelar.core.JwtService
-import com.wanari.tutelar.core.Errors.{InvalidJwt, WrongConfig}
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import pdi.jwt.algorithms.{JwtAsymmetricAlgorithm, JwtHmacAlgorithm}
@@ -16,7 +17,6 @@ import scala.concurrent.duration.Duration
 
 class JwtServiceImpl[F[_]: MonadError[*[_], Throwable]](config: JwtConfig) extends JwtService[F] {
 
-  import cats.syntax.flatMap._
   import cats.syntax.functor._
   import com.wanari.tutelar.util.ApplicativeErrorSyntax._
 
@@ -46,19 +46,20 @@ class JwtServiceImpl[F[_]: MonadError[*[_], Throwable]](config: JwtConfig) exten
     }
   }
 
-  override def decode(token: String): F[JsObject] = {
-    settings.flatMap { set =>
+  private def decode(token: String): OptionT[F, JsObject] = {
+    val result = settings.map { set =>
       set.algo match {
-        case a: JwtHmacAlgorithm       => JwtSprayJson.decodeJson(token, set.decodeKey, Seq(a)).pureOrRise
-        case a: JwtAsymmetricAlgorithm => JwtSprayJson.decodeJson(token, set.decodeKey, Seq(a)).pureOrRise
+        case a: JwtHmacAlgorithm       => JwtSprayJson.decodeJson(token, set.decodeKey, Seq(a)).toOption
+        case a: JwtAsymmetricAlgorithm => JwtSprayJson.decodeJson(token, set.decodeKey, Seq(a)).toOption
       }
     }
+    OptionT(result)
   }
 
-  override def validateAndDecode(token: String): F[JsObject] = {
+  override def validateAndDecode(token: String): ErrorOr[F, JsObject] = {
     for {
-      _    <- validate(token).map(_.pureUnitOrRise(InvalidJwt()))
-      data <- decode(token)
+      _    <- EitherT.right(validate(token)).ensure(InvalidJwt())(identity)
+      data <- decode(token).toRight[AppError](InvalidJwt())
     } yield data
   }
 

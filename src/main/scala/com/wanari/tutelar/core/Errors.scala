@@ -1,30 +1,45 @@
 package com.wanari.tutelar.core
 
-import akka.http.scaladsl.model.HttpResponse
+import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
+import akka.http.scaladsl.server.Directives.{complete, onComplete}
+import akka.http.scaladsl.server.Route
+import cats.data.EitherT
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import com.wanari.tutelar.util.LoggerUtil.{LogContext, Logger}
+import spray.json.{JsObject, RootJsonFormat, RootJsonWriter}
+
+import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
 object Errors {
-  sealed abstract class ConfigError(msg: String) extends Throwable(msg)
-  case class WrongConfig(msg: String)            extends ConfigError(msg)
+  type ErrorOr[F[_], T] = EitherT[F, AppError, T]
 
-  sealed abstract class AuthError(msg: String) extends Throwable(msg)
-  case class UserNotFound()                    extends AuthError(s"User not found")
-  case class AccountNotFound()                 extends AuthError("Account not found")
-  case class AccountUsed()                     extends AuthError("Account already used")
-  case class UserHadThisAccountType()          extends AuthError("User already had this type of account")
-  case class UserLastAccount()                 extends AuthError("This account is the users last account")
-  case class AuthenticationFailed()            extends AuthError("Authentication failed, wrong credentials")
+  sealed trait AppError {
+    def msg: String
+  }
+  sealed abstract class ConfigError(val msg: String) extends Throwable
+  case class WrongConfig(override val msg: String)   extends ConfigError(msg)
 
-  sealed abstract class Oauth2Error(msg: String)       extends Throwable(msg)
+  sealed abstract class AuthError(val msg: String) extends AppError
+  case class UserNotFound()                        extends AuthError(s"User not found")
+  case class AccountNotFound()                     extends AuthError("Account not found")
+  case class AccountUsed()                         extends AuthError("Account already used")
+  case class UserHadThisAccountType()              extends AuthError("User already had this type of account")
+  case class UserLastAccount()                     extends AuthError("This account is the users last account")
+  case class AuthenticationFailed()                extends AuthError("Authentication failed, wrong credentials")
+  case class InvalidTokenMissingId()               extends AuthError(s"Invalid token! Missing id key.")
+
+  sealed abstract class Oauth2Error(val msg: String)   extends AppError
   case class InvalidCsrfToken()                        extends Oauth2Error("Wrong csrf token")
   case class InvalidProfileDataMissingKey(key: String) extends Oauth2Error(s"Invalid profile data, missing key: $key")
   case class InvalidProfileDataNotJsonObject()         extends Oauth2Error("Invalid profile data, is not a JSON object")
 
-  sealed abstract class JwtError(msg: String) extends Throwable(msg)
-  case class InvalidJwt()                     extends JwtError("Invalid JWT")
+  sealed abstract class JwtError(val msg: String) extends AppError
+  case class InvalidJwt()                         extends JwtError("Invalid JWT")
 
-  sealed abstract class UserPassError(msg: String) extends Throwable(msg)
-  case class WeakPassword()                        extends UserPassError("The password is weak")
-  case class UsernameUsed()                        extends UserPassError("Username already used")
+  sealed abstract class UserPassError(val msg: String) extends AppError
+  case class WeakPassword()                            extends UserPassError("The password is weak")
+  case class UsernameUsed()                            extends UserPassError("Username already used")
 
   sealed abstract class EmailPassError(msg: String) extends UserPassError(msg)
   case class InvalidEmailToken()                    extends EmailPassError("Invalid email token")
@@ -33,6 +48,41 @@ object Errors {
   case class HttpClientError(response: HttpResponse)
       extends EmailHttpServiceError(s"Error: StatusCode=${response.status}")
 
-  sealed abstract class TotpError(msg: String) extends Throwable(msg)
+  sealed abstract class TotpError(val msg: String) extends AppError
+  case class InvalidAlgo(algo: String)             extends TotpError(s"Invalid algo $algo")
+  case class WrongPassword()                       extends TotpError("Wrong password")
 
+  implicit class ResponseWrapper[T](val response: ErrorOr[Future, T]) {
+    def toComplete(implicit w: RootJsonWriter[T], ctx: LogContext, logger: Logger): Route = {
+      toComplete(None)
+    }
+    def toComplete(handler: ErrorHandler)(implicit w: RootJsonWriter[T], ctx: LogContext, logger: Logger): Route = {
+      toComplete(Option(handler))
+    }
+
+    private def toComplete(
+        mbHandler: Option[ErrorHandler]
+    )(implicit w: RootJsonWriter[T], ctx: LogContext, logger: Logger) = {
+      val errorHandler = mbHandler.map(_.orElse(defaultHandler)).getOrElse(defaultHandler)
+
+      onComplete(response.value) {
+        case Success(Right(res))  => complete(res)
+        case Success(Left(error)) => errorHandler(error)
+        case Failure(error) =>
+          logger.error("Unhandled error!", error)
+          complete(StatusCodes.InternalServerError)
+      }
+    }
+  }
+
+  type ErrorHandler = PartialFunction[AppError, Route]
+
+  private def defaultHandler: ErrorHandler = {
+    case appError: AppError => complete((StatusCodes.Unauthorized, ErrorResponse(appError.msg)))
+  }
+
+  case class ErrorResponse(error: String)
+  import spray.json.DefaultJsonProtocol._
+  implicit val errorResponseFormat: RootJsonFormat[ErrorResponse] = jsonFormat1(ErrorResponse.apply)
+  implicit val unitWriter: RootJsonWriter[Unit]                   = (_: Unit) => JsObject()
 }

@@ -2,8 +2,10 @@ package com.wanari.tutelar.providers.userpass.ldap
 
 import java.util.Properties
 
+import cats.data.EitherT
 import com.wanari.tutelar.core.AuthService
 import com.wanari.tutelar.core.AuthService.TokenData
+import com.wanari.tutelar.core.Errors.{AuthenticationFailed, ErrorOr}
 import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import javax.naming.Context
@@ -20,17 +22,25 @@ class LdapServiceImpl(
   private lazy val context  = createSearchContext()
   private lazy val controls = createSearchControls()
 
+  import cats.instances.future._
+
   override def init: Future[Unit] = {
     for (_ <- context; _ <- controls) yield ()
   }
 
   override def login(username: String, password: String, data: Option[JsObject])(
       implicit ctx: LogContext
-  ): Future[TokenData] = {
-    for {
+  ): ErrorOr[Future, TokenData] = {
+    val attributesFE = (for {
       user       <- findUser(username)
       _          <- getUserInitialDirContext(user.getNameInNamespace, password)
       attributes <- attributesConvertToMap(user.getAttributes)
+    } yield Right(attributes))
+      .recover {
+        case _ => Left(AuthenticationFailed())
+      }
+    for {
+      attributes <- EitherT(attributesFE)
       token      <- authService.registerOrLogin("LDAP", username, "", JsObject(attributes))
     } yield token
   }

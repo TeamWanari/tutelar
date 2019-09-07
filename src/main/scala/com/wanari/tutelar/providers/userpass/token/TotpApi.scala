@@ -1,7 +1,6 @@
 package com.wanari.tutelar.providers.userpass.token
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives.{as, entity, path, pathPrefix, post, _}
 import akka.http.scaladsl.server.Route
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
@@ -10,7 +9,6 @@ import com.wanari.tutelar.providers.userpass.token.TotpApi.RegisterData
 import spray.json.{DefaultJsonProtocol, JsObject, RootJsonFormat}
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
 
 class TotpApi(
     implicit val service: TotpService[Future],
@@ -32,14 +30,9 @@ class TotpApi(
         } ~
           path("qrCode") {
             get {
-              withTrace(s"QrCode_$servicePath") { _ =>
+              withTrace(s"QrCode_$servicePath") { implicit ctx =>
                 import TotpServiceImpl._
-                import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-
-                onComplete(service.qrCodeData) {
-                  case Success(t) => complete(t)
-                  case Failure(_) => complete(StatusCodes.InternalServerError)
-                }
+                service.qrCodeData.toComplete
               }
             }
           }

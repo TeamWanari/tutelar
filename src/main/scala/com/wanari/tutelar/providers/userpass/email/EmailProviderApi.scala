@@ -1,16 +1,15 @@
 package com.wanari.tutelar.providers.userpass.email
 
-import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import com.wanari.tutelar.core.Errors._
+import com.wanari.tutelar.core.ProviderApi
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
 import com.wanari.tutelar.providers.userpass.email.EmailProviderApi._
 import spray.json.{DefaultJsonProtocol, JsObject, RootJsonFormat}
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import com.wanari.tutelar.core.ProviderApi
 
 import scala.concurrent.Future
-import scala.util.Success
 
 class EmailProviderApi(
     implicit val service: EmailProviderService[Future],
@@ -40,10 +39,7 @@ class EmailProviderApi(
         post {
           entity(as[EmailData]) { data =>
             withTrace("SendRegister_email") { implicit ctx =>
-              onComplete(service.sendRegister(data.email)) {
-                case Success(_) => complete(StatusCodes.OK)
-                case _          => complete(StatusCodes.InternalServerError)
-              }
+              service.sendRegister(data.email).toComplete
             }
           }
         }
@@ -59,10 +55,7 @@ class EmailProviderApi(
         post {
           entity(as[EmailData]) { data =>
             withTrace("SendResetPassword_email") { implicit ctx =>
-              onComplete(service.sendResetPassword(data.email)) {
-                case Success(_) => complete(StatusCodes.OK)
-                case _          => complete(StatusCodes.InternalServerError)
-              }
+              service.sendResetPassword(data.email).toComplete
             }
           }
         }

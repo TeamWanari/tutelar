@@ -9,6 +9,7 @@ import com.wanari.tutelar.providers.userpass.basic.BasicProviderApi
 import com.wanari.tutelar.providers.userpass.email.EmailProviderApi
 import com.wanari.tutelar.providers.userpass.ldap.LdapApi
 import com.wanari.tutelar.providers.userpass.token.TotpApi
+import com.wanari.tutelar.util.LoggerUtil
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.TracingDirectives._
 import io.opentracing.Tracer
@@ -20,6 +21,8 @@ import scala.concurrent.Future
 trait Api {
   private val tracer: Tracer                                    = GlobalTracer.get()
   protected def withTrace(name: String): Directive1[LogContext] = trace(tracer, name).map(new LogContext(tracer, _))
+
+  protected implicit lazy val logger: LoggerUtil.Logger = new LoggerUtil.Logger("API")
 
   def route(): Route
 }
