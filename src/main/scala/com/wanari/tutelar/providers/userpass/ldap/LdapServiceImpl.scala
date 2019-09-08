@@ -31,18 +31,21 @@ class LdapServiceImpl(
   override def login(username: String, password: String, data: Option[JsObject])(
       implicit ctx: LogContext
   ): ErrorOr[Future, TokenData] = {
-    val attributesFE = (for {
+    for {
+      attributes <- EitherT(loginAndGetAttributes(username, password))
+      token      <- authService.registerOrLogin("LDAP", username, "", JsObject(attributes))
+    } yield token
+  }
+
+  private def loginAndGetAttributes(username: String, password: String) = {
+    val result = for {
       user       <- findUser(username)
       _          <- getUserInitialDirContext(user.getNameInNamespace, password)
       attributes <- attributesConvertToMap(user.getAttributes)
-    } yield Right(attributes))
-      .recover {
-        case _ => Left(AuthenticationFailed())
-      }
-    for {
-      attributes <- EitherT(attributesFE)
-      token      <- authService.registerOrLogin("LDAP", username, "", JsObject(attributes))
-    } yield token
+    } yield Right(attributes)
+    result.recover {
+      case _ => Left(AuthenticationFailed())
+    }
   }
 
   private def attributesConvertToMap(attributes: Attributes): Future[Map[String, JsValue]] = {

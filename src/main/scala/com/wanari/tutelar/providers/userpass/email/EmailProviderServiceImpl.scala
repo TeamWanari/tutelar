@@ -23,9 +23,6 @@ class EmailProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
 ) extends BasicProviderServiceImpl
     with EmailProviderService[F] {
 
-  import cats.syntax.flatMap._
-  import cats.syntax.functor._
-
   override protected val authType = "EMAIL"
 
   protected val jwtService: JwtService[F] = new JwtServiceImpl[F](getJwtConfig("emailProvider"))
@@ -44,11 +41,10 @@ class EmailProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
   }
 
   def sendRegister(email: String)(implicit ctx: LogContext): ErrorOr[F, Unit] = {
-    val result = for {
-      token  <- createToken(email, EmailToken.RegisterType)
-      result <- emailService.sendRegisterUrl(email, token)
+    for {
+      token  <- EitherT.right(createToken(email, EmailToken.RegisterType))
+      result <- EitherT.right(emailService.sendRegisterUrl(email, token))
     } yield result
-    EitherT.right(result)
   }
 
   override def resetPassword(resetPasswordToken: String, password: String, data: Option[JsObject])(

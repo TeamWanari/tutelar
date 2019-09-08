@@ -121,7 +121,7 @@ object OAuth2Service {
   implicit val tokenResponseHelperReader: RootJsonReader[TokenResponseHelper] = jsonFormat1(TokenResponseHelper)
   def profileDataReader(idKey: String): RootJsonReader[ProfileData] = {
     case obj: JsObject =>
-      obj.fields.get(idKey).fold(throw throw InvalidProfileDataMissingKey(idKey)) {
+      obj.fields.get(idKey).fold(throw InvalidProfileDataMissingKey(idKey)) {
         case strId: JsString =>
           ProfileData(strId.value, obj)
         case idVal: JsValue =>
