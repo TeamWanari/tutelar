@@ -92,6 +92,12 @@ addCompilerPlugin("io.tryp"       % "splain"          % "0.4.1" cross CrossVersi
 
 cancelable in Global := true
 
+lazy val buildTime = java.time.ZonedDateTime.now(java.time.ZoneOffset.UTC)
+lazy val builtAtMillis: SettingKey[Long] = SettingKey[Long]("builtAtMillis", "time of build")
+ThisBuild / builtAtMillis := buildTime.toInstant.toEpochMilli
+lazy val builtAtString: SettingKey[String] = SettingKey[String]("builtAtString", "time of build")
+ThisBuild / builtAtString := buildTime.toString
+
 lazy val buildInfoSettings = Seq(
   buildInfoKeys := Seq[BuildInfoKey](
     name,
@@ -100,8 +106,9 @@ lazy val buildInfoSettings = Seq(
     sbtVersion,
     BuildInfoKey.action("commitHash") {
       git.gitHeadCommit.value
-    }
+    },
+    builtAtString,
+    builtAtMillis
   ),
-  buildInfoOptions := Seq(BuildInfoOption.BuildTime),
   buildInfoPackage := "com.wanari.tutelar"
 )
