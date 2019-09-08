@@ -92,7 +92,7 @@ addCompilerPlugin("io.tryp"       % "splain"          % "0.4.1" cross CrossVersi
 
 cancelable in Global := true
 
-lazy val buildTime = java.time.ZonedDateTime.now(java.time.ZoneOffset.UTC)
+lazy val buildTime                       = java.time.ZonedDateTime.now(java.time.ZoneOffset.UTC)
 lazy val builtAtMillis: SettingKey[Long] = SettingKey[Long]("builtAtMillis", "time of build")
 ThisBuild / builtAtMillis := buildTime.toInstant.toEpochMilli
 lazy val builtAtString: SettingKey[String] = SettingKey[String]("builtAtString", "time of build")
