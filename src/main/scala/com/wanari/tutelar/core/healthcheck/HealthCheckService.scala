@@ -1,9 +1,11 @@
 package com.wanari.tutelar.core.healthcheck
 
+import com.wanari.tutelar.core.Errors.ErrorOr
 import com.wanari.tutelar.core.healthcheck.HealthCheckService.HealthCheckResult
+import spray.json.RootJsonFormat
 
 trait HealthCheckService[F[_]] {
-  def getStatus: F[HealthCheckResult]
+  def getStatus: ErrorOr[F, HealthCheckResult]
 }
 
 object HealthCheckService {
@@ -16,5 +18,5 @@ object HealthCheckService {
       buildAtMillis: Long,
       commitHash: Option[String]
   )
-  implicit val healthCheckResultFormat = jsonFormat6(HealthCheckResult)
+  implicit val healthCheckResultFormat: RootJsonFormat[HealthCheckResult] = jsonFormat6(HealthCheckResult)
 }

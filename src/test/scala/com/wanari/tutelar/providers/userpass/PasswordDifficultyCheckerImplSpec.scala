@@ -3,7 +3,7 @@ package com.wanari.tutelar.providers.userpass
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
 import org.scalatest.{Matchers, WordSpecLike}
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{Success, Try}
 
 class PasswordDifficultyCheckerImplSpec extends WordSpecLike with Matchers {
 
@@ -31,13 +31,11 @@ class PasswordDifficultyCheckerImplSpec extends WordSpecLike with Matchers {
             validExamples.foreach { in =>
               s"valid - $in" in {
                 service.isValid(in) shouldBe Success(true)
-                service.validate(in) shouldBe Success(())
               }
             }
             invalidExamples.foreach { in =>
               s"invalid - $in" in {
                 service.isValid(in) shouldBe Success(false)
-                service.validate(in) shouldBe a[Failure[_]]
               }
             }
           }

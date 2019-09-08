@@ -1,14 +1,16 @@
 package com.wanari.tutelar.providers.userpass.basic
 import cats.MonadError
+import cats.data.EitherT
 import com.wanari.tutelar.TestBase
+import com.wanari.tutelar.core.Errors.{AuthenticationFailed, UserNotFound, UsernameUsed, WeakPassword}
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.NonEmptyPasswordChecker
 import org.mindrot.jbcrypt.BCrypt
+import org.mockito.ArgumentMatchersSugar._
 import org.mockito.Mockito.verify
 import spray.json.{JsObject, JsTrue}
-import org.mockito.ArgumentMatchersSugar._
 
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 class BasicProviderServiceSpec extends TestBase {
 
@@ -28,11 +30,11 @@ class BasicProviderServiceSpec extends TestBase {
   "#login" should {
     "successful" in new TestScope {
       initDb()
-      service.login(savedAccount.externalId, "secretpw", None) shouldBe Success(authenticateResponse)
+      service.login(savedAccount.externalId, "secretpw", None) shouldBe EitherT.rightT(authenticateResponse)
     }
     "send extra data via hook" in new TestScope {
       initDb()
-      service.login(savedAccount.externalId, "secretpw", Some(JsObject("hello" -> JsTrue)))
+      service.login(savedAccount.externalId, "secretpw", Some(JsObject("hello" -> JsTrue))).value.get
       verify(hookService).login(
         eqTo(savedAccount.userId),
         eqTo(savedAccount.externalId),
@@ -42,17 +44,17 @@ class BasicProviderServiceSpec extends TestBase {
     }
     "failure" when {
       "user not found" in new TestScope {
-        service.login(savedAccount.externalId, "secretpw", None) shouldBe a[Failure[_]]
+        service.login(savedAccount.externalId, "secretpw", None) shouldBe EitherT.leftT(UserNotFound())
       }
       "wrong password" in new TestScope {
         initDb()
-        service.login(savedAccount.externalId, "wrongpw", None) shouldBe a[Failure[_]]
+        service.login(savedAccount.externalId, "wrongpw", None) shouldBe EitherT.leftT(AuthenticationFailed())
       }
     }
   }
   "#register" should {
     "successful" in new TestScope {
-      service.register("newuser", "pw", None) shouldBe Success(authenticateResponse)
+      service.register("newuser", "pw", None) shouldBe EitherT.rightT(authenticateResponse)
 
       val newUserData = databaseService.accounts.get(authType -> "newuser")
       newUserData shouldBe a[Some[_]]
@@ -67,11 +69,11 @@ class BasicProviderServiceSpec extends TestBase {
     }
     "failure" when {
       "password is weak" in new TestScope {
-        service.register("newuser", "", None) shouldBe a[Failure[_]]
+        service.register("newuser", "", None) shouldBe EitherT.leftT(WeakPassword())
       }
       "username is already used" in new TestScope {
         initDb()
-        service.register(savedAccount.externalId, "asd", None) shouldBe a[Failure[_]]
+        service.register(savedAccount.externalId, "asd", None) shouldBe EitherT.leftT(UsernameUsed())
       }
     }
   }

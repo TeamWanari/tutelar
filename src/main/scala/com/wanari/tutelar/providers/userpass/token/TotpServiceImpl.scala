@@ -3,8 +3,9 @@ package com.wanari.tutelar.providers.userpass.token
 import java.security.SecureRandom
 
 import cats.MonadError
-import cats.data.OptionT
+import cats.data.EitherT
 import com.wanari.tutelar.core.AuthService.TokenData
+import com.wanari.tutelar.core.Errors.{AppError, ErrorOr, InvalidAlgo, UserNotFound, UsernameUsed, WrongPassword}
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.core.{AuthService, JwtService}
@@ -21,8 +22,6 @@ class TotpServiceImpl[F[_]: MonadError[*[_], Throwable]](
     getJwtConfig: String => JwtConfig
 ) extends TotpService[F] {
   import TotpServiceImpl._
-  import cats.implicits._
-  import com.wanari.tutelar.util.ApplicativeErrorSyntax._
   import spray.json._
 
   protected val authType                   = "TOTP"
@@ -35,52 +34,44 @@ class TotpServiceImpl[F[_]: MonadError[*[_], Throwable]](
     jwtService.init
   }
 
-  override def qrCodeData: F[QRData] = {
-    val result = for {
-      config <- OptionT.liftF(totpConfig())
-      algo   <- OptionT.fromOption[F](OTPAlgorithm.algos.find(_.name == config.algorithm))
+  override def qrCodeData: ErrorOr[F, QRData] = {
+    for {
+      config <- EitherT.right[AppError](totpConfig())
+      algo   <- EitherT.fromOption(OTPAlgorithm.algos.find(_.name == config.algorithm), InvalidAlgo(config.algorithm))
       key      = OTPKey.randomStrong(algo, secureRandom)
       totp     = TOTP(algo, config.digits, config.period, if (config.startFromCurrentTime) now else 0, key)
       totpData = TotpData(config.algorithm, totp.digits, totp.period, totp.initialTimestamp, key.toBase32)
       uri      = totp.toURI("")
-      token <- OptionT.liftF(jwtService.encode(totpData.toJson.asJsObject))
+      token <- EitherT.right(jwtService.encode(totpData.toJson.asJsObject))
     } yield {
       QRData(token, uri)
     }
-
-    result.pureOrRaise(new Exception())
   }
 
   override def register(userName: String, registerToken: String, password: String, data: Option[JsObject])(
       implicit ctx: LogContext
-  ): F[TokenData] = {
-    val result = for {
-      config           <- OptionT.liftF(totpConfig())
-      totpDataAsString <- OptionT.liftF(decodeToken(registerToken))
+  ): ErrorOr[F, TokenData] = {
+    for {
+      config           <- EitherT.right[AppError](totpConfig())
+      totpDataAsString <- decodeToken(registerToken)
       _                <- checkPassword(totpDataAsString, password, config.window)
-      usernameIsUsed   <- OptionT.liftF(authService.findCustomData(authType, userName).isDefined) if !usernameIsUsed
-      token <- OptionT.liftF(
-        authService.registerOrLogin(authType, userName, totpDataAsString, data.getOrElse(JsObject()))
-      )
+      _                <- authService.findCustomData(authType, userName).toLeft(()).leftMap(_ => UsernameUsed())
+      token            <- authService.registerOrLogin(authType, userName, totpDataAsString, data.getOrElse(JsObject()))
     } yield token
-
-    result.pureOrRaise(new Exception())
   }
 
   override def login(username: String, password: String, data: Option[JsObject])(
       implicit ctx: LogContext
-  ): F[TokenData] = {
-    val result: OptionT[F, TokenData] = for {
-      config    <- OptionT.liftF(totpConfig())
-      savedData <- authService.findCustomData(authType, username)
+  ): ErrorOr[F, TokenData] = {
+    for {
+      config    <- EitherT.right[AppError](totpConfig())
+      savedData <- authService.findCustomData(authType, username).toRight(UserNotFound())
       _         <- checkPassword(savedData, password, config.window)
-      token     <- OptionT.liftF(authService.registerOrLogin(authType, username, savedData, data.getOrElse(JsObject())))
+      token     <- authService.registerOrLogin(authType, username, savedData, data.getOrElse(JsObject()))
     } yield token
-
-    result.pureOrRaise(new Exception())
   }
 
-  private def checkPassword(savedData: String, recievedToken: String, window: Int): OptionT[F, Unit] = {
+  private def checkPassword(savedData: String, recievedToken: String, window: Int): ErrorOr[F, Unit] = {
     val totpResponse = for {
       data <- Try(savedData.parseJson.convertTo[TotpData]).toOption
       algo <- OTPAlgorithm.algos.find(_.name == data.algorithm)
@@ -90,10 +81,10 @@ class TotpServiceImpl[F[_]: MonadError[*[_], Throwable]](
     } yield {
       ()
     }
-    totpResponse.toOptionT[F]
+    EitherT.fromOption(totpResponse, WrongPassword())
   }
 
-  private def decodeToken(str: String): F[String] = {
+  private def decodeToken(str: String): ErrorOr[F, String] = {
     jwtService.validateAndDecode(str).map(_.toString)
   }
 }

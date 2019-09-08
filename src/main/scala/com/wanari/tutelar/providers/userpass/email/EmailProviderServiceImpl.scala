@@ -1,8 +1,9 @@
 package com.wanari.tutelar.providers.userpass.email
 
 import cats.MonadError
+import cats.data.EitherT
 import com.wanari.tutelar.core.AuthService.TokenData
-import com.wanari.tutelar.core.Errors.{InvalidEmailToken, UserNotFound}
+import com.wanari.tutelar.core.Errors.{AppError, ErrorOr, InvalidEmailToken, UserNotFound}
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.core.{AuthService, JwtService}
@@ -12,6 +13,8 @@ import com.wanari.tutelar.providers.userpass.email.EmailProviderServiceImpl.Emai
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import spray.json._
 
+import scala.util.{Success, Try}
+
 class EmailProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
     implicit emailService: EmailService[F],
     authService: AuthService[F],
@@ -19,10 +22,6 @@ class EmailProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
     getJwtConfig: String => JwtConfig
 ) extends BasicProviderServiceImpl
     with EmailProviderService[F] {
-
-  import cats.syntax.flatMap._
-  import cats.syntax.functor._
-  import com.wanari.tutelar.util.ApplicativeErrorSyntax._
 
   override protected val authType = "EMAIL"
 
@@ -34,43 +33,48 @@ class EmailProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
 
   override def register(registerToken: String, password: String, data: Option[JsObject])(
       implicit ctx: LogContext
-  ): F[TokenData] = {
+  ): ErrorOr[F, TokenData] = {
     for {
       email <- decodeToken(registerToken, EmailToken.RegisterType)
       token <- super.register(email, password, data)
     } yield token
   }
 
-  def sendRegister(email: String)(implicit ctx: LogContext): F[Unit] = {
+  def sendRegister(email: String)(implicit ctx: LogContext): ErrorOr[F, Unit] = {
     for {
-      token  <- createToken(email, EmailToken.RegisterType)
-      result <- emailService.sendRegisterUrl(email, token)
+      token  <- EitherT.right(createToken(email, EmailToken.RegisterType))
+      result <- EitherT.right(emailService.sendRegisterUrl(email, token))
     } yield result
   }
 
   override def resetPassword(resetPasswordToken: String, password: String, data: Option[JsObject])(
       implicit ctx: LogContext
-  ): F[TokenData] = {
+  ): ErrorOr[F, TokenData] = {
     for {
       email <- decodeToken(resetPasswordToken, EmailToken.ResetPasswordType)
       token <- changePasswordAndLogin(email, password, data)
     } yield token
   }
 
-  def sendResetPassword(email: String)(implicit ctx: LogContext): F[Unit] = {
+  def sendResetPassword(email: String)(implicit ctx: LogContext): ErrorOr[F, Unit] = {
     for {
       _      <- checkIsExists(email)
-      token  <- createToken(email, EmailToken.ResetPasswordType)
-      result <- emailService.sendResetPasswordUrl(email, token)
+      token  <- EitherT.right(createToken(email, EmailToken.ResetPasswordType))
+      result <- EitherT.right(emailService.sendResetPasswordUrl(email, token))
     } yield result
   }
 
-  private def decodeToken(registerToken: String, `type`: String): F[String] = {
+  private def decodeToken(registerToken: String, `type`: String): ErrorOr[F, String] = {
     import EmailProviderServiceImpl._
+    def decodeToEmailToken(tokenData: JsObject): Either[AppError, EmailToken] = {
+      Try(tokenData.convertTo[EmailToken]).filter(_.`type` == `type`) match {
+        case Success(value) => Right(value)
+        case _              => Left(InvalidEmailToken())
+      }
+    }
     for {
       tokenData  <- jwtService.validateAndDecode(registerToken)
-      emailToken <- tokenData.convertToF[F, EmailToken]
-      _          <- (emailToken.`type` == `type`).pureUnitOrRise(InvalidEmailToken())
+      emailToken <- EitherT.fromEither(decodeToEmailToken(tokenData))
     } yield emailToken.email
   }
 
@@ -80,15 +84,15 @@ class EmailProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
 
   private def changePasswordAndLogin(email: String, password: String, data: Option[JsObject])(
       implicit ctx: LogContext
-  ): F[TokenData] = {
+  ): ErrorOr[F, TokenData] = {
     for {
       _     <- checkIsExists(email)
       token <- authService.registerOrLogin(authType, email, encryptPassword(password), data.getOrElse(JsObject()))
     } yield token
   }
 
-  private def checkIsExists(email: String): F[Unit] = {
-    authService.findCustomData(authType, email).pureOrRaise(UserNotFound()).map(_ => ())
+  private def checkIsExists(email: String): ErrorOr[F, Unit] = {
+    authService.findCustomData(authType, email).toRight[AppError](UserNotFound()).map(_ => ())
   }
 }
 

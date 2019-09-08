@@ -2,6 +2,7 @@ package com.wanari.tutelar.providers.oauth2
 
 import akka.http.scaladsl.model._
 import akka.stream.ActorMaterializer
+import cats.data.EitherT
 import com.wanari.tutelar.TestBase
 import com.wanari.tutelar.core.AuthService.TokenData
 import com.wanari.tutelar.core.{AuthService, CsrfService}
@@ -17,7 +18,7 @@ import org.mockito.ArgumentMatchersSugar._
 import org.mockito.Mockito._
 import spray.json.{JsObject, JsTrue}
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Try}
 
 class OAuth2ServiceSpec extends TestBase {
 
@@ -112,23 +113,25 @@ class OAuth2ServiceSpec extends TestBase {
     }
 
     "authenticateWithCallback correctly" in new Scope {
-      when(service.csrfService.checkCsrfToken("dummy", "state")) thenReturn Try({})
-      when(service.authService.registerOrLogin("dummy", "id", "token", JsObject("raw" -> JsTrue))) thenReturn Try(
-        TokenData("ToKeN", "refresh")
-      )
+      when(service.csrfService.checkCsrfToken("dummy", "state")) thenReturn EitherT.rightT(())
+      when(service.authService.registerOrLogin("dummy", "id", "token", JsObject("raw" -> JsTrue))) thenReturn EitherT
+        .rightT(
+          TokenData("ToKeN", "refresh")
+        )
       when(service.http.singleRequest(any[HttpRequest])(any[LogContext])) thenReturn Try(HttpResponse())
       when(service.http.unmarshalEntityTo[TokenResponseHelper](HttpResponse())) thenReturn Try(
         TokenResponseHelper("token")
       )
 
-      service.authenticateWithCallback("code", "state") shouldBe Success(TokenData("ToKeN", "refresh"))
+      service.authenticateWithCallback("code", "state") shouldBe EitherT.rightT(TokenData("ToKeN", "refresh"))
     }
 
     "authenticateWithAccessToken correctly" in new Scope {
-      when(service.authService.registerOrLogin("dummy", "id", "token", JsObject("raw" -> JsTrue))) thenReturn Try(
-        TokenData("ToKeN", "refresh")
-      )
-      service.authenticateWithAccessToken("token") shouldBe Success(TokenData("ToKeN", "refresh"))
+      when(service.authService.registerOrLogin("dummy", "id", "token", JsObject("raw" -> JsTrue))) thenReturn EitherT
+        .rightT(
+          TokenData("ToKeN", "refresh")
+        )
+      service.authenticateWithAccessToken("token") shouldBe EitherT.rightT(TokenData("ToKeN", "refresh"))
     }
   }
 

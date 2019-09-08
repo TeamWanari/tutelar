@@ -1,9 +1,10 @@
 package com.wanari.tutelar.providers.oauth2
 
 import akka.http.scaladsl.model._
+import cats.data.EitherT
 import cats.{Applicative, MonadError}
 import com.wanari.tutelar.core.AuthService.TokenData
-import com.wanari.tutelar.core.Errors.{InvalidProfileDataMissingKey, InvalidProfileDataNotJsonObject}
+import com.wanari.tutelar.core.Errors.{ErrorOr, InvalidProfileDataMissingKey, InvalidProfileDataNotJsonObject}
 import com.wanari.tutelar.core.{AuthService, CsrfService}
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.{
   OAuth2Config,
@@ -50,10 +51,7 @@ trait OAuth2Service[F[_]] {
   def authenticateWithCallback(
       code: String,
       state: String
-  )(implicit me: MonadError[F, Throwable], ctx: LogContext): F[TokenData] = {
-    import cats.syntax.flatMap._
-    import cats.syntax.functor._
-
+  )(implicit me: MonadError[F, Throwable], ctx: LogContext): ErrorOr[F, TokenData] = {
     def getToken(clientId: String, clientSecret: String, selfRedirectUri: Uri) = {
       http.singleRequest(
         createTokenRequest(
@@ -65,23 +63,20 @@ trait OAuth2Service[F[_]] {
 
     for {
       _               <- csrfService.checkCsrfToken(TYPE, state)
-      config          <- oAuth2config()
-      selfRedirectUri <- getSelfRedirectUri
-      response        <- getToken(config.clientId, config.clientSecret, selfRedirectUri)
-      tokenResponse   <- http.unmarshalEntityTo[TokenResponseHelper](response)
-      profile         <- getProfile(tokenResponse)
+      config          <- EitherT.right(oAuth2config())
+      selfRedirectUri <- EitherT.right(getSelfRedirectUri)
+      response        <- EitherT.right(getToken(config.clientId, config.clientSecret, selfRedirectUri))
+      tokenResponse   <- EitherT.right(http.unmarshalEntityTo[TokenResponseHelper](response))
+      profile         <- EitherT.right(getProfile(tokenResponse))
       token           <- authService.registerOrLogin(TYPE, profile.id, tokenResponse.access_token, profile.data)
     } yield token
   }
 
   def authenticateWithAccessToken(
       accessToken: String
-  )(implicit me: MonadError[F, Throwable], ctx: LogContext): F[TokenData] = {
-    import cats.syntax.flatMap._
-    import cats.syntax.functor._
-
+  )(implicit me: MonadError[F, Throwable], ctx: LogContext): ErrorOr[F, TokenData] = {
     for {
-      profile <- getProfile(TokenResponseHelper(accessToken))
+      profile <- EitherT.right(getProfile(TokenResponseHelper(accessToken)))
       token   <- authService.registerOrLogin(TYPE, profile.id, accessToken, profile.data)
     } yield token
   }

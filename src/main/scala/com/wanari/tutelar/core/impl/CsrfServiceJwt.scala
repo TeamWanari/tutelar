@@ -3,8 +3,9 @@ package com.wanari.tutelar.core.impl
 import java.time.Clock
 
 import cats.MonadError
+import cats.data.EitherT
 import com.wanari.tutelar.core.CsrfService
-import com.wanari.tutelar.core.Errors.InvalidCsrfToken
+import com.wanari.tutelar.core.Errors.{AppError, ErrorOr, InvalidCsrfToken}
 import com.wanari.tutelar.core.impl.CsrfServiceJwt.CsrfJwtConfig
 import com.wanari.tutelar.util.DateTimeUtil
 import pdi.jwt.{JwtAlgorithm, JwtClaim, JwtSprayJson}
@@ -14,10 +15,7 @@ import scala.concurrent.duration.Duration
 
 class CsrfServiceJwt[F[_]: MonadError[*[_], Throwable]: DateTimeUtil](implicit csrfJwtConfig: () => F[CsrfJwtConfig])
     extends CsrfService[F] {
-  import cats.syntax.applicative._
-  import cats.syntax.flatMap._
   import cats.syntax.functor._
-  import com.wanari.tutelar.util.ApplicativeErrorSyntax._
   import com.wanari.tutelar.util.SpraySyntax._
 
   protected implicit val clock = Clock.systemDefaultZone()
@@ -30,14 +28,17 @@ class CsrfServiceJwt[F[_]: MonadError[*[_], Throwable]: DateTimeUtil](implicit c
     }
   }
 
-  def checkCsrfToken(auther: String, token: String): F[Unit] = {
-    csrfJwtConfig().map { config =>
-      JwtSprayJson
-        .decodeJson(token, config.key, Seq(JwtAlgorithm.HS256))
-        .fold(_.raise[F, JsObject], _.pure)
-        .map(_.fields.get("auther").contains(JsString(auther)))
-        .flatMap(_.pureUnitOrRise(InvalidCsrfToken()))
-    }
+  def checkCsrfToken(auther: String, token: String): ErrorOr[F, Unit] = {
+    for {
+      config <- EitherT.right[AppError](csrfJwtConfig())
+      data <- EitherT.fromOption(
+        JwtSprayJson.decodeJson(token, config.key, Seq(JwtAlgorithm.HS256)).toOption,
+        InvalidCsrfToken()
+      )
+      _ <- EitherT
+        .rightT[F, AppError](!data.fields.get("auther").contains(JsString(auther)))
+        .ensure(InvalidCsrfToken())(identity)
+    } yield ()
   }
 
 }
