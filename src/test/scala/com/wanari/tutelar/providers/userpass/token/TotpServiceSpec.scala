@@ -82,6 +82,7 @@ class TotpServiceSpec extends TestBase {
 
     "failure" when {
       "username is already used" in new TestScope {
+        initMock(jwtServiceMock)
         initDb()
         service.register(savedAccount.externalId, "token", "755224", None) shouldBe EitherT.leftT(UsernameUsed())
       }

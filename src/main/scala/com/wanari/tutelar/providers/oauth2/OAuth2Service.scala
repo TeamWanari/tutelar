@@ -4,7 +4,7 @@ import akka.http.scaladsl.model._
 import cats.data.EitherT
 import cats.{Applicative, MonadError}
 import com.wanari.tutelar.core.AuthService.TokenData
-import com.wanari.tutelar.core.Errors.ErrorOr
+import com.wanari.tutelar.core.Errors.{ErrorOr, InvalidProfileDataMissingKey, InvalidProfileDataNotJsonObject}
 import com.wanari.tutelar.core.{AuthService, CsrfService}
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.{
   OAuth2Config,
@@ -121,14 +121,14 @@ object OAuth2Service {
   implicit val tokenResponseHelperReader: RootJsonReader[TokenResponseHelper] = jsonFormat1(TokenResponseHelper)
   def profileDataReader(idKey: String): RootJsonReader[ProfileData] = {
     case obj: JsObject =>
-      obj.fields.get(idKey).fold(throw new Exception()) { // TODO throw InvalidProfileDataMissingKey(idKey)
+      obj.fields.get(idKey).fold(throw throw InvalidProfileDataMissingKey(idKey)) {
         case strId: JsString =>
           ProfileData(strId.value, obj)
         case idVal: JsValue =>
           ProfileData(idVal.compactPrint, obj)
       }
     case _ =>
-      throw new Exception() // TODO throw InvalidProfileDataNotJsonObject()
+      throw InvalidProfileDataNotJsonObject()
   }
 
   case class OAuth2Config(

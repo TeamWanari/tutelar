@@ -230,6 +230,8 @@ class AuthServiceSpec extends TestBase {
       service.unlink(savedUser.id, savedAccount.authType) shouldBe EitherT.leftT(UserLastAccount())
     }
     "fail if account not found " in new TestScope {
+      val savedAccount2 = Account("AUTH_TYPE2", "saved_ext_id", savedUser.id, "somedata")
+      databaseService.saveAccount(savedAccount2)
       service.unlink(savedUser.id, "random_type") shouldBe EitherT.leftT(AccountNotFound())
     }
     "delete the account " in new TestScope {

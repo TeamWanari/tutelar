@@ -112,7 +112,7 @@ class EmailProviderServiceSpec extends TestBase {
           when(jwtServiceMock.validateAndDecode(any[String])).thenReturn(
             EitherT.rightT[Try, AppError](
               JsObject(
-                "email" -> JsString("new@user"),
+                "email" -> JsString(savedAccount.externalId),
                 "type"  -> JsString("register")
               )
             )
@@ -160,93 +160,95 @@ class EmailProviderServiceSpec extends TestBase {
         service.sendRegister("").value shouldBe a[Failure[_]]
       }
     }
-  }
-  "#reset-password" should {
-    trait ResetPasswordScope extends TestScope {
-      when(jwtServiceMock.validateAndDecode(any[String])).thenReturn(
-        EitherT.rightT[Try, AppError](
-          JsObject(
-            "email" -> JsString(savedExternalId),
-            "type"  -> JsString("reset")
-          )
-        )
-      )
-    }
-
-    "successful" in new ResetPasswordScope {
-      initDb()
-      service.resetPassword("resetToken", "pw", None) shouldBe EitherT.rightT(authenticateResponse)
-      verify(jwtServiceMock).validateAndDecode("resetToken")
-    }
-    "change the password" in new ResetPasswordScope {
-      initDb()
-      service.resetPassword("resetToken", "new_secret", None) shouldBe EitherT.rightT(authenticateResponse)
-
-      val userData = databaseService.accounts.get(authType -> savedExternalId)
-      userData shouldBe a[Some[_]]
-      BCrypt.checkpw("new_secret", userData.get.customData) shouldBe true
-    }
-    "send extra data via hook" in new ResetPasswordScope {
-      initDb()
-      service.resetPassword("", "pw", Some(JsObject("hello" -> JsTrue)))
-      verify(hookService).login(
-        eqTo(savedAccount.userId),
-        eqTo(savedAccount.externalId),
-        eqTo("EMAIL"),
-        eqTo(JsObject("hello" -> JsTrue))
-      )(any[LogContext])
-    }
-    "failure" when {
-      "user not found" in new ResetPasswordScope {
-        service.resetPassword("", "pw", None) shouldBe EitherT.leftT(UserNotFound())
-      }
-      "wrong token" in new TestScope {
-        initDb()
+    "#reset-password" should {
+      trait ResetPasswordScope extends TestScope {
         when(jwtServiceMock.validateAndDecode(any[String])).thenReturn(
           EitherT.rightT[Try, AppError](
             JsObject(
               "email" -> JsString(savedExternalId),
-              "type"  -> JsString("asdasd")
+              "type"  -> JsString("reset")
             )
           )
         )
-        service.resetPassword("", "pw", None) shouldBe EitherT.leftT(InvalidEmailToken())
       }
-      "token is wrong" in new TestScope {
+
+      "successful" in new ResetPasswordScope {
         initDb()
-        val error: Either[AppError, JsObject] = Left(InvalidJwt())
-        when(jwtServiceMock.validateAndDecode(any[String])).thenReturn(EitherT(Success(error)))
-        service.resetPassword("", "pw", None) shouldBe EitherT.leftT(InvalidJwt())
+        service.resetPassword("resetToken", "pw", None) shouldBe EitherT.rightT(authenticateResponse)
+        verify(jwtServiceMock).validateAndDecode("resetToken")
+      }
+      "change the password" in new ResetPasswordScope {
+        initDb()
+        service.resetPassword("resetToken", "new_secret", None) shouldBe EitherT.rightT(authenticateResponse)
+
+        val userData = databaseService.accounts.get(authType -> savedExternalId)
+        userData shouldBe a[Some[_]]
+        BCrypt.checkpw("new_secret", userData.get.customData) shouldBe true
+      }
+      "send extra data via hook" in new ResetPasswordScope {
+        initDb()
+        service.resetPassword("", "pw", Some(JsObject("hello" -> JsTrue)))
+        verify(hookService).login(
+          eqTo(savedAccount.userId),
+          eqTo(savedAccount.externalId),
+          eqTo("EMAIL"),
+          eqTo(JsObject("hello" -> JsTrue))
+        )(any[LogContext])
+      }
+      "failure" when {
+        "user not found" in new ResetPasswordScope {
+          service.resetPassword("", "pw", None) shouldBe EitherT.leftT(UserNotFound())
+        }
+        "wrong token" in new TestScope {
+          initDb()
+          when(jwtServiceMock.validateAndDecode(any[String])).thenReturn(
+            EitherT.rightT[Try, AppError](
+              JsObject(
+                "email" -> JsString(savedExternalId),
+                "type"  -> JsString("asdasd")
+              )
+            )
+          )
+          service.resetPassword("", "pw", None) shouldBe EitherT.leftT(InvalidEmailToken())
+        }
+        "token is wrong" in new TestScope {
+          initDb()
+          val error: Either[AppError, JsObject] = Left(InvalidJwt())
+          when(jwtServiceMock.validateAndDecode(any[String])).thenReturn(EitherT(Success(error)))
+          service.resetPassword("", "pw", None) shouldBe EitherT.leftT(InvalidJwt())
+        }
       }
     }
-  }
-  "#send-reset-password" should {
-    "not call email service if not find email in db" in new TestScope {
-      service.sendResetPassword(savedExternalId) shouldBe EitherT.leftT(UserNotFound())
-      verify(emailService, never).sendRegisterUrl(eqTo(savedExternalId), any[String])(any[LogContext])
-    }
-    "call send service with the given email address" in new TestScope {
-      initDb()
-      when(emailService.sendResetPasswordUrl(any[String], any[String])(any[LogContext])).thenReturn(Success(()))
-      service.sendResetPassword(savedExternalId) shouldBe EitherT.rightT(())
-      verify(emailService).sendResetPasswordUrl(eqTo(savedExternalId), any[String])(any[LogContext])
-    }
-    "create token with the email address and type" in new TestScope {
-      initDb()
-      service.sendResetPassword(savedExternalId)
-      verify(jwtServiceMock).encode(JsObject("email" -> JsString(savedExternalId), "type" -> JsString("reset")))
-    }
-    "and call send service" in new TestScope {
-      initDb()
-      when(emailService.sendResetPasswordUrl(any[String], any[String])(any[LogContext])).thenReturn(Success(()))
-      when(jwtServiceMock.encode(any[JsObject], any[Option[Duration]])).thenReturn(Success("RESET_TOKEN"))
-      service.sendResetPassword(savedExternalId)
-      verify(emailService).sendResetPasswordUrl(any[String], eqTo("RESET_TOKEN"))(any[LogContext])
-    }
-    "fail when send failed" in new TestScope {
-      when(emailService.sendResetPasswordUrl(any[String], any[String])(any[LogContext]))
-        .thenReturn(Failure(new Exception))
-      service.sendResetPassword("").value shouldBe a[Failure[_]]
+    "#send-reset-password" should {
+      "not call email service if not find email in db" in new TestScope {
+        service.sendResetPassword(savedExternalId) shouldBe EitherT.leftT(UserNotFound())
+        verify(emailService, never).sendRegisterUrl(eqTo(savedExternalId), any[String])(any[LogContext])
+      }
+      "call send service with the given email address" in new TestScope {
+        initDb()
+        when(emailService.sendResetPasswordUrl(any[String], any[String])(any[LogContext])).thenReturn(Success(()))
+        service.sendResetPassword(savedExternalId) shouldBe EitherT.rightT(())
+        verify(emailService).sendResetPasswordUrl(eqTo(savedExternalId), any[String])(any[LogContext])
+      }
+      "create token with the email address and type" in new TestScope {
+        initDb()
+        service.sendResetPassword(savedExternalId)
+        verify(jwtServiceMock).encode(JsObject("email" -> JsString(savedExternalId), "type" -> JsString("reset")))
+      }
+      "and call send service" in new TestScope {
+        initDb()
+        when(emailService.sendResetPasswordUrl(any[String], any[String])(any[LogContext])).thenReturn(Success(()))
+        when(jwtServiceMock.encode(any[JsObject], any[Option[Duration]])).thenReturn(Success("RESET_TOKEN"))
+        service.sendResetPassword(savedExternalId)
+        verify(emailService).sendResetPasswordUrl(any[String], eqTo("RESET_TOKEN"))(any[LogContext])
+      }
+      "fail when send failed" in new TestScope {
+        initDb()
+        when(jwtServiceMock.encode(any[JsObject], any[Option[Duration]])).thenReturn(Success("RESET_TOKEN"))
+        when(emailService.sendResetPasswordUrl(any[String], any[String])(any[LogContext]))
+          .thenReturn(Failure(new Exception))
+        service.sendResetPassword(savedExternalId).value shouldBe a[Failure[_]]
+      }
     }
   }
 }
