@@ -48,7 +48,7 @@ lazy val core = (project in file("."))
       val slickV    = "3.3.2"
       val jwtV      = "4.0.0"
       Seq(
-        "org.typelevel"        %% "cats-core"                % "2.0.0-RC3",
+        "org.typelevel"        %% "cats-core"                % "2.0.0",
         "com.typesafe.akka"    %% "akka-http"                % akkaHttpV,
         "com.typesafe.akka"    %% "akka-http-spray-json"     % akkaHttpV,
         "com.typesafe.akka"    %% "akka-http-testkit"        % akkaHttpV % "it,test",
@@ -61,7 +61,7 @@ lazy val core = (project in file("."))
         "org.slf4j"            % "jul-to-slf4j"              % "1.7.28",
         "com.typesafe.slick"   %% "slick"                    % slickV,
         "com.typesafe.slick"   %% "slick-hikaricp"           % slickV,
-        "org.postgresql"       % "postgresql"                % "42.2.6",
+        "org.postgresql"       % "postgresql"                % "42.2.7",
         "com.pauldijou"        %% "jwt-core"                 % jwtV,
         "com.pauldijou"        %% "jwt-spray-json"           % jwtV,
         "org.mindrot"          % "jbcrypt"                   % "0.4",
@@ -71,12 +71,12 @@ lazy val core = (project in file("."))
         "io.opentracing"       % "opentracing-util"          % "0.33.0",
         "io.opentracing"       % "opentracing-noop"          % "0.33.0",
         "io.jaegertracing"     % "jaeger-client"             % "1.0.0",
-        "org.reactivemongo"    %% "reactivemongo"            % "0.18.5",
+        "org.reactivemongo"    %% "reactivemongo"            % "0.18.6",
         "com.lightbend.akka"   %% "akka-stream-alpakka-amqp" % "1.1.1",
-        "org.bouncycastle"     % "bcprov-jdk15on"            % "1.62",
+        "org.bouncycastle"     % "bcprov-jdk15on"            % "1.63",
         "org.scalatest"        %% "scalatest"                % "3.0.8" % "it,test",
         "org.mockito"          % "mockito-core"              % "3.0.0" % "it,test",
-        "org.mockito"          %% "mockito-scala"            % "1.5.15" % "it,test"
+        "org.mockito"          %% "mockito-scala"            % "1.5.16" % "it,test"
       )
     }
   )
