@@ -43,27 +43,23 @@ lazy val core = (project in file("."))
       "-Xlint"
     ),
     libraryDependencies ++= {
-      val akkaHttpV = "10.1.9"
-      val akkaV     = "2.5.25"
-      val slickV    = "3.3.2"
-      val jwtV      = "4.0.0"
       Seq(
         "org.typelevel"        %% "cats-core"                % "2.0.0",
-        "com.typesafe.akka"    %% "akka-http"                % akkaHttpV,
-        "com.typesafe.akka"    %% "akka-http-spray-json"     % akkaHttpV,
-        "com.typesafe.akka"    %% "akka-http-testkit"        % akkaHttpV % "it,test",
-        "com.typesafe.akka"    %% "akka-actor"               % akkaV,
-        "com.typesafe.akka"    %% "akka-stream"              % akkaV,
-        "com.typesafe.akka"    %% "akka-slf4j"               % akkaV,
-        "com.typesafe.akka"    %% "akka-testkit"             % akkaV % "it,test",
+        "com.typesafe.akka"    %% "akka-http"                % "10.1.9",
+        "com.typesafe.akka"    %% "akka-http-spray-json"     % "10.1.9",
+        "com.typesafe.akka"    %% "akka-http-testkit"        % "10.1.9" % "it,test",
+        "com.typesafe.akka"    %% "akka-actor"               % "2.5.25",
+        "com.typesafe.akka"    %% "akka-stream"              % "2.5.25",
+        "com.typesafe.akka"    %% "akka-slf4j"               % "2.5.25",
+        "com.typesafe.akka"    %% "akka-testkit"             % "2.5.25" % "it,test",
         "ch.qos.logback"       % "logback-classic"           % "1.2.3",
         "net.logstash.logback" % "logstash-logback-encoder"  % "6.2",
         "org.slf4j"            % "jul-to-slf4j"              % "1.7.28",
-        "com.typesafe.slick"   %% "slick"                    % slickV,
-        "com.typesafe.slick"   %% "slick-hikaricp"           % slickV,
-        "org.postgresql"       % "postgresql"                % "42.2.7",
-        "com.pauldijou"        %% "jwt-core"                 % jwtV,
-        "com.pauldijou"        %% "jwt-spray-json"           % jwtV,
+        "com.typesafe.slick"   %% "slick"                    % "3.3.2",
+        "com.typesafe.slick"   %% "slick-hikaricp"           % "3.3.2",
+        "org.postgresql"       % "postgresql"                % "42.2.8",
+        "com.pauldijou"        %% "jwt-core"                 % "4.0.0",
+        "com.pauldijou"        %% "jwt-spray-json"           % "4.0.0",
         "org.mindrot"          % "jbcrypt"                   % "0.4",
         "commons-codec"        % "commons-codec"             % "1.13",
         "ch.megard"            %% "akka-http-cors"           % "0.4.1",
