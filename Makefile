@@ -14,6 +14,9 @@ down: ## Destroy all services and volumes
 psql: ## Open psql console
 	$(compose) exec db bash -c "psql -U postgres"
 
+mongo: ## Open mongo console
+	$(compose) exec mongo bash -c "mongo"
+
 rundocs: ## Start docs localhost:4000
 	sbt "; project docs ; previewAuto"
 
