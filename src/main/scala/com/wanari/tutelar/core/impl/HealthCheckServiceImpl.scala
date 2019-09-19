@@ -1,11 +1,11 @@
-package com.wanari.tutelar.core.healthcheck
+package com.wanari.tutelar.core.impl
 
-import cats.data.EitherT
 import cats.Monad
+import cats.data.EitherT
 import com.wanari.tutelar.BuildInfo
-import com.wanari.tutelar.core.DatabaseService
 import com.wanari.tutelar.core.Errors.ErrorOr
-import com.wanari.tutelar.core.healthcheck.HealthCheckService.HealthCheckResult
+import com.wanari.tutelar.core.HealthCheckService.HealthCheckResult
+import com.wanari.tutelar.core.{DatabaseService, HealthCheckService}
 
 class HealthCheckServiceImpl[F[_]: Monad](implicit databaseService: DatabaseService[F]) extends HealthCheckService[F] {
 

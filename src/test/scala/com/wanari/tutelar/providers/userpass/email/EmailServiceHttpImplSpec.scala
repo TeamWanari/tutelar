@@ -31,10 +31,8 @@ class EmailServiceHttpImplSpec extends TestKit(ActorSystem("HookServiceSpec")) w
     implicit lazy val e: MonadError[Try, Throwable] = implicitly
     implicit lazy val httpWrapper                   = mock[HttpWrapper[Try]]
     when(httpWrapper.singleRequest(any[HttpRequest])(any[LogContext])).thenReturn(Failure(new Exception))
-    implicit lazy val config: () => Try[EmailServiceHttpConfig] = () => {
-      Success(EmailServiceHttpConfig("_SERVICE_URL_", "_USER_", "_PASS_"))
-    }
-    lazy val service = new EmailServiceHttpImpl[Try]()
+    implicit lazy val config: EmailServiceHttpConfig = EmailServiceHttpConfig("_SERVICE_URL_", "_USER_", "_PASS_")
+    lazy val service                                 = new EmailServiceHttpImpl[Try]()
   }
 
   "EmailServiceHttpImpl" should {

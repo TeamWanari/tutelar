@@ -26,8 +26,8 @@ class TotpServiceSpec extends TestBase {
     override lazy val savedCustomData =
       TotpData("SHA1", 6, 30000, 0, "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ").toJson.toString
 
-    implicit val configF = () => Success(TotpConfig("SHA1", 1, 30000, 6, true))
-    val random           = mock[SecureRandom]
+    implicit val config = TotpConfig("SHA1", 1, 30000, 6, true)
+    val random          = mock[SecureRandom]
 
     val jwtServiceMock = mock[JwtService[Try]]
 

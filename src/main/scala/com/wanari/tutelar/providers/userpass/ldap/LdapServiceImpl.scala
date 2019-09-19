@@ -16,16 +16,15 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class LdapServiceImpl(
     implicit ec: ExecutionContext,
-    ldapConfig: () => Future[LdapConfig],
+    config: LdapConfig,
     authService: AuthService[Future]
 ) extends LdapService[Future] {
-  private lazy val context  = createSearchContext()
-  private lazy val controls = createSearchControls()
+  private lazy val context = getUserInitialDirContext(config.readonlyUserWithNameSpace, config.readonlyUserPassword)
 
   import cats.instances.future._
 
   override def init: Future[Unit] = {
-    for (_ <- context; _ <- controls) yield ()
+    context.map(_ => ())
   }
 
   override def login(username: String, password: String, data: Option[JsObject])(
@@ -39,28 +38,28 @@ class LdapServiceImpl(
 
   private def loginAndGetAttributes(username: String, password: String) = {
     val result = for {
-      user       <- findUser(username)
-      _          <- getUserInitialDirContext(user.getNameInNamespace, password)
-      attributes <- attributesConvertToMap(user.getAttributes)
-    } yield Right(attributes)
+      user <- findUser(username)
+      _    <- getUserInitialDirContext(user.getNameInNamespace, password)
+    } yield {
+      val attributes = attributesConvertToMap(user.getAttributes)
+      Right(attributes)
+    }
     result.recover {
       case _ => Left(AuthenticationFailed())
     }
   }
 
-  private def attributesConvertToMap(attributes: Attributes): Future[Map[String, JsValue]] = {
-    ldapConfig().map { config =>
-      import scala.jdk.CollectionConverters._
-      val arrayAttributes = config.userSearchReturnArrayAttributes.map(_.toLowerCase)
-      attributes.getAll.asScala.map { attribute =>
-        val jsValue = if (arrayAttributes.contains(attribute.getID.toLowerCase)) {
-          JsArray(attribute.getAll.asScala.map(convertToJsValue).toVector)
-        } else {
-          convertToJsValue(attribute.get())
-        }
-        attribute.getID -> jsValue
-      }.toMap
-    }
+  private def attributesConvertToMap(attributes: Attributes): Map[String, JsValue] = {
+    import scala.jdk.CollectionConverters._
+    val arrayAttributes = config.userSearchReturnArrayAttributes.map(_.toLowerCase)
+    attributes.getAll.asScala.map { attribute =>
+      val jsValue = if (arrayAttributes.contains(attribute.getID.toLowerCase)) {
+        JsArray(attribute.getAll.asScala.map(convertToJsValue).toVector)
+      } else {
+        convertToJsValue(attribute.get())
+      }
+      attribute.getID -> jsValue
+    }.toMap
 
   }
 
@@ -79,50 +78,35 @@ class LdapServiceImpl(
   }
 
   private def getUserInitialDirContext(username: String, password: String): Future[InitialDirContext] = {
-    for {
-      config <- ldapConfig()
-      ctx <- Future {
-        val props = new Properties
-        props.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory")
-        props.put(Context.PROVIDER_URL, config.ldapUrl)
-        props.put(Context.SECURITY_PRINCIPAL, username)
-        props.put(Context.SECURITY_CREDENTIALS, password)
+    Future {
+      val props = new Properties
+      props.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory")
+      props.put(Context.PROVIDER_URL, config.ldapUrl)
+      props.put(Context.SECURITY_PRINCIPAL, username)
+      props.put(Context.SECURITY_CREDENTIALS, password)
 
-        new InitialDirContext(props)
-      }
-    } yield ctx
+      new InitialDirContext(props)
+    }
   }
 
   private def findUser(username: String): Future[SearchResult] = {
     for {
-      config <- ldapConfig()
-      ctx    <- context
-      ctrl   <- controls
+      ctx <- context
       data <- Future {
-        val ans = ctx.search(config.userSearchBaseDomain, s"${config.userSearchAttribute}=$username", ctrl)
+        val ans = ctx.search(config.userSearchBaseDomain, s"${config.userSearchAttribute}=$username", controls)
         ans.nextElement
       }
     } yield data
   }
 
-  private def createSearchControls(): Future[SearchControls] = {
-    for {
-      config <- ldapConfig()
-    } yield {
-      val returningAttributes      = config.userSearchReturnAttributes ++ config.userSearchReturnArrayAttributes
-      val controls: SearchControls = new SearchControls
-      controls.setReturningAttributes(returningAttributes.toArray)
-      controls.setSearchScope(SearchControls.SUBTREE_SCOPE)
-      controls
-    }
+  private lazy val controls: SearchControls = {
+    val returningAttributes      = config.userSearchReturnAttributes ++ config.userSearchReturnArrayAttributes
+    val controls: SearchControls = new SearchControls
+    controls.setReturningAttributes(returningAttributes.toArray)
+    controls.setSearchScope(SearchControls.SUBTREE_SCOPE)
+    controls
   }
 
-  private def createSearchContext(): Future[InitialDirContext] = {
-    for {
-      config <- ldapConfig()
-      ctx    <- getUserInitialDirContext(config.readonlyUserWithNameSpace, config.readonlyUserPassword)
-    } yield ctx
-  }
 }
 
 object LdapServiceImpl {

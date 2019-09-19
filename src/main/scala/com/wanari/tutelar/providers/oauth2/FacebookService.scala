@@ -2,15 +2,15 @@ package com.wanari.tutelar.providers.oauth2
 
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.{Accept, Authorization, OAuth2BearerToken}
-import cats.MonadError
+import cats.Monad
 import com.wanari.tutelar.core.{AuthService, CsrfService}
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.util.HttpWrapper
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import spray.json.RootJsonReader
 
-class FacebookService[F[_]: MonadError[*[_], Throwable]](
-    val oAuth2config: () => F[OAuth2Config]
+class FacebookService[F[_]: Monad](
+    val oAuth2config: OAuth2Config
 )(
     implicit
     val authService: AuthService[F],

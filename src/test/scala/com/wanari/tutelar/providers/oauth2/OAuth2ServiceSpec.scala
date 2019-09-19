@@ -89,7 +89,7 @@ class OAuth2ServiceSpec extends TestBase {
 
     trait Scope {
       val service = new OAuth2Service[Try] {
-        val oAuth2config = () => Try(OAuth2Config("https://self.com/test", "clientId", "clientSecret", Seq("a", "b")))
+        val oAuth2config = OAuth2Config("https://self.com/test", "clientId", "clientSecret", Seq("a", "b"))
         val csrfService  = mock[CsrfService[Try]]
         val http         = mock[HttpWrapper[Try]]
         val authService  = mock[AuthService[Try]]

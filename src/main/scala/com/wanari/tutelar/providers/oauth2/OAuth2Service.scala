@@ -2,7 +2,7 @@ package com.wanari.tutelar.providers.oauth2
 
 import akka.http.scaladsl.model._
 import cats.data.EitherT
-import cats.{Applicative, MonadError}
+import cats.MonadError
 import com.wanari.tutelar.core.AuthService.TokenData
 import com.wanari.tutelar.core.Errors.{ErrorOr, InvalidProfileDataMissingKey, InvalidProfileDataNotJsonObject}
 import com.wanari.tutelar.core.{AuthService, CsrfService}
@@ -17,29 +17,26 @@ import com.wanari.tutelar.util.LoggerUtil.LogContext
 import spray.json.{JsObject, JsString, JsValue, RootJsonFormat, RootJsonReader}
 
 trait OAuth2Service[F[_]] {
-  val oAuth2config: () => F[OAuth2Config]
-  val csrfService: CsrfService[F]
-  val http: HttpWrapper[F]
-  val authService: AuthService[F]
+  def oAuth2config: OAuth2Config
+  def csrfService: CsrfService[F]
+  def http: HttpWrapper[F]
+  def authService: AuthService[F]
 
-  val TYPE: String
-  val redirectUriBase: Uri
+  def TYPE: String
+  def redirectUriBase: Uri
 
   protected def createTokenRequest(entityHelper: TokenRequestHelper, selfRedirectUri: Uri): HttpRequest
   protected def getProfile(token: TokenResponseHelper)(implicit ctx: LogContext): F[ProfileData]
 
   def generateIdentifierUrl(implicit me: MonadError[F, Throwable]): F[Uri] = {
-    import cats.syntax.flatMap._
     import cats.syntax.functor._
     for {
-      config          <- oAuth2config()
-      state           <- csrfService.getCsrfToken(TYPE, JsObject.empty)
-      selfRedirectUri <- getSelfRedirectUri
+      state <- csrfService.getCsrfToken(TYPE, JsObject.empty)
     } yield {
       redirectUriBase.withQuery(
         Uri.Query(
-          "client_id"     -> config.clientId,
-          "scope"         -> config.scopes.mkString(" "),
+          "client_id"     -> oAuth2config.clientId,
+          "scope"         -> oAuth2config.scopes.mkString(" "),
           "state"         -> state,
           "response_type" -> "code",
           "redirect_uri"  -> selfRedirectUri.toString
@@ -62,13 +59,11 @@ trait OAuth2Service[F[_]] {
     }
 
     for {
-      _               <- csrfService.checkCsrfToken(TYPE, state)
-      config          <- EitherT.right(oAuth2config())
-      selfRedirectUri <- EitherT.right(getSelfRedirectUri)
-      response        <- EitherT.right(getToken(config.clientId, config.clientSecret, selfRedirectUri))
-      tokenResponse   <- EitherT.right(http.unmarshalEntityTo[TokenResponseHelper](response))
-      profile         <- EitherT.right(getProfile(tokenResponse))
-      token           <- authService.registerOrLogin(TYPE, profile.id, tokenResponse.access_token, profile.data)
+      _             <- csrfService.checkCsrfToken(TYPE, state)
+      response      <- EitherT.right(getToken(oAuth2config.clientId, oAuth2config.clientSecret, selfRedirectUri))
+      tokenResponse <- EitherT.right(http.unmarshalEntityTo[TokenResponseHelper](response))
+      profile       <- EitherT.right(getProfile(tokenResponse))
+      token         <- authService.registerOrLogin(TYPE, profile.id, tokenResponse.access_token, profile.data)
     } yield token
   }
 
@@ -81,12 +76,9 @@ trait OAuth2Service[F[_]] {
     } yield token
   }
 
-  protected def getSelfRedirectUri(implicit applicative: Applicative[F]): F[Uri] = {
-    import cats.syntax.functor._
-    oAuth2config().map { config =>
-      val uri = Uri(config.rootUrl)
-      uri.withPath(uri.path ?/ TYPE.toLowerCase / "callback")
-    }
+  protected lazy val selfRedirectUri: Uri = {
+    val uri = Uri(oAuth2config.rootUrl)
+    uri.withPath(uri.path ?/ TYPE.toLowerCase / "callback")
   }
 }
 

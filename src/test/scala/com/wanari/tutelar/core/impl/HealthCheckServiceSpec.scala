@@ -1,16 +1,15 @@
-package com.wanari.tutelar.core.healthcheck
+package com.wanari.tutelar.core.impl
 
 import cats.Id
-import com.wanari.tutelar.core.DatabaseService
-import com.wanari.tutelar.core.config.ServerConfig
-import com.wanari.tutelar.core.healthcheck.HealthCheckService.HealthCheckResult
+import com.wanari.tutelar.core.HealthCheckService.HealthCheckResult
+import com.wanari.tutelar.core.{ConfigService, DatabaseService}
 import com.wanari.tutelar.{BuildInfo, TestBase}
 import org.mockito.Mockito.when
 
 class HealthCheckServiceSpec extends TestBase {
 
   trait TestScope {
-    implicit val configService: ServerConfig[Id]          = mock[ServerConfig[Id]]
+    implicit val configService: ConfigService             = mock[ConfigService]
     implicit val databaseServiceMock: DatabaseService[Id] = mock[DatabaseService[Id]]
     val service                                           = new HealthCheckServiceImpl[Id]()
   }

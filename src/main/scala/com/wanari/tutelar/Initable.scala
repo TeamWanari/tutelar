@@ -1,7 +1,7 @@
 package com.wanari.tutelar
 
 import cats.MonadError
-import com.wanari.tutelar.core.config.ServerConfig
+import com.wanari.tutelar.core.ConfigService
 import org.slf4j.Logger
 
 trait Initable[F[_]] {
@@ -24,7 +24,7 @@ object Initable {
   def initializeIfEnabled[F[_]: MonadError[*[_], Throwable]](
       initable: => Initable[F],
       name: String
-  )(implicit conf: ServerConfig[F], logger: Logger): F[Unit] = {
+  )(implicit conf: ConfigService, logger: Logger): F[Unit] = {
     if (conf.getEnabledModules.contains(name)) initialize(initable, name)
     else ().pure[F]
   }

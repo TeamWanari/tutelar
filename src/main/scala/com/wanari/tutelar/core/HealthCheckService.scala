@@ -1,7 +1,7 @@
-package com.wanari.tutelar.core.healthcheck
+package com.wanari.tutelar.core
 
 import com.wanari.tutelar.core.Errors.ErrorOr
-import com.wanari.tutelar.core.healthcheck.HealthCheckService.HealthCheckResult
+import com.wanari.tutelar.core.HealthCheckService.HealthCheckResult
 import spray.json.RootJsonFormat
 
 trait HealthCheckService[F[_]] {

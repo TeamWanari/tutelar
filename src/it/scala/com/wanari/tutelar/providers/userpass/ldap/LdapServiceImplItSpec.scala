@@ -25,7 +25,7 @@ class LdapServiceImplItSpec extends WordSpecLike with Matchers with AwaitUtil wi
   }
 
   private val services = new ItTestServices {
-    import configService.runtimeConfig._
+    import configService._
     override implicit lazy val authService: AuthService[Future] = mock[AuthService[Future]]
     when(authService.registerOrLogin(any[String], any[String], any[String], any[JsObject])(any[LogContext])) thenReturn EitherT
       .rightT(TokenData("TOKEN", "REFRESH_TOKEN"))

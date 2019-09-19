@@ -9,9 +9,9 @@ class PasswordDifficultyCheckerImplSpec extends WordSpecLike with Matchers {
 
   trait TestScope {
     import cats.instances.try_._
-    lazy val patternConfig                                = ""
-    implicit lazy val config: () => Try[PasswordSettings] = () => Success(PasswordSettings(patternConfig))
-    lazy val service                                      = new PasswordDifficultyCheckerImpl[Try]
+    lazy val patternConfig                     = ""
+    implicit lazy val config: PasswordSettings = PasswordSettings(patternConfig)
+    lazy val service                           = new PasswordDifficultyCheckerImpl[Try]
   }
 
   val exactlyOneLowerChar      = "^[a-z]$"

@@ -1,16 +1,15 @@
 package com.wanari.tutelar.providers.userpass
 
-import cats.MonadError
+import cats.Monad
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
 
-class PasswordDifficultyCheckerImpl[F[_]: MonadError[*[_], Throwable]](implicit config: () => F[PasswordSettings])
+class PasswordDifficultyCheckerImpl[F[_]: Monad](implicit config: PasswordSettings)
     extends PasswordDifficultyChecker[F] {
-  import cats.syntax.functor._
+
+  import cats.syntax.applicative._
 
   override def isValid(password: String): F[Boolean] = {
-    config().map { settings =>
-      settings.pattern.r.findFirstIn(password).isDefined
-    }
+    config.pattern.r.findFirstIn(password).isDefined.pure
   }
 }
 

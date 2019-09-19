@@ -1,4 +1,4 @@
-package com.wanari.tutelar.core.healthcheck
+package com.wanari.tutelar.core
 
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route

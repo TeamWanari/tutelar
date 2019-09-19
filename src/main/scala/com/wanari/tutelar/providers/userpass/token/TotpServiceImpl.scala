@@ -5,7 +5,7 @@ import java.security.SecureRandom
 import cats.MonadError
 import cats.data.EitherT
 import com.wanari.tutelar.core.AuthService.TokenData
-import com.wanari.tutelar.core.Errors.{AppError, ErrorOr, InvalidAlgo, UserNotFound, UsernameUsed, WrongPassword}
+import com.wanari.tutelar.core.Errors.{ErrorOr, InvalidAlgo, UserNotFound, UsernameUsed, WrongPassword}
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.core.{AuthService, JwtService}
@@ -18,7 +18,7 @@ import scala.util.Try
 
 class TotpServiceImpl[F[_]: MonadError[*[_], Throwable]](
     implicit authService: AuthService[F],
-    totpConfig: () => F[TotpConfig],
+    config: TotpConfig,
     getJwtConfig: String => JwtConfig
 ) extends TotpService[F] {
   import TotpServiceImpl._
@@ -36,8 +36,7 @@ class TotpServiceImpl[F[_]: MonadError[*[_], Throwable]](
 
   override def qrCodeData: ErrorOr[F, QRData] = {
     for {
-      config <- EitherT.right[AppError](totpConfig())
-      algo   <- EitherT.fromOption(OTPAlgorithm.algos.find(_.name == config.algorithm), InvalidAlgo(config.algorithm))
+      algo <- EitherT.fromOption(OTPAlgorithm.algos.find(_.name == config.algorithm), InvalidAlgo(config.algorithm))
       key      = OTPKey.randomStrong(algo, secureRandom)
       totp     = TOTP(algo, config.digits, config.period, if (config.startFromCurrentTime) now else 0, key)
       totpData = TotpData(config.algorithm, totp.digits, totp.period, totp.initialTimestamp, key.toBase32)
@@ -52,7 +51,6 @@ class TotpServiceImpl[F[_]: MonadError[*[_], Throwable]](
       implicit ctx: LogContext
   ): ErrorOr[F, TokenData] = {
     for {
-      config           <- EitherT.right[AppError](totpConfig())
       totpDataAsString <- decodeToken(registerToken)
       _                <- checkPassword(totpDataAsString, password, config.window)
       _                <- authService.findCustomData(authType, userName).toLeft(()).leftMap(_ => UsernameUsed())
@@ -64,7 +62,6 @@ class TotpServiceImpl[F[_]: MonadError[*[_], Throwable]](
       implicit ctx: LogContext
   ): ErrorOr[F, TokenData] = {
     for {
-      config    <- EitherT.right[AppError](totpConfig())
       savedData <- authService.findCustomData(authType, username).toRight(UserNotFound())
       _         <- checkPassword(savedData, password, config.window)
       token     <- authService.registerOrLogin(authType, username, savedData, data.getOrElse(JsObject()))

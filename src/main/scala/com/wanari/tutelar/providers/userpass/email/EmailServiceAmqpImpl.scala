@@ -10,25 +10,27 @@ import spray.json.RootJsonFormat
 
 class EmailServiceAmqpImpl[F[_]: Monad](
     implicit amqpService: AmqpService[F],
-    configByNameF: String => F[AmqpQueueConfig]
+    configByName: String => AmqpQueueConfig
 ) extends EmailService[F]
     with Initable[F] {
-  import cats.syntax.functor._
+  import cats.syntax.applicative._
 
-  protected lazy val queue: F[AmqpQueue] = {
-    configByNameF("email_service").map(amqpService.createQueue)
+  protected lazy val queue: AmqpQueue = {
+    val conf = configByName("email_service")
+    amqpService.createQueue(conf)
   }
 
   override def init: F[Unit] = {
-    queue.map(_ => ())
+    queue
+    ().pure[F]
   }
 
   override def sendRegisterUrl(email: String, token: String)(implicit ctx: LogContext): F[Unit] = {
-    queue.map(_.send(TokenMessage("register", email, token)))
+    queue.send(TokenMessage("register", email, token)).pure[F]
   }
 
   override def sendResetPasswordUrl(email: String, token: String)(implicit ctx: LogContext): F[Unit] = {
-    queue.map(_.send(TokenMessage("reset-password", email, token)))
+    queue.send(TokenMessage("reset-password", email, token)).pure[F]
   }
 }
 

@@ -12,7 +12,7 @@ import spray.json._
 
 class EmailServiceHttpImpl[F[_]: MonadError[*[_], Throwable]](
     implicit http: HttpWrapper[F],
-    configF: () => F[EmailServiceHttpConfig]
+    config: EmailServiceHttpConfig
 ) extends EmailService[F] {
 
   override def sendRegisterUrl(email: String, token: String)(implicit ctx: LogContext): F[Unit] = {
@@ -28,7 +28,7 @@ class EmailServiceHttpImpl[F[_]: MonadError[*[_], Throwable]](
     import cats.syntax.functor._
     import com.wanari.tutelar.util.ApplicativeErrorSyntax._
 
-    val requestF: F[HttpRequest] = configF().map { config =>
+    val request: HttpRequest = {
       val url         = s"${config.url}/send"
       val entity      = HttpEntity(ContentTypes.`application/json`, data.toJson.compactPrint)
       val credentials = BasicHttpCredentials(config.username, config.password)
@@ -38,7 +38,6 @@ class EmailServiceHttpImpl[F[_]: MonadError[*[_], Throwable]](
     }
 
     for {
-      request  <- requestF
       response <- http.singleRequest(request)
       result   <- response.status.isSuccess().pureUnitOrRise(HttpClientError(response))
     } yield result

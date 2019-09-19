@@ -1,13 +1,17 @@
 package com.wanari.tutelar
 
-import com.wanari.tutelar.core.AmqpService
+import com.wanari.tutelar.core.{AmqpService, ConfigService}
 import com.wanari.tutelar.core.HookService.HookConfig
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
 import com.wanari.tutelar.core.TracerService.TracerServiceConfig
-import com.wanari.tutelar.core.config.{RuntimeConfig, ServerConfig}
 import com.wanari.tutelar.core.impl.database.DatabaseServiceFactory.DatabaseConfig
 import com.wanari.tutelar.core.impl.database.MongoDatabaseService.MongoConfig
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl
+import com.wanari.tutelar.providers.oauth2.OAuth2Service
+import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl
+import com.wanari.tutelar.providers.userpass.email.{EmailServiceFactory, EmailServiceHttpImpl}
+import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl
+import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl
 import org.slf4j.LoggerFactory
 
 import scala.util.{Success, Try}
@@ -25,17 +29,24 @@ class InitiableSpec extends TestBase {
       }
     }
     implicit val logger = LoggerFactory.getLogger("test")
-    implicit val config = new ServerConfig[Try] {
-      override def getEnabledModules: Seq[String]                             = Seq("modulename")
-      override val runtimeConfig: RuntimeConfig[Try]                          = null
-      override def init: Try[Unit]                                            = ???
-      override def getMongoConfig: MongoConfig                                = ???
-      override def getDatabaseConfig: DatabaseConfig                          = ???
-      override def getTracerServiceConfig: TracerServiceConfig                = ???
-      override def getJwtConfigByName(name: String): JwtServiceImpl.JwtConfig = ???
-      override def getCallbackConfig: CallbackConfig                          = ???
-      override def getHookConfig: HookConfig                                  = ???
-      override def getAmqpConfig: AmqpService.AmqpConfig                      = ???
+    implicit val config = new ConfigService {
+      override def getEnabledModules: Seq[String]                                           = Seq("modulename")
+      override def getMongoConfig: MongoConfig                                              = ???
+      override def getDatabaseConfig: DatabaseConfig                                        = ???
+      override def getTracerServiceConfig: TracerServiceConfig                              = ???
+      override def getJwtConfigByName(name: String): JwtServiceImpl.JwtConfig               = ???
+      override def getCallbackConfig: CallbackConfig                                        = ???
+      override def getHookConfig: HookConfig                                                = ???
+      override def getAmqpConfig: AmqpService.AmqpConfig                                    = ???
+      override def emailServiceFactoryConfig: EmailServiceFactory.EmailServiceFactoryConfig = ???
+      override def emailServiceHttpConfig: EmailServiceHttpImpl.EmailServiceHttpConfig      = ???
+      override def totpConfig: TotpServiceImpl.TotpConfig                                   = ???
+      override def getAmqpQueueConfig(name: String): AmqpService.AmqpQueueConfig            = ???
+      override def facebookConfig: OAuth2Service.OAuth2Config                               = ???
+      override def githubConfig: OAuth2Service.OAuth2Config                                 = ???
+      override def googleConfig: OAuth2Service.OAuth2Config                                 = ???
+      override def ldapConfig: LdapServiceImpl.LdapConfig                                   = ???
+      override def passwordSettings: PasswordDifficultyCheckerImpl.PasswordSettings         = ???
     }
   }
   import cats.instances.try_._
