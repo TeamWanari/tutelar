@@ -1,4 +1,4 @@
-FROM hseeberger/scala-sbt:11.0.3_1.2.8_2.13.0 as builder
+FROM hseeberger/scala-sbt:8u212_1.2.8_2.13.0 as builder
 WORKDIR /app
 COPY build.sbt /app/build.sbt
 COPY project /app/project
@@ -9,9 +9,10 @@ RUN sbt compile test stage && \
     chmod u+x,g+x /app/target/universal/stage/bin/tutelar
 
 
-FROM openjdk:11
+FROM openjdk:8-alpine
 USER root
-RUN useradd --system --create-home --uid 1001 --gid 0 tutelar
+RUN apk add --no-cache bash && \
+    adduser -S -u 1001 tutelar
 USER 1001
 EXPOSE 9000
 ENTRYPOINT ["/app/bin/tutelar"]
