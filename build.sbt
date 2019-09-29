@@ -45,9 +45,9 @@ lazy val core = (project in file("."))
     libraryDependencies ++= {
       Seq(
         "org.typelevel"        %% "cats-core"                % "2.0.0",
-        "com.typesafe.akka"    %% "akka-http"                % "10.1.9",
-        "com.typesafe.akka"    %% "akka-http-spray-json"     % "10.1.9",
-        "com.typesafe.akka"    %% "akka-http-testkit"        % "10.1.9" % "it,test",
+        "com.typesafe.akka"    %% "akka-http"                % "10.1.10",
+        "com.typesafe.akka"    %% "akka-http-spray-json"     % "10.1.10",
+        "com.typesafe.akka"    %% "akka-http-testkit"        % "10.1.10" % "it,test",
         "com.typesafe.akka"    %% "akka-actor"               % "2.5.25",
         "com.typesafe.akka"    %% "akka-stream"              % "2.5.25",
         "com.typesafe.akka"    %% "akka-slf4j"               % "2.5.25",
@@ -58,8 +58,8 @@ lazy val core = (project in file("."))
         "com.typesafe.slick"   %% "slick"                    % "3.3.2",
         "com.typesafe.slick"   %% "slick-hikaricp"           % "3.3.2",
         "org.postgresql"       % "postgresql"                % "42.2.8",
-        "com.pauldijou"        %% "jwt-core"                 % "4.0.0",
-        "com.pauldijou"        %% "jwt-spray-json"           % "4.0.0",
+        "com.pauldijou"        %% "jwt-core"                 % "4.1.0",
+        "com.pauldijou"        %% "jwt-spray-json"           % "4.1.0",
         "org.mindrot"          % "jbcrypt"                   % "0.4",
         "commons-codec"        % "commons-codec"             % "1.13",
         "ch.megard"            %% "akka-http-cors"           % "0.4.1",
@@ -67,12 +67,12 @@ lazy val core = (project in file("."))
         "io.opentracing"       % "opentracing-util"          % "0.33.0",
         "io.opentracing"       % "opentracing-noop"          % "0.33.0",
         "io.jaegertracing"     % "jaeger-client"             % "1.0.0",
-        "org.reactivemongo"    %% "reactivemongo"            % "0.18.6",
+        "org.reactivemongo"    %% "reactivemongo"            % "0.18.7",
         "com.lightbend.akka"   %% "akka-stream-alpakka-amqp" % "1.1.1",
         "org.bouncycastle"     % "bcprov-jdk15on"            % "1.63",
         "org.scalatest"        %% "scalatest"                % "3.0.8" % "it,test",
         "org.mockito"          % "mockito-core"              % "3.0.0" % "it,test",
-        "org.mockito"          %% "mockito-scala"            % "1.5.16" % "it,test"
+        "org.mockito"          %% "mockito-scala"            % "1.5.18" % "it,test"
       )
     }
   )
