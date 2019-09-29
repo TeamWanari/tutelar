@@ -1,12 +1,16 @@
 package com.wanari.tutelar.core.impl.database
 
+import com.typesafe.config.Config
 import com.wanari.tutelar.core.DatabaseService
 import com.wanari.tutelar.core.DatabaseService.{Account, AccountId, User}
+import com.wanari.tutelar.core.impl.database.PostgresDatabaseService.PostgresConfig
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class PostgresDatabaseService(db: Database)(implicit ec: ExecutionContext) extends DatabaseService[Future] {
+class PostgresDatabaseService(implicit config: PostgresConfig, ec: ExecutionContext) extends DatabaseService[Future] {
+
+  private lazy val db: Database = Database.forConfig(config.path, config.config)
 
   override def init: Future[Unit] = {
     db.run(sql"SELECT 1".as[Int]).map(_ => ())
@@ -111,6 +115,5 @@ class PostgresDatabaseService(db: Database)(implicit ec: ExecutionContext) exten
 }
 
 object PostgresDatabaseService {
-  //TODO this is an uncontrolled read from the config
-  def getDatabase: Database = Database.forConfig("database.postgres")
+  case class PostgresConfig(config: Config, path: String)
 }

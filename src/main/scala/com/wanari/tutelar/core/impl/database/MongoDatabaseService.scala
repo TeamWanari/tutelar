@@ -11,7 +11,7 @@ import reactivemongo.bson.{BSONDocument, BSONDocumentHandler, BSONInteger, Macro
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class MongoDatabaseService(config: => MongoConfig)(implicit ec: ExecutionContext, driver: MongoDriver)
+class MongoDatabaseService(implicit config: MongoConfig, ec: ExecutionContext, driver: MongoDriver)
     extends DatabaseService[Future] {
   import MongoDatabaseService._
   import cats.instances.future._

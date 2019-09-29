@@ -1,9 +1,11 @@
 package com.wanari.tutelar.core.database
 
 import cats.data.OptionT
+import com.typesafe.config.ConfigFactory
 import com.wanari.tutelar.AwaitUtil
 import com.wanari.tutelar.core.DatabaseService.{Account, User}
 import com.wanari.tutelar.core.impl.database.MongoDatabaseService.MongoConfig
+import com.wanari.tutelar.core.impl.database.PostgresDatabaseService.PostgresConfig
 import com.wanari.tutelar.core.impl.database.{MemoryDatabaseService, MongoDatabaseService, PostgresDatabaseService}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 import reactivemongo.api.collections.bson.BSONCollection
@@ -15,15 +17,17 @@ import scala.concurrent.Future
 
 class DatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUtil with BeforeAndAfterAll {
   import cats.instances.future._
+  import slick.jdbc.PostgresProfile.api.Database
 
   private val memoryService = new MemoryDatabaseService[Future]
 
-  private val db              = PostgresDatabaseService.getDatabase
-  private val postgresService = new PostgresDatabaseService(db)
+  private val db                      = Database.forConfig("database.postgres")
+  private implicit val postgresConfig = PostgresConfig(ConfigFactory.load(), "database.postgres")
+  private val postgresService         = new PostgresDatabaseService
 
   private implicit val mongoDriver = new MongoDriver()
   private implicit val mongoConfig = MongoConfig("mongodb://localhost/tutelar", "users")
-  private val mongoService         = new MongoDatabaseService(mongoConfig)
+  private val mongoService         = new MongoDatabaseService
   private val mongoCollection = await({
     (for {
       uri        <- OptionT.fromOption(MongoConnection.parseURI(mongoConfig.uri).toOption)

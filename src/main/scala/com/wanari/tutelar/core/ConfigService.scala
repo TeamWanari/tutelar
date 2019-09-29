@@ -6,6 +6,7 @@ import com.wanari.tutelar.core.ProviderApi.CallbackConfig
 import com.wanari.tutelar.core.TracerService.TracerServiceConfig
 import com.wanari.tutelar.core.impl.database.DatabaseServiceFactory.DatabaseConfig
 import com.wanari.tutelar.core.impl.database.MongoDatabaseService.MongoConfig
+import com.wanari.tutelar.core.impl.database.PostgresDatabaseService.PostgresConfig
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
@@ -17,6 +18,7 @@ import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl.TotpConfig
 trait ConfigService {
   def getEnabledModules: Seq[String]
   implicit def getMongoConfig: MongoConfig
+  implicit def getPostgresConfig: PostgresConfig
   implicit def getDatabaseConfig: DatabaseConfig
   implicit def getTracerServiceConfig: TracerServiceConfig
   implicit def getJwtConfigByName(name: String): JwtConfig

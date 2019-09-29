@@ -13,10 +13,11 @@ object DatabaseServiceFactory {
       ev: Applicative[Future],
       ec: ExecutionContext
   ): DatabaseService[Future] = {
+    import config._
     config.getDatabaseConfig.`type` match {
       case DatabaseConfig.MEMORY   => new MemoryDatabaseService[Future]
-      case DatabaseConfig.POSTGRES => new PostgresDatabaseService(PostgresDatabaseService.getDatabase)
-      case DatabaseConfig.MONGO    => new MongoDatabaseService(config.getMongoConfig)
+      case DatabaseConfig.POSTGRES => new PostgresDatabaseService
+      case DatabaseConfig.MONGO    => new MongoDatabaseService
       // todo not supported?
     }
   }

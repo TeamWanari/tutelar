@@ -6,6 +6,7 @@ import com.wanari.tutelar.core.ProviderApi.CallbackConfig
 import com.wanari.tutelar.core.TracerService.TracerServiceConfig
 import com.wanari.tutelar.core.impl.database.DatabaseServiceFactory.DatabaseConfig
 import com.wanari.tutelar.core.impl.database.MongoDatabaseService.MongoConfig
+import com.wanari.tutelar.core.impl.database.PostgresDatabaseService
 import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl
 import com.wanari.tutelar.providers.oauth2.OAuth2Service
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl
@@ -16,7 +17,7 @@ import org.slf4j.LoggerFactory
 
 import scala.util.{Success, Try}
 
-class InitiableSpec extends TestBase {
+class InitableSpec extends TestBase {
 
   trait TestScope {
     var called = false
@@ -47,6 +48,7 @@ class InitiableSpec extends TestBase {
       override def googleConfig: OAuth2Service.OAuth2Config                                 = ???
       override def ldapConfig: LdapServiceImpl.LdapConfig                                   = ???
       override def passwordSettings: PasswordDifficultyCheckerImpl.PasswordSettings         = ???
+      override def getPostgresConfig: PostgresDatabaseService.PostgresConfig                = ???
     }
   }
   import cats.instances.try_._
