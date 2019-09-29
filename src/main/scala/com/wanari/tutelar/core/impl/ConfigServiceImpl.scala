@@ -22,7 +22,7 @@ import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl.TotpConfig
 
 import scala.concurrent.duration.FiniteDuration
 import scala.io.Source
-import scala.util.Try
+import scala.util.Using
 
 class ConfigServiceImpl() extends ConfigService {
   private lazy val conf: Config = ConfigFactory.load
@@ -165,7 +165,9 @@ class ConfigServiceImpl() extends ConfigService {
   }
 
   private def readFromFileOrConf(config: Config, key: String): String = {
-    Try(Source.fromFile(config.getString(s"${key}File")).mkString).getOrElse(config.getString(key))
+    lazy val fromConfig = config.getString(key)
+    val fromFile        = Using(Source.fromFile(config.getString(s"${key}File")))(_.mkString)
+    fromFile.getOrElse(fromConfig)
   }
 
   private def readOauth2Config(name: String): OAuth2Config = {
