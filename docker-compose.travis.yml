@@ -1,0 +1,36 @@
+version: '3'
+services:
+  tutelar:
+    image: hseeberger/scala-sbt:8u212_1.2.8_2.13.0
+    working_dir: /app
+    volumes:
+      - ./:/app
+    environment:
+      DB_URL: "jdbc:postgresql://postgres:5432/postgres?user=postgres&password=postgres"
+      LDAP_URL: "ldap://ldap:389"
+      DB_URI: "mongodb://mongo/tutelar"
+    depends_on:
+      - postgres
+      - mongo
+      - ldap
+    command: sleep 5000
+  postgres:
+    image: postgres:11.2
+    environment:
+      POSTGRES_PASSWORD: "postgres"
+    volumes:
+    - ./scripts/databases/postgres.sql:/docker-entrypoint-initdb.d/database.sql:ro
+  mongo:
+    image: mongo:4.0.9
+    volumes:
+    - ./scripts/databases/mongo.js:/docker-entrypoint-initdb.d/database.js:ro
+  ldap:
+    image: osixia/openldap:1.2.4
+    environment:
+      LDAP_ORGANISATION: "Wanari"
+      LDAP_DOMAIN: "wanari.com"
+      LDAP_BASE_DN: "dc=wanari,dc=com"
+      LDAP_READONLY_USER: "true"
+    volumes:
+      - ./scripts/ldap/ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom
+    command: --copy-service
