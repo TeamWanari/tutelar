@@ -7,7 +7,7 @@ services:
 
 script:
   - docker-compose -f docker-compose.travis.yml up -d
-  - docker-compose -f docker-compose.travis.yml exec tutelar sbt -mem 2048 clean compile test it:test
+  - docker-compose -f docker-compose.travis.yml exec tutelar sbt -mem 2048 clean compile test it:test clean
 
 before_deploy:
   - git config --global user.name "$USER"
@@ -22,4 +22,4 @@ deploy:
   script: sbt "; project docs ; makeSite ; ghpagesPushSite"
   skip_cleanup: true
   on:
-    branch: master
+    branch: fix-docs
