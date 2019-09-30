@@ -1,0 +1,12 @@
+sudo: required
+language: scala
+
+scala:
+  - 2.13.0
+
+services:
+  - docker
+
+script:
+  - docker-compose -f docker-compose.dev.yml -p tutelar up -d
+  - sbt clean compile test it:test
