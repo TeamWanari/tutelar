@@ -16,8 +16,11 @@ before_deploy:
   - docker-compose -f docker-compose.travis.yml exec tutelar touch ~/.ssh/known_hosts
   - docker-compose -f docker-compose.travis.yml exec tutelar ssh-keyscan -H github.com >> ~/.ssh/known_hosts
   - echo $HOSTNAME
-  - docker-compose -f docker-compose.travis.yml exec tutelar bash -c "echo \"$$HOSTNAME\""
-  - docker-compose -f docker-compose.travis.yml exec tutelar bash -c "echo \"$HOSTNAME\""
+#  - docker-compose -f docker-compose.travis.yml exec tutelar bash -c "echo \"$$HOSTNAME\""
+#  - docker-compose -f docker-compose.travis.yml exec tutelar bash -c "echo \"$HOSTNAME\""
+  - docker-compose -f docker-compose.travis.yml exec tutelar bash -c 'echo "$HOSTNAME"'
+  - "docker-compose -f docker-compose.travis.yml exec tutelar bash -c 'echo \"$HOSTNAME\"'"
+  - 'docker-compose -f docker-compose.travis.yml exec tutelar bash -c "echo \"$HOSTNAME\""'
   - docker-compose -f docker-compose.travis.yml exec tutelar ssh-add project/travis-deploy-key
 
 deploy:
