@@ -12,14 +12,15 @@ before_deploy:
   - chmod 600 project/travis-deploy-key
   - docker-compose -f docker-compose.travis.yml exec tutelar git config --global user.name "$USER"
   - docker-compose -f docker-compose.travis.yml exec tutelar git config --global user.email "$TRAVIS_BUILD_NUMBER@$TRAVIS_COMMIT"
-  - docker-compose -f docker-compose.travis.yml exec tutelar mkdir -p ~/.ssh
-  - docker-compose -f docker-compose.travis.yml exec tutelar touch ~/.ssh/known_hosts
-  - docker-compose -f docker-compose.travis.yml exec tutelar ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-  - docker-compose -f docker-compose.travis.yml exec tutelar bash -c 'eval $(ssh-agent -s) && ssh-add project/travis-deploy-key'
 
 deploy:
   provider: script
-  script: docker-compose -f docker-compose.travis.yml exec tutelar sbt "; project docs ; makeSite ; ghpagesPushSite"
+  script: docker-compose -f docker-compose.travis.yml exec tutelar bash -c 'mkdir -p ~/.ssh && \
+  touch ~/.ssh/known_hosts && \
+  ssh-keyscan -H github.com >> ~/.ssh/known_hosts && \
+  eval $(ssh-agent -s) && \
+  ssh-add project/travis-deploy-key && \
+  sbt "; project docs ; makeSite ; ghpagesPushSite"'
   skip_cleanup: true
   on:
     branch: docstest
