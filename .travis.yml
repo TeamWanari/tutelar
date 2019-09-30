@@ -1,0 +1,8 @@
+sudo: required
+
+services:
+  - docker
+
+script:
+  - docker-compose -f docker-compose.travis.yml up -d
+  - docker-compose -f docker-compose.travis.yml exec tutelar sbt -mem 2048 clean compile test it:test

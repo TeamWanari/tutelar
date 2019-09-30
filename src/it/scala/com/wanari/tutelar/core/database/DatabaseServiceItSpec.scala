@@ -21,13 +21,18 @@ class DatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUtil wi
 
   private val memoryService = new MemoryDatabaseService[Future]
 
+  private val config = ConfigFactory.load()
+
   private val db                      = Database.forConfig("database.postgres")
-  private implicit val postgresConfig = PostgresConfig(ConfigFactory.load(), "database.postgres")
+  private implicit val postgresConfig = PostgresConfig(config, "database.postgres")
   private val postgresService         = new PostgresDatabaseService
 
   private implicit val mongoDriver = new MongoDriver()
-  private implicit val mongoConfig = MongoConfig("mongodb://localhost/tutelar", "users")
-  private val mongoService         = new MongoDatabaseService
+  private implicit val mongoConfig = MongoConfig(
+    config.getString("database.mongo.uri"),
+    config.getString("database.mongo.collection")
+  )
+  private val mongoService = new MongoDatabaseService
   private val mongoCollection = await({
     (for {
       uri        <- OptionT.fromOption(MongoConnection.parseURI(mongoConfig.uri).toOption)
