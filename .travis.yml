@@ -5,7 +5,7 @@ services:
 
 script:
   - docker-compose -f docker-compose.travis.yml up -d
-#  - docker-compose -f docker-compose.travis.yml exec tutelar sbt -mem 2048 clean compile test it:test
+  - docker-compose -f docker-compose.travis.yml exec tutelar sbt -mem 2048 clean compile test it:test
 
 before_deploy:
   - openssl aes-256-cbc -K $encrypted_5b60a6c9b373_key -iv $encrypted_5b60a6c9b373_iv -in project/travis-deploy-key.enc -out project/travis-deploy-key -d
