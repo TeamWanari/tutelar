@@ -16,8 +16,8 @@ script:
 
 before_deploy:
   - sudo chown -R $UID .
-  - git config --global user.name "$USER"
-  - git config --global user.email "$TRAVIS_BUILD_NUMBER@$TRAVIS_COMMIT"
+  - git config --global user.name "travis"
+  - git config --global user.email "travis@tutelar"
   - openssl aes-256-cbc -K $encrypted_5b60a6c9b373_key -iv $encrypted_5b60a6c9b373_iv -in project/travis-deploy-key.enc -out project/travis-deploy-key -d
   - chmod 600 project/travis-deploy-key
   - eval "$(ssh-agent -s)"
