@@ -5,6 +5,7 @@ language: scala
 branches:
   only:
     - master
+    - /^v.*$/
 
 services:
   - docker
@@ -27,4 +28,5 @@ deploy:
   script: sbt "; project docs ; makeSite ; ghpagesPushSite"
   skip_cleanup: true
   on:
-    branch: master
+    all_branches: true
+    condition: "$TRAVIS_TAG =~ ^v.*$"
