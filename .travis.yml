@@ -7,10 +7,9 @@ services:
 
 script:
   - docker-compose -f docker-compose.travis.yml up -d
-  - docker-compose -f docker-compose.travis.yml exec tutelar sbt -mem 2048 clean compile test it:test
+  - docker-compose -f docker-compose.travis.yml exec -u $(id -u $USERNAME) tutelar sbt -mem 2048 clean compile test it:test
 
 before_deploy:
-  - sudo rm -R target project/target project/project/target
   - git config --global user.name "$USER"
   - git config --global user.email "$TRAVIS_BUILD_NUMBER@$TRAVIS_COMMIT"
   - openssl aes-256-cbc -K $encrypted_5b60a6c9b373_key -iv $encrypted_5b60a6c9b373_iv -in project/travis-deploy-key.enc -out project/travis-deploy-key -d
