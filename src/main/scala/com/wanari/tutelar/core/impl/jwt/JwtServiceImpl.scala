@@ -39,9 +39,8 @@ class JwtServiceImpl[F[_]: MonadError[*[_], Throwable]](config: JwtConfig) exten
     for {
       ec <- encode(JsObject())
       de <- decode(ec).value
-    } yield {
-      de.getOrElse(WrongConfig("JWT can't decode after encode").raise)
-    }
+      _  <- de.isDefined.pureUnitOrRise(WrongConfig("JWT can't decode after encode"))
+    } yield ()
   }
 
   override def encode(data: JsObject, expirationTime: Option[Duration] = None): F[String] = {
