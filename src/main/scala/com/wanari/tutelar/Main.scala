@@ -8,6 +8,7 @@ import com.wanari.tutelar.util.LoggerUtil
 import io.opentracing.util.GlobalTracer
 import org.slf4j.{Logger, LoggerFactory}
 
+import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
@@ -24,7 +25,8 @@ object Main extends App {
   val services = new RealServices()
 
   val starting = for {
-    _ <- services.init()
+    services <- Future(new RealServices())
+    _        <- services.init()
     route = Api.createApi(services)
     server <- Http().bindAndHandle(route, "0.0.0.0", 9000)
   } yield {

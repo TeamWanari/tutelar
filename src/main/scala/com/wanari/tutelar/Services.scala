@@ -43,8 +43,7 @@ trait Services[F[_]] {
     import cats.syntax.flatMap._
     import cats.syntax.functor._
 
-    logger.info("Init services")
-    // todo check config
+    logger.info("Init services...")
     for {
       _ <- initialize(tracerService, "tracer")
       _ <- initialize(databaseService, "database")
@@ -53,7 +52,9 @@ trait Services[F[_]] {
       _ <- initializeIfEnabled(emailLoginService, "email")
       _ <- initializeIfEnabled(totpService, "totp")
       _ <- initializeIfEnabled(ldapService, "ldap")
-    } yield ()
+    } yield {
+      logger.info("Init services DONE")
+    }
   }
 }
 
@@ -83,7 +84,7 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
   implicit lazy val emailLoginService: EmailProviderService[Future] = new EmailProviderServiceImpl[Future]()
   implicit lazy val totpService: TotpService[Future]                = new TotpServiceImpl[Future]()
   implicit lazy val tracerService: TracerService[Future]            = new TracerService[Future]()
-  implicit val amqpService: AmqpService[Future]                     = new AmqpServiceImpl[Future]()
+  implicit lazy val amqpService: AmqpService[Future]                = new AmqpServiceImpl[Future]()
   implicit lazy val passwordDifficultyChecker: PasswordDifficultyChecker[Future] =
     new PasswordDifficultyCheckerImpl[Future]
 }

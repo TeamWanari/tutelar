@@ -18,6 +18,7 @@ import scala.concurrent.duration.Duration
 class JwtServiceImpl[F[_]: MonadError[*[_], Throwable]](config: JwtConfig) extends JwtService[F] {
 
   import cats.syntax.functor._
+  import cats.syntax.flatMap._
   import com.wanari.tutelar.util.ApplicativeErrorSyntax._
 
   protected implicit val clock = Clock.systemDefaultZone()
@@ -35,7 +36,12 @@ class JwtServiceImpl[F[_]: MonadError[*[_], Throwable]](config: JwtConfig) exten
 
   override def init: F[Unit] = {
     Security.addProvider(new BouncyCastleProvider)
-    settings.map(_ => ())
+    for {
+      ec <- encode(JsObject())
+      de <- decode(ec).value
+    } yield {
+      de.getOrElse(WrongConfig("JWT can't decode after encode").raise)
+    }
   }
 
   override def encode(data: JsObject, expirationTime: Option[Duration] = None): F[String] = {

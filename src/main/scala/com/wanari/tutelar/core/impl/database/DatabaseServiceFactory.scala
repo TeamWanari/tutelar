@@ -1,6 +1,7 @@
 package com.wanari.tutelar.core.impl.database
 
 import cats.Applicative
+import com.wanari.tutelar.core.Errors.WrongConfig
 import com.wanari.tutelar.core.{ConfigService, DatabaseService}
 import reactivemongo.api.MongoDriver
 
@@ -18,7 +19,7 @@ object DatabaseServiceFactory {
       case DatabaseConfig.MEMORY   => new MemoryDatabaseService[Future]
       case DatabaseConfig.POSTGRES => new PostgresDatabaseService
       case DatabaseConfig.MONGO    => new MongoDatabaseService
-      // todo not supported?
+      case _                       => throw WrongConfig(s"Unsupported database type: ${config.getDatabaseConfig.`type`}")
     }
   }
 

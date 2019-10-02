@@ -21,7 +21,9 @@ lazy val docs = (project in file("docs"))
     name := "paradox-docs",
     paradoxTheme := Some(builtinParadoxTheme("generic")),
     sourceDirectory in Paradox := sourceDirectory.value / "main" / "paradox",
-    scmInfo := Some(ScmInfo(url("https://github.com/TeamWanari/tutelar"), "scm:git:git@github.com:TeamWanari/tutelar.git")),
+    scmInfo := Some(
+      ScmInfo(url("https://github.com/TeamWanari/tutelar"), "scm:git:git@github.com:TeamWanari/tutelar.git")
+    ),
     git.remoteRepo := scmInfo.value.get.connection.replace("scm:git:", ""),
     ver
   )

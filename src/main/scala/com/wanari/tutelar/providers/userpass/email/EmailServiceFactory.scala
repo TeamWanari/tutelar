@@ -3,6 +3,7 @@ package com.wanari.tutelar.providers.userpass.email
 import cats.MonadError
 import com.wanari.tutelar.core.AmqpService
 import com.wanari.tutelar.core.AmqpService.AmqpQueueConfig
+import com.wanari.tutelar.core.Errors.WrongConfig
 import com.wanari.tutelar.providers.userpass.email.EmailServiceHttpImpl.EmailServiceHttpConfig
 import com.wanari.tutelar.util.HttpWrapper
 
@@ -19,7 +20,7 @@ object EmailServiceFactory {
     config.`type` match {
       case HTTP => new EmailServiceHttpImpl[F]()
       case AMQP => new EmailServiceAmqpImpl[F]()
-      // todo not supported?
+      case _    => throw WrongConfig(s"Unsupported email service type: ${config.`type`}")
     }
   }
 
