@@ -31,7 +31,7 @@ class JwtServiceSpec extends TestBase {
   val asymmetricRSA = Seq("RS256", "RS384", "RS512")
     .map { algo =>
       val config1  = JwtConfig(1.day, algo, "", JwtServiceSpec.privateRSAKey1, JwtServiceSpec.publicRSAKey1)
-      val config2  = config1.copy(privateKey = JwtServiceSpec.privateRSAKey2)
+      val config2  = config1.copy(privateKey = JwtServiceSpec.privateRSAKey2, publicKey = JwtServiceSpec.publicRSAKey2)
       val service1 = createServiceWithConf(config1)
       val service2 = createServiceWithConf(config2)
       (algo, service1, service2)
@@ -40,7 +40,7 @@ class JwtServiceSpec extends TestBase {
   val asymmetricES = Seq("ES256", "ES384", "ES512")
     .map { algo =>
       val config1  = JwtConfig(1.day, algo, "", JwtServiceSpec.privateECKey1, JwtServiceSpec.publicECKey1)
-      val config2  = config1.copy(privateKey = JwtServiceSpec.privateECKey2)
+      val config2  = config1.copy(privateKey = JwtServiceSpec.privateECKey2, publicKey = JwtServiceSpec.publicECKey2)
       val service1 = createServiceWithConf(config1)
       val service2 = createServiceWithConf(config2)
       (algo, service1, service2)
@@ -133,32 +133,43 @@ object JwtServiceSpec {
                          |-----END PUBLIC KEY-----
                          |""".stripMargin
   val privateRSAKey2 = """-----BEGIN RSA PRIVATE KEY-----
-                         |MIIEpAIBAAKCAQEA2gvq1grjy+BntlCkdFoHYug904n32Z9YSMdRdOvvclXdQTYU
-                         |8iD5p27gx90qSzfUUpoJ4R8pc0Ky23/KJI8KOYUG1iMibcdkdMWl5PJynu+JUbqt
-                         |q5Kd8uwl+cKkUy22qUQ7gTqP/WqMdvvUTWN/iEvTyzg/bIIYqhtzJY5MQN9LBQzo
-                         |r5Fk2/tvRZDAe+NruBrUqte6qas9Dd+IRESfhHABgX0a0VEc+8hlDBEkPA3+jxER
-                         |HojuefjK+zcnM1Arz2iUUrtUpOXB0PRMNIsRBRrl2lQ85fjKDXXR06XU33KlTLwS
-                         |gGe3ZdglIUVTCjYIygk70RJvhNhwmrrB/AwwlwIDAQABAoIBAEQfMwgaMN8SRfSs
-                         |ryR2uBYLjr1XPmrsII3kT6uixpVHBDAKcHLRII5R0sI+c6c6UwhXfbyqmq2a6fwv
-                         |qXzQf5ZG3ELsiSYZBGaDFXg40tya46D4HKgcz2IEqzyjtekSwB2T5q9SF4hJ0Iaf
-                         |2M0wx7hSUGIOOapx3rjOiKP0GBiv1sJSdE5Fi9Zo74ZYrX7lCdvcxW/v9TjbHXxR
-                         |EaNDzwAjrW4SUkpe3YLJ/EsxWI7YFVeeh76Q7se/tN2JmoK1hWVDon/zonvLzbdI
-                         |wyYw1AVPHQdvHTkaKWzm9iGOZ36vNxE6q8AF6BjzIX4A0pywh2XL6K8OvGAdGaiA
-                         |vxmA1WECgYEA7tMXo96Ho4q6DrRSdUl9cPbQsRbnm/grdJmOsomGqHOghyidNc3m
-                         |z4VKJ8gtmdE4dZ9uh/jOjkuvsA9FpPssk47vTpPNKdWJafpbQM1wmiCcBe6jyAj3
-                         |FOXu3lBQea2bpy1MaXl6RkpYgA9rKqbi5utM87wH7jYn3GBd4Qf5X7ECgYEA6bpJ
-                         |6BjrhXp0rZUnfXob87eRHXR848gDT5T6s7EliX1UFzaujZIiuV5X8QHAj229Q590
-                         |VRiQ/HxGBZA6Rp0DZeedOL9w9/4Bih/cF85ty2yKJfGDj/RoVq43u0FcUd3F3djM
-                         |FUUSbKIUICK3AQWgBmWTumkYA/dWZbi54aNRLscCgYEApqCXRNj07/DRgYLkaTqe
-                         |D9vUnUnqzJJo11BwFDcJwavy23pFvY1sNWu84mazEje8Wayj9LBuhS9fY8o0ADjS
-                         |0B0Q8FUE9uQqnMt1MZBkuNR5p1Xp5Z4DrgwDDg8hJtQu3oQnZQvBeRtUBf07+yU2
-                         |+IBBT2joa5ZTV1nRBjmHDvECgYEAuWvophDfCA2V8v+ZTJpLApZmsY9wZOSQe9oc
-                         |6eFnfiPHSoM/B2Ef2x9VdQWG1kKhG7ysdbX/j86nXlKFaO+3emi8+gAmhxcj8YhE
-                         |+z3xLKj3EBMB5HppLBsaa5v2uZvPFaigf19Etpn+jV/8/vqPcYO0Jvao7ryR9jEO
-                         |hksiZJECgYAFkORYAvvx9RVHKcL/H8/CPZ96PZPrTPTXOJdEILtOTBYXKI5pcgVG
-                         |A8MEsvhik3ghlEwcFZ9fe49kx+BrYgiwN+4PubO6b7usV5MNhA3bxdsgwJxoUQMG
-                         |S1JVm6xx05o+6pVOCyT+47zCAYVzgjiiAakGwHoTUEaR5V5St+IxWA==
+                         |MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQClpZWHjKUtqyaP
+                         |mdBSXMsJYqdZ/wa/E9EkREa/zcQxSAtFBGgRr8PbV75xlOKnNL0Y2sLT6/AGLBlI
+                         |6wekcV4Vc5Sr0yZ9Kh/ZNG68Lyo0MxDv3pb08ckmxAuKhz4OgI0ax/IuWxqyLxTh
+                         |7CdgCye0NrG+2FDWZuJqGLu29vZeYoNpXFfnvJYXC+FaK0hLQzLOBecpIFRcPML9
+                         |PNpzjIoEZSvsB8x0SO6RTXXvKadAF2sTeuKBztcdDMgY4hjFUEdCPJVNt+c68VQQ
+                         |agB3S1xMqF/Ao1PHIlr+EVgNF5+DXwyrZwzHm6af5WOEQFMBNOx3/pR9xHtoRaaL
+                         |Iso/tdlHAgMBAAECggEBAKG7TogOdqhkVz4WPCRunX8IZ8WjDv85ZhY2460aRtin
+                         |MvmsF8BNELn0relQKQyAnbDKxzcLQkuEexuK/uc8GVRwiVRK0WWb34S/gO8UTeyx
+                         |f3P0rQdzm6bR+0LCUYDvWtYvKvK/2Qzok0cSwE8yFQ4L6PghVKxBwAc/Jui5sErt
+                         |59OOkaLWhcJbjjJRB9sSfTmuPVsUHrBsTQoVuhMXHgiRSz4gk2bnP/QQERtD8Si/
+                         |46w/34a3/ErEe/NV/eiNNeHGxqEX8itkXtCx9YoAbt0qEKdUHiK6XDAIJ7CLk+WL
+                         |NPA8kkEY74PG6XJgGTtuC/WVC9H6U70C5A5IGYPtxkECgYEA595S/8zws5dccYHz
+                         |4x7OYMTP8M9Is3W9v7Kwk6pffP+JfZKd7ByWT/lrBNNgvAC48BGVhjJkAt+vHF9z
+                         |jXwYOlruC0+H24gYSDwbI86N2sLNZez+Wljeyn1lazZu/1QF5VdvXn4RTv7CXMQ+
+                         |Iqv3UrQ+lg6Ih9Q2aaC2uEjInl8CgYEAtuLqV3FjVbNq8Rv9//AyFjVE6bgkXzCc
+                         |LjOi99b7V05g7Dw1ddxWA8RbVv6LDLUAv83CjhG2MO8fxrz18MRRSxx7bQMTBOp/
+                         |ASasIm6wghOCbIvyqb2KcjMKJuUELVfKmt80HTq5kJC1QcOSL3Rmvy5fuvAQ1SCW
+                         |XO7atzo43hkCgYEAgrig6n5MJbPr9kJhkWZIy92prgXu4t46f9zqGBYxh3M5vIXw
+                         |arEjPStM3oedPeDaYt5HAkVehRA+1SwrJVUVA7FICzBnU6lCp1bbpjBJYU/6JMCc
+                         |FauMz3QqvWsO4Pwp5saIjylb8MFIKqyoqztwUDw2HLtM1ecaViq5WOQP1tkCgYB9
+                         |IH2i/DIxhYLqmfNLs+Qg66tNmS5Rbmm89plOpmjqj/aiSoNtMyYqh6LSv28Vb5Wm
+                         |pTmyiA22JzT/fXNrmnXgRQlxSUQu/d2NRQ9Ks57SMFTwvUN2vPbHMYKFn/UerM0y
+                         |7vmx8ebaMRfCefM/wo01yp22wd9SYmxeAxHjgNM9qQKBgGRkoZ9VvKWuy/RYHT4n
+                         |hwu+HVj/UqRI1b5hgcf1wLMibFq1gkzQoDTNGZ6NtNyCqMVodAXvtlJdgbItBUQf
+                         |oYqYo1PpERSe2RXfnNDI8/5lokmmYwZIX5Q+ssu45duKihPyMdAqteyi0YYmMDQk
+                         |PFM4Dl9nfirsZZzsmLRGXKxn
                          |-----END RSA PRIVATE KEY-----
+                         |""".stripMargin
+  val publicRSAKey2  = """-----BEGIN PUBLIC KEY-----
+                         |MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApaWVh4ylLasmj5nQUlzL
+                         |CWKnWf8GvxPRJERGv83EMUgLRQRoEa/D21e+cZTipzS9GNrC0+vwBiwZSOsHpHFe
+                         |FXOUq9MmfSof2TRuvC8qNDMQ796W9PHJJsQLioc+DoCNGsfyLlsasi8U4ewnYAsn
+                         |tDaxvthQ1mbiahi7tvb2XmKDaVxX57yWFwvhWitIS0MyzgXnKSBUXDzC/Tzac4yK
+                         |BGUr7AfMdEjukU117ymnQBdrE3rigc7XHQzIGOIYxVBHQjyVTbfnOvFUEGoAd0tc
+                         |TKhfwKNTxyJa/hFYDRefg18Mq2cMx5umn+VjhEBTATTsd/6UfcR7aEWmiyLKP7XZ
+                         |RwIDAQAB
+                         |-----END PUBLIC KEY-----
                          |""".stripMargin
 
   val privateECKey1 = """-----BEGIN EC PRIVATE KEY-----
@@ -178,13 +189,19 @@ object JwtServiceSpec {
                         |-----END PUBLIC KEY-----
                         |""".stripMargin
   val privateECKey2 = """-----BEGIN EC PRIVATE KEY-----
-                        |MIH3AgEAMBAGByqGSM49AgEGBSuBBAAjBIHfMIHcAgEBBEIBH3YxW5SXadNwa8yW
-                        |nLesf8pek6jhNCAYfrVZQwljgFOqlomUojK4HTVMGSv8kpBy5fT8tA5MmDiHA4jE
-                        |YLKoTiWgBwYFK4EEACOhgYkDgYYABADwflqa45ej15BybS2bA3u7FCchPD+AE9+P
-                        |Ck/YQqfe/ZFRv5Z+81IlF1AiIhZZaGlOHbKnDkF5GGfEY5GR3tgoOQGRwlxxh+Oi
-                        |7rIAy1y48CS71bTvNHfyZuGinRNo5Q04pYTsBvrgkKzjtK3vaowT/KUwB8rGrkcn
-                        |fqAkCqt6gXz7rw==
+                        |MIH3AgEAMBAGByqGSM49AgEGBSuBBAAjBIHfMIHcAgEBBEIB0MDbtqqkzOG17rI8
+                        |9GB9E7kAD8wiXypUc2mvt2E8RAXiIOfQhcJga/op6z5DESkOE9nbZr79ELqzIAlJ
+                        |uie20L+gBwYFK4EEACOhgYkDgYYABAGyOCJp7h3Gw26PJilIORcVNFWQyDQ6iWaf
+                        |I1mR5kIspv+MzP/pmnqSV+2cCLvmpNj7rQb3QCuMabCihJ+rz9xu/wHAORY3vmln
+                        |ECge5nJS8gd9pHA6m6ihMTvHsf8MlOBGfWKZ0nG7mxm9Y3tt/GsDLU5soupRISAA
+                        |tYtS/BdcniSagg==
                         |-----END EC PRIVATE KEY-----
                         |""".stripMargin
-
+  val publicECKey2  = """-----BEGIN PUBLIC KEY-----
+                        |MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQBsjgiae4dxsNujyYpSDkXFTRVkMg0
+                        |OolmnyNZkeZCLKb/jMz/6Zp6klftnAi75qTY+60G90ArjGmwooSfq8/cbv8BwDkW
+                        |N75pZxAoHuZyUvIHfaRwOpuooTE7x7H/DJTgRn1imdJxu5sZvWN7bfxrAy1ObKLq
+                        |USEgALWLUvwXXJ4kmoI=
+                        |-----END PUBLIC KEY-----
+                        |""".stripMargin
 }

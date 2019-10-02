@@ -24,7 +24,7 @@ object JwtKeyGenerator {
 
   def generateRSAKeyPair: (String, String) = {
     val keyGen = KeyPairGenerator.getInstance("RSA")
-    keyGen.initialize(512)
+    keyGen.initialize(2048)
     val rsaKey = keyGen.genKeyPair
 
     convertToPem("RSA", rsaKey)
@@ -45,5 +45,11 @@ object JwtKeyGenerator {
 
   private def convertToPemDataFormat(data: Array[Byte]): String = {
     Base64.getEncoder.encodeToString(data).grouped(64).mkString("\r\n") + "\r\n"
+  }
+
+  def main(args: Array[String]): Unit = {
+    println(generateRSAKeyPair)
+    println("=" * 80)
+    println(generateECDSAKeyPair)
   }
 }
