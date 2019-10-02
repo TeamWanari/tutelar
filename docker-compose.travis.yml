@@ -6,9 +6,9 @@ services:
     volumes:
       - ./:/app
     environment:
-      DB_URL: "jdbc:postgresql://postgres:5432/postgres?user=postgres&password=postgres"
+      POSTGRES_URL: "jdbc:postgresql://postgres:5432/postgres?user=postgres&password=postgres"
       LDAP_URL: "ldap://ldap:389"
-      DB_URI: "mongodb://mongo/tutelar"
+      MONGO_URI: "mongodb://mongo/tutelar"
     depends_on:
       - postgres
       - mongo
