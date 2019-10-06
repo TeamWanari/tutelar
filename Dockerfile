@@ -6,7 +6,7 @@ RUN sbt update
 COPY . .
 RUN sbt stage && \
     chmod -R u=rX,g=rX /app/target/universal/stage && \
-    chmod u+x,g+x /app/target/universal/stage/bin/tutelar
+    chmod u+x,g+x /app/target/universal/stage/bin/main
 
 
 FROM openjdk:8-alpine
@@ -15,6 +15,6 @@ RUN apk add --no-cache bash && \
     adduser -S -u 1001 tutelar
 USER 1001
 EXPOSE 9000
-ENTRYPOINT ["/app/bin/tutelar"]
+ENTRYPOINT ["/app/bin/main"]
 CMD []
 COPY --from=builder --chown=1001:root /app/target/universal/stage /app
