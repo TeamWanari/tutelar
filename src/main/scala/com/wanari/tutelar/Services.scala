@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import akka.stream.Materializer
 import cats.MonadError
 import com.wanari.tutelar.core._
-import com.wanari.tutelar.core.impl.{ConfigServiceImpl, HealthCheckServiceImpl, _}
+import com.wanari.tutelar.core.impl._
 import com.wanari.tutelar.core.impl.database._
 import com.wanari.tutelar.providers.oauth2.{FacebookService, GithubService, GoogleService}
 import com.wanari.tutelar.providers.userpass.basic.{BasicProviderService, BasicProviderServiceImpl}
@@ -37,6 +37,7 @@ trait Services[F[_]] {
   implicit def passwordDifficultyChecker: PasswordDifficultyChecker[F]
   implicit def tracerService: TracerService[F]
   implicit def amqpService: AmqpService[F]
+  implicit def escherService: EscherService[F]
 
   def init()(implicit logger: Logger, ev: MonadError[F, Throwable]): F[Unit] = {
     import Initable._
@@ -48,6 +49,7 @@ trait Services[F[_]] {
       _ <- initialize(tracerService, "tracer")
       _ <- initialize(databaseService, "database")
       _ <- initialize(authService, "auth_service")
+      _ <- initialize(escherService, "escher")
       _ <- initializeIfEnabled(amqpService, "ampq")
       _ <- initializeIfEnabled(emailLoginService, "email")
       _ <- initializeIfEnabled(totpService, "totp")
@@ -85,6 +87,7 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
   implicit lazy val totpService: TotpService[Future]                = new TotpServiceImpl[Future]()
   implicit lazy val tracerService: TracerService[Future]            = new TracerService[Future]()
   implicit lazy val amqpService: AmqpService[Future]                = new AmqpServiceImpl[Future]()
+  implicit lazy val escherService: EscherService[Future]            = new EscherServiceImpl()
   implicit lazy val passwordDifficultyChecker: PasswordDifficultyChecker[Future] =
     new PasswordDifficultyCheckerImpl[Future]
 }

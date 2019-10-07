@@ -1,5 +1,7 @@
 package com.wanari.tutelar.core
 
+import com.emarsys.escher.akka.http.config.EscherConfig
+import com.typesafe.config.Config
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import spray.json.{JsObject, RootJsonFormat}
 
@@ -15,6 +17,7 @@ trait HookService[F[_]] {
 object HookService {
   sealed trait AuthConfig
   case class BasicAuthConfig(username: String, password: String) extends AuthConfig
+  case object EscherAuthConfig                                   extends AuthConfig
   case class HookConfig(baseUrl: String, authConfig: AuthConfig)
 
   case class HookUserData(id: String, externalId: String, authType: String, data: Option[JsObject])

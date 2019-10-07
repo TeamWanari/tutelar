@@ -1,5 +1,6 @@
 package com.wanari.tutelar.core
 
+import com.emarsys.escher.akka.http.config.EscherConfig
 import com.wanari.tutelar.core.AmqpService.{AmqpConfig, AmqpQueueConfig}
 import com.wanari.tutelar.core.HookService.HookConfig
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
@@ -34,4 +35,5 @@ trait ConfigService {
   def googleConfig: OAuth2Config
   implicit def ldapConfig: LdapConfig
   implicit def passwordSettings: PasswordSettings
+  implicit def escherConfig: EscherConfig
 }

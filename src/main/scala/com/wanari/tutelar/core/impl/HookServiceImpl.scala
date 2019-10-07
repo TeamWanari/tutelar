@@ -1,16 +1,18 @@
 package com.wanari.tutelar.core.impl
+
 import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model.headers.BasicHttpCredentials
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpRequest, HttpResponse}
 import cats.MonadError
-import com.wanari.tutelar.core.HookService
 import com.wanari.tutelar.core.HookService._
+import com.wanari.tutelar.core.{EscherService, HookService}
 import com.wanari.tutelar.util.HttpWrapper
-import com.wanari.tutelar.util.LoggerUtil.LogContext
+import com.wanari.tutelar.util.LoggerUtil.{LogContext, Logger}
 
 class HookServiceImpl[F[_]: MonadError[*[_], Throwable]](
     implicit config: HookConfig,
-    http: HttpWrapper[F]
+    http: HttpWrapper[F],
+    escher: EscherService[F]
 ) extends HookService[F] {
   import cats.syntax.applicative._
   import cats.syntax.applicativeError._
@@ -18,6 +20,8 @@ class HookServiceImpl[F[_]: MonadError[*[_], Throwable]](
   import cats.syntax.functor._
   import spray.json.DefaultJsonProtocol._
   import spray.json._
+
+  private val logger = new Logger("HookService")
 
   override def register(id: String, externalId: String, authType: String, data: JsObject)(
       implicit ctx: LogContext
@@ -84,12 +88,20 @@ class HookServiceImpl[F[_]: MonadError[*[_], Throwable]](
       val request = HttpRequest(POST, url, entity = entity)
       authenticator(config.authConfig, request)
     }.flatMap(http.singleRequest)
+      .recoverWith {
+        case ex: HookDisabled => ex.raiseError
+        case ex =>
+          logger.warn(s"FAILED Send hook to $endpoint", ex)
+          ex.raiseError
+      }
   }
 
   private def authenticator(authConfig: AuthConfig, request: HttpRequest): F[HttpRequest] = {
     authConfig match {
       case BasicAuthConfig(username, password) =>
         request.addCredentials(BasicHttpCredentials(username, password)).pure[F]
+      case EscherAuthConfig =>
+        escher.signRequest("hook", request)
     }
   }
 

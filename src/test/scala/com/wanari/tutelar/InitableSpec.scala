@@ -1,5 +1,6 @@
 package com.wanari.tutelar
 
+import com.emarsys.escher.akka.http.config.EscherConfig
 import com.wanari.tutelar.core.{AmqpService, ConfigService}
 import com.wanari.tutelar.core.HookService.HookConfig
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
@@ -49,6 +50,7 @@ class InitableSpec extends TestBase {
       override def ldapConfig: LdapServiceImpl.LdapConfig                                   = ???
       override def passwordSettings: PasswordDifficultyCheckerImpl.PasswordSettings         = ???
       override def getPostgresConfig: PostgresDatabaseService.PostgresConfig                = ???
+      override def escherConfig: EscherConfig                                               = ???
     }
   }
   import cats.instances.try_._

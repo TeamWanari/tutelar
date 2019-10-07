@@ -2,12 +2,13 @@ package com.wanari.tutelar.core.impl
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.ActorMaterializer
 import akka.testkit.TestKit
 import com.wanari.tutelar.TestBase
-import com.wanari.tutelar.core.HookService
-import com.wanari.tutelar.core.HookService.{BasicAuthConfig, HookConfig}
+import com.wanari.tutelar.core.{EscherService, HookService}
+import com.wanari.tutelar.core.HookService.{BasicAuthConfig, EscherAuthConfig, HookConfig}
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.{AkkaHttpWrapper, HttpWrapper}
 import org.mockito.ArgumentMatchersSugar.any
@@ -44,13 +45,24 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
     val httpMock = mock[HttpWrapper[Future]]
     when(httpMock.singleRequest(any[HttpRequest])(any[LogContext])) thenReturn Future.successful(response)
 
+    implicit val dummyEscher = new EscherService[Future] {
+      override def signRequest(service: String, request: HttpRequest): Future[HttpRequest] = {
+        Future.successful(request.copy(headers = request.headers :+ RawHeader("ESCHER", service)))
+      }
+      override def init: Future[Unit] = ???
+    }
+
     implicit val http = new AkkaHttpWrapper() {
       override def singleRequest(httpRequest: HttpRequest)(implicit ctx: LogContext): Future[HttpResponse] =
         httpMock.singleRequest(httpRequest)(ctx)
     }
-    implicit val config = HookConfig(baseUrl, BasicAuthConfig("user", "pass"))
-    lazy val service    = new HookServiceImpl[Future]()
+    implicit lazy val config = HookConfig(baseUrl, BasicAuthConfig("user", "pass"))
+    lazy val service         = new HookServiceImpl[Future]()
 
+  }
+
+  trait EscherTestScope extends TestScope {
+    override lazy val config = HookConfig(baseUrl, EscherAuthConfig)
   }
 
   type ServiceFunc = HookService[Future] => (String, String, String, JsObject) => Future[JsObject]
@@ -65,6 +77,11 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
           "add auth header - basic" in new TestScope {
             await(getFunc(service)(userId, externalId, authType, userInfo))
             validateBasicAuth(httpMock)
+          }
+
+          "sign request - escher" in new EscherTestScope {
+            await(getFunc(service)(userId, externalId, authType, userInfo))
+            validateEscherAuth(httpMock)
           }
 
           "send the user data and return the response" in new TestScope {
@@ -90,6 +107,11 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
         validateBasicAuth(httpMock)
       }
 
+      "sign request - escher" in new EscherTestScope {
+        await(service.modify(userId, externalId, authType, userInfo))
+        validateEscherAuth(httpMock)
+      }
+
       "send the user data" in new TestScope {
         await(service.modify(userId, externalId, authType, userInfo))
         validateRequest(httpMock)(
@@ -110,6 +132,11 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
       "add auth header - basic" in new TestScope {
         await(service.unlink(userId, externalId, authType))
         validateBasicAuth(httpMock)
+      }
+
+      "sign request - escher" in new EscherTestScope {
+        await(service.unlink(userId, externalId, authType))
+        validateEscherAuth(httpMock)
       }
 
       "send the user id and auth type" in new TestScope {
@@ -133,6 +160,11 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
         validateBasicAuth(httpMock)
       }
 
+      "sign request - escher" in new EscherTestScope {
+        await(service.delete(userId))
+        validateEscherAuth(httpMock)
+      }
+
       "send the user id" in new TestScope {
         await(service.delete(userId))
         validateRequest(httpMock)(
@@ -147,6 +179,12 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
     val captor: ArgumentCaptor[HttpRequest] = ArgumentCaptor.forClass(classOf[HttpRequest])
     verify(httpMock).singleRequest(captor.capture())(any[LogContext])
     captor.getValue.getHeader("Authorization").get().value() shouldEqual "Basic dXNlcjpwYXNz"
+  }
+
+  def validateEscherAuth(httpMock: HttpWrapper[Future]): Unit = {
+    val captor: ArgumentCaptor[HttpRequest] = ArgumentCaptor.forClass(classOf[HttpRequest])
+    verify(httpMock).singleRequest(captor.capture())(any[LogContext])
+    captor.getValue.getHeader("ESCHER").get().value() shouldEqual "hook"
   }
 
   def validateRequest(httpMock: HttpWrapper[Future])(expectedUrl: String, expectedRequest: Any): Unit = {

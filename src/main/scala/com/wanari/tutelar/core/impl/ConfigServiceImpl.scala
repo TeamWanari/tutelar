@@ -2,11 +2,12 @@ package com.wanari.tutelar.core.impl
 
 import java.util.concurrent.TimeUnit
 
+import com.emarsys.escher.akka.http.config.EscherConfig
 import com.typesafe.config.{Config, ConfigFactory}
 import com.wanari.tutelar.core.AmqpService.{AmqpConfig, AmqpQueueConfig}
 import com.wanari.tutelar.core.ConfigService
 import com.wanari.tutelar.core.Errors.WrongConfig
-import com.wanari.tutelar.core.HookService.{BasicAuthConfig, HookConfig}
+import com.wanari.tutelar.core.HookService.{BasicAuthConfig, EscherAuthConfig, HookConfig}
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
 import com.wanari.tutelar.core.TracerService.TracerServiceConfig
 import com.wanari.tutelar.core.impl.database.DatabaseServiceFactory.DatabaseConfig
@@ -116,6 +117,8 @@ class ConfigServiceImpl() extends ConfigService {
             config.getString("basicAuth.username"),
             readFromFileOrConf(config, "basicAuth.password")
           )
+        case "escher" => EscherAuthConfig
+        case t        => throw WrongConfig(s"Unsupported hook type: $t")
       }
       HookConfig(
         config.getString("baseUrl"),
@@ -204,6 +207,12 @@ class ConfigServiceImpl() extends ConfigService {
       }
       AmqpQueueConfig(conf.getConfig(path))
     }.fold(logAndThrow(s"AMQP for $name"), identity)
+  }
+
+  override implicit def escherConfig: EscherConfig = {
+    Try {
+      new EscherConfig(conf.getConfig("escher"))
+    }.fold(logAndThrow("Escher"), identity)
   }
 
   override lazy val facebookConfig: OAuth2Config = readOauth2Config("facebook")
