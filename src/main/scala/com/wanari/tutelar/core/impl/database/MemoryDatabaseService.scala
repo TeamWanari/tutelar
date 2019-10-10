@@ -4,14 +4,12 @@ import cats.Applicative
 import com.wanari.tutelar.core.DatabaseService
 import com.wanari.tutelar.core.DatabaseService.{Account, AccountId, User}
 
-import scala.collection.mutable
-
 class MemoryDatabaseService[F[_]: Applicative] extends DatabaseService[F] {
   import cats.syntax.applicative._
+  import scala.jdk.CollectionConverters._
 
-  // todo: to be thread safe
-  val users    = mutable.Map.empty[String, User]
-  val accounts = mutable.Map.empty[AccountId, Account]
+  val users    = new java.util.concurrent.ConcurrentHashMap[String, User].asScala
+  val accounts = new java.util.concurrent.ConcurrentHashMap[AccountId, Account].asScala
 
   override def saveUser(user: DatabaseService.User): F[Unit] = { users += (user.id -> user); () }.pure
 
