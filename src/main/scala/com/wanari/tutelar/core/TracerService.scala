@@ -4,12 +4,13 @@ import cats.MonadError
 import com.wanari.tutelar.Initable
 import com.wanari.tutelar.core.TracerService.TracerServiceConfig
 import com.wanari.tutelar.core.Errors.WrongConfig
-import io.jaegertracing.Configuration
-import io.jaegertracing.Configuration.{ReporterConfiguration, SamplerConfiguration}
 import io.opentracing.noop.NoopTracerFactory
 import io.opentracing.util.GlobalTracer
 
-class TracerService[F[_]: MonadError[*[_], Throwable]](implicit config: TracerServiceConfig) extends Initable[F] {
+class TracerService[F[_]: MonadError[*[_], Throwable]](
+    implicit config: TracerServiceConfig,
+    configService: ConfigService
+) extends Initable[F] {
   import cats.syntax.applicative._
   import com.wanari.tutelar.util.ApplicativeErrorSyntax._
 
@@ -26,12 +27,7 @@ class TracerService[F[_]: MonadError[*[_], Throwable]](implicit config: TracerSe
   }
 
   private def initJaeger(): Unit = {
-    // todo from config
-    val samplerConfig  = SamplerConfiguration.fromEnv().withType("const").withParam(1)
-    val reporterConfig = ReporterConfiguration.fromEnv().withLogSpans(true)
-    val config         = new Configuration("tutelar").withSampler(samplerConfig).withReporter(reporterConfig)
-
-    GlobalTracer.registerIfAbsent(config.getTracer)
+    GlobalTracer.registerIfAbsent(configService.jaegerConfig.getTracer)
   }
 
 }

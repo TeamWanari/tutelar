@@ -15,6 +15,7 @@ import com.wanari.tutelar.providers.userpass.email.EmailServiceFactory.EmailServ
 import com.wanari.tutelar.providers.userpass.email.EmailServiceHttpImpl.EmailServiceHttpConfig
 import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
 import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl.TotpConfig
+import io.jaegertracing.Configuration
 
 trait ConfigService {
   def getEnabledModules: Seq[String]
@@ -36,4 +37,5 @@ trait ConfigService {
   implicit def ldapConfig: LdapConfig
   implicit def passwordSettings: PasswordSettings
   implicit def escherConfig: EscherConfig
+  implicit def jaegerConfig: Configuration
 }

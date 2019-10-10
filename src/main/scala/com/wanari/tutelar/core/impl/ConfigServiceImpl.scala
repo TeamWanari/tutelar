@@ -21,6 +21,8 @@ import com.wanari.tutelar.providers.userpass.email.EmailServiceHttpImpl.EmailSer
 import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
 import com.wanari.tutelar.providers.userpass.token.OTP.OTPAlgorithm
 import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl.TotpConfig
+import io.jaegertracing.Configuration
+import io.jaegertracing.Configuration.{ReporterConfiguration, SamplerConfiguration}
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration.FiniteDuration
@@ -218,6 +220,18 @@ class ConfigServiceImpl() extends ConfigService {
   override lazy val facebookConfig: OAuth2Config = readOauth2Config("facebook")
   override lazy val githubConfig: OAuth2Config   = readOauth2Config("github")
   override lazy val googleConfig: OAuth2Config   = readOauth2Config("google")
+
+  override implicit lazy val jaegerConfig: Configuration = {
+    Try {
+      val config = conf.getConfig("jaeger")
+      val samplerConfig = SamplerConfiguration
+        .fromEnv()
+        .withType(config.getString("sampler.type"))
+        .withParam(config.getInt("sampler.param"))
+      val reporterConfig = ReporterConfiguration.fromEnv().withLogSpans(config.getBoolean("reporter.withLogSpans"))
+      new Configuration(config.getString("serviceName")).withSampler(samplerConfig).withReporter(reporterConfig)
+    }.fold(logAndThrow("Jaeger"), identity)
+  }
 
   private def readOauth2Config(name: String): OAuth2Config = {
     Try {

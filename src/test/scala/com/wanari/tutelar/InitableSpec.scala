@@ -14,6 +14,7 @@ import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl
 import com.wanari.tutelar.providers.userpass.email.{EmailServiceFactory, EmailServiceHttpImpl}
 import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl
 import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl
+import io.jaegertracing.Configuration
 import org.slf4j.LoggerFactory
 
 import scala.util.{Success, Try}
@@ -51,6 +52,7 @@ class InitableSpec extends TestBase {
       override def passwordSettings: PasswordDifficultyCheckerImpl.PasswordSettings         = ???
       override def getPostgresConfig: PostgresDatabaseService.PostgresConfig                = ???
       override def escherConfig: EscherConfig                                               = ???
+      override def jaegerConfig: Configuration                                              = ???
     }
   }
   import cats.instances.try_._
