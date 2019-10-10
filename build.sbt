@@ -77,7 +77,7 @@ lazy val core = (project in file("."))
         "io.jaegertracing"     % "jaeger-client"             % "1.0.0",
         "org.reactivemongo"    %% "reactivemongo"            % "0.18.7",
         "com.lightbend.akka"   %% "akka-stream-alpakka-amqp" % "1.1.1",
-        "org.bouncycastle"     % "bcprov-jdk15on"            % "1.63",
+        "org.bouncycastle"     % "bcprov-jdk15on"            % "1.64",
         "com.emarsys"          %% "escher-akka-http"         % "1.1.0",
         "org.scalatest"        %% "scalatest"                % "3.0.8" % "it,test",
         "org.mockito"          % "mockito-core"              % "3.1.0" % "it,test",
