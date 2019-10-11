@@ -9,7 +9,7 @@ import com.wanari.tutelar.core.ConfigService
 import com.wanari.tutelar.core.Errors.WrongConfig
 import com.wanari.tutelar.core.HookService.{BasicAuthConfig, EscherAuthConfig, HookConfig}
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
-import com.wanari.tutelar.core.TracerService.TracerServiceConfig
+import com.wanari.tutelar.core.TracerService.{JaegerConfig, TracerServiceConfig}
 import com.wanari.tutelar.core.impl.database.DatabaseServiceFactory.DatabaseConfig
 import com.wanari.tutelar.core.impl.database.MongoDatabaseService.MongoConfig
 import com.wanari.tutelar.core.impl.database.PostgresDatabaseService.PostgresConfig
@@ -221,7 +221,7 @@ class ConfigServiceImpl() extends ConfigService {
   override lazy val githubConfig: OAuth2Config   = readOauth2Config("github")
   override lazy val googleConfig: OAuth2Config   = readOauth2Config("google")
 
-  override implicit lazy val jaegerConfig: Configuration = {
+  override implicit lazy val jaegerConfig: JaegerConfig = {
     Try {
       val config = conf.getConfig("jaeger")
       val samplerConfig = SamplerConfiguration

@@ -4,7 +4,7 @@ import com.emarsys.escher.akka.http.config.EscherConfig
 import com.wanari.tutelar.core.AmqpService.{AmqpConfig, AmqpQueueConfig}
 import com.wanari.tutelar.core.HookService.HookConfig
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
-import com.wanari.tutelar.core.TracerService.TracerServiceConfig
+import com.wanari.tutelar.core.TracerService.{JaegerConfig, TracerServiceConfig}
 import com.wanari.tutelar.core.impl.database.DatabaseServiceFactory.DatabaseConfig
 import com.wanari.tutelar.core.impl.database.MongoDatabaseService.MongoConfig
 import com.wanari.tutelar.core.impl.database.PostgresDatabaseService.PostgresConfig
@@ -15,7 +15,6 @@ import com.wanari.tutelar.providers.userpass.email.EmailServiceFactory.EmailServ
 import com.wanari.tutelar.providers.userpass.email.EmailServiceHttpImpl.EmailServiceHttpConfig
 import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
 import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl.TotpConfig
-import io.jaegertracing.Configuration
 
 trait ConfigService {
   def getEnabledModules: Seq[String]
@@ -37,5 +36,5 @@ trait ConfigService {
   implicit def ldapConfig: LdapConfig
   implicit def passwordSettings: PasswordSettings
   implicit def escherConfig: EscherConfig
-  implicit def jaegerConfig: Configuration
+  implicit def jaegerConfig: JaegerConfig
 }

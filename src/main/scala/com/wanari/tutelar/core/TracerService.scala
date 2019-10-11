@@ -33,6 +33,8 @@ class TracerService[F[_]: MonadError[*[_], Throwable]](
 }
 
 object TracerService {
+  type JaegerConfig = io.jaegertracing.Configuration
+
   val OFF: String    = "off"
   val JAEGER: String = "jaeger"
   case class TracerServiceConfig(client: String)
