@@ -22,9 +22,11 @@ class FacebookService[F[_]: Monad](
   import cats.syntax.functor._
 
   val TYPE            = "facebook"
-  val redirectUriBase = Uri("https://www.facebook.com/v3.2/dialog/oauth")
-  val tokenEndpoint   = Uri("https://graph.facebook.com/v3.2/oauth/access_token")
-  val userEndpoint    = Uri("https://graph.facebook.com/me")
+  val redirectUriBase = Uri("https://www.facebook.com/v4.0/dialog/oauth")
+  val tokenEndpoint   = Uri("https://graph.facebook.com/v4.0/oauth/access_token")
+  val userEndpoint = Uri(
+    "https://graph.facebook.com/v4.0/me?fields=id,first_name,last_name,middle_name,name,name_format,picture,short_name"
+  )
 
   protected def createTokenRequest(entityHelper: TokenRequestHelper, selfRedirectUri: Uri): HttpRequest = {
     val endpoint = tokenEndpoint.withQuery(
