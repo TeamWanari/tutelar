@@ -7,5 +7,4 @@ EXPOSE 9000
 ENTRYPOINT ["/app/bin/main"]
 CMD []
 # Files from Travis build
-COPY --chown=1001:root . /app
-RUN ls /app
+COPY --chown=1001:root ./stage /app
