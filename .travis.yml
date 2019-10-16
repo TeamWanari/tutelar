@@ -15,7 +15,7 @@ script:
   - docker-compose -f docker-compose.travis.yml exec tutelar sbt -mem 2048 clean compile test it:test stage "; project docs ; makeSite"
   - cp -R ./target/universal/stage ./stage
   - chmod -R u=rX,g=rX ./stage && chmod u+x,g+x ./stage/bin/main
-  - docker build -t teamwanari/tutelar .
+  - docker build -t teamwanari/tutelar ./stage
 
 before_deploy:
   - sudo chown -R $UID .
