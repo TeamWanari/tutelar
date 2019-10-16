@@ -34,7 +34,7 @@ deploy:
     on:
       branch: master
   - provider: script
-    script: docker tag tutelar teamwanari/tutelar:$TRAVIS_TAG && docker push teamwanari/tutelar:$TRAVIS_TAG && sbt "; project docs ; ghpagesPushSite"
+    script: docker tag teamwanari/tutelar teamwanari/tutelar:$TRAVIS_TAG && docker push teamwanari/tutelar:$TRAVIS_TAG && sbt "; project docs ; ghpagesPushSite"
     skip_cleanup: true
     on:
       all_branches: true
