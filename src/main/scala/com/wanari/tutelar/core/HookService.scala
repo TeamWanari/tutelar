@@ -1,7 +1,5 @@
 package com.wanari.tutelar.core
 
-import com.emarsys.escher.akka.http.config.EscherConfig
-import com.typesafe.config.Config
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import spray.json.{JsObject, RootJsonFormat}
 
