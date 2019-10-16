@@ -25,7 +25,7 @@ before_deploy:
   - chmod 600 project/travis-deploy-key
   - eval "$(ssh-agent -s)"
   - ssh-add project/travis-deploy-key
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - echo "$DOCKER_PASSWORD" | docker login -u teamwanari --password-stdin
 
 deploy:
   - provider: script
