@@ -19,7 +19,7 @@ A micro-service for authentication.
 #### How to run
 See [Docker images](https://hub.docker.com/r/teamwanari/tutelar/tags)
 
-_TODO_
+docker build .
 
 
 #### Contributing
