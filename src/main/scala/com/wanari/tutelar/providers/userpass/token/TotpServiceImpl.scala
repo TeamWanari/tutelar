@@ -54,7 +54,7 @@ class TotpServiceImpl[F[_]: MonadError[*[_], Throwable]](
       totpDataAsString <- decodeToken(registerToken)
       _                <- checkPassword(totpDataAsString, password, config.window)
       _                <- authService.findCustomData(authType, userName).toLeft(()).leftMap(_ => UsernameUsed())
-      token            <- authService.registerOrLogin(authType, userName, totpDataAsString, data.getOrElse(JsObject()))
+      token            <- authService.registerOrLogin(authType, userName, totpDataAsString, data.getOrElse(JsObject()), None) // TODO refresh-token
     } yield token
   }
 
@@ -64,7 +64,7 @@ class TotpServiceImpl[F[_]: MonadError[*[_], Throwable]](
     for {
       savedData <- authService.findCustomData(authType, username).toRight(UserNotFound())
       _         <- checkPassword(savedData, password, config.window)
-      token     <- authService.registerOrLogin(authType, username, savedData, data.getOrElse(JsObject()))
+      token     <- authService.registerOrLogin(authType, username, savedData, data.getOrElse(JsObject()), None) // TODO refresh-token
     } yield token
   }
 

@@ -9,7 +9,13 @@ import spray.json.JsObject
 
 trait AuthService[F[_]] extends Initable[F] {
   def findCustomData(authType: String, externalId: String): OptionT[F, String]
-  def registerOrLogin(authType: String, externalId: String, customData: String, providedData: JsObject)(
+  def registerOrLogin(
+      authType: String,
+      externalId: String,
+      customData: String,
+      providedData: JsObject,
+      refreshToken: Option[LongTermToken]
+  )(
       implicit ctx: LogContext
   ): ErrorOr[F, TokenData]
   def deleteUser(userId: String)(implicit ctx: LogContext): ErrorOr[F, Unit]

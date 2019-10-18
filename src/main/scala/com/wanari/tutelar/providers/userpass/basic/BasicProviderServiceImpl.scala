@@ -20,9 +20,15 @@ class BasicProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
       implicit ctx: LogContext
   ): ErrorOr[F, TokenData] = {
     for {
-      _     <- EitherT.right(passwordDifficultyChecker.isValid(password)).ensure(WeakPassword())(identity)
-      _     <- authService.findCustomData(authType, username).toLeft(()).leftMap(_ => UsernameUsed())
-      token <- authService.registerOrLogin(authType, username, encryptPassword(password), data.getOrElse(JsObject()))
+      _ <- EitherT.right(passwordDifficultyChecker.isValid(password)).ensure(WeakPassword())(identity)
+      _ <- authService.findCustomData(authType, username).toLeft(()).leftMap(_ => UsernameUsed())
+      token <- authService.registerOrLogin(
+        authType,
+        username,
+        encryptPassword(password),
+        data.getOrElse(JsObject()),
+        None
+      ) // TODO refresh-token
     } yield token
   }
 
@@ -34,7 +40,7 @@ class BasicProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
         .findCustomData(authType, username)
         .toRight[AppError](UserNotFound())
         .ensure(AuthenticationFailed())(hash => checkPassword(password, hash))
-      token <- authService.registerOrLogin(authType, username, passwordHash, data.getOrElse(JsObject()))
+      token <- authService.registerOrLogin(authType, username, passwordHash, data.getOrElse(JsObject()), None) // TODO refresh-token
     } yield token
   }
 }
