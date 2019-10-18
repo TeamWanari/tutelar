@@ -135,7 +135,7 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
   )(implicit ctx: LogContext): F[(Account, JsObject)] = {
     for {
       id   <- idGenerator.generate()
-      time <- timeService.getCurrentTimeMillis()
+      time <- timeService.getCurrentTimeMillis
       user    = User(id, time)
       account = Account(authType, externalId, user.id, customData)
       _    <- databaseService.saveUser(user)

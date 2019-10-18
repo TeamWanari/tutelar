@@ -38,6 +38,7 @@ trait Services[F[_]] {
   implicit def tracerService: TracerService[F]
   implicit def amqpService: AmqpService[F]
   implicit def escherService: EscherService[F]
+  implicit def expirationService: ExpirationService[F]
 
   def init()(implicit logger: Logger, ev: MonadError[F, Throwable]): F[Unit] = {
     import Initable._
@@ -88,6 +89,7 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
   implicit lazy val tracerService: TracerService[Future]            = new TracerService[Future]()
   implicit lazy val amqpService: AmqpService[Future]                = new AmqpServiceImpl[Future]()
   implicit lazy val escherService: EscherService[Future]            = new EscherServiceImpl()
+  implicit lazy val expirationService: ExpirationService[Future]    = new ExpirationServiceImpl[Future]()
   implicit lazy val passwordDifficultyChecker: PasswordDifficultyChecker[Future] =
     new PasswordDifficultyCheckerImpl[Future]
 }

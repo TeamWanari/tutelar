@@ -2,6 +2,7 @@ package com.wanari.tutelar.core
 
 import com.emarsys.escher.akka.http.config.EscherConfig
 import com.wanari.tutelar.core.AmqpService.{AmqpConfig, AmqpQueueConfig}
+import com.wanari.tutelar.core.ExpirationService.ExpirationConfig
 import com.wanari.tutelar.core.HookService.HookConfig
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
 import com.wanari.tutelar.core.TracerService.{JaegerConfig, TracerServiceConfig}
@@ -37,4 +38,5 @@ trait ConfigService {
   implicit def passwordSettings: PasswordSettings
   implicit def escherConfig: EscherConfig
   implicit def jaegerConfig: JaegerConfig
+  implicit def providerExpirationConfigs: Map[String, ExpirationConfig]
 }
