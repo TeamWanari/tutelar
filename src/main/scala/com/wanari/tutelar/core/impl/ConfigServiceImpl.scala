@@ -7,6 +7,7 @@ import com.typesafe.config.{Config, ConfigFactory}
 import com.wanari.tutelar.core.AmqpService.{AmqpConfig, AmqpQueueConfig}
 import com.wanari.tutelar.core.ConfigService
 import com.wanari.tutelar.core.Errors.WrongConfig
+import com.wanari.tutelar.core.ExpirationService._
 import com.wanari.tutelar.core.HookService.{BasicAuthConfig, EscherAuthConfig, HookConfig}
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
 import com.wanari.tutelar.core.TracerService.{JaegerConfig, TracerServiceConfig}
@@ -91,7 +92,7 @@ class ConfigServiceImpl() extends ConfigService {
     Try {
       val config = conf.getConfig(s"jwt.$name")
       JwtConfig(
-        FiniteDuration(config.getDuration("expirationTime").getSeconds, TimeUnit.SECONDS),
+        getDuration(config, "expirationTime"),
         config.getString("algorithm"),
         readFromFileOrConf(config, "secret"),
         readFromFileOrConf(config, "privateKey"),
@@ -233,6 +234,23 @@ class ConfigServiceImpl() extends ConfigService {
     }.fold(logAndThrow("Jaeger"), identity)
   }
 
+  override implicit lazy val providerExpirationConfigs: Map[String, ExpirationConfig] = {
+    Try {
+      import scala.jdk.CollectionConverters._
+      val config    = conf.getConfig("providerLoginExpiration")
+      val providers = config.root().keySet().asScala
+      providers.map { providerName =>
+        val expirationConfig = config.getString(s"$providerName.type") match {
+          case ""           => ExpirationDisabled
+          case "inactivity" => ExpirationInactivity(getDuration(config, s"$providerName.duration"))
+          case "lifetime"   => ExpirationLifetime(getDuration(config, s"$providerName.duration"))
+          case t            => throw new IllegalArgumentException(s"$t unknown expiration type.")
+        }
+        providerName -> expirationConfig
+      }.toMap
+    }.fold(logAndThrow("ExpirationService"), identity)
+  }
+
   private def readOauth2Config(name: String): OAuth2Config = {
     Try {
       val config = conf.getConfig(s"oauth2.$name")
@@ -249,6 +267,10 @@ class ConfigServiceImpl() extends ConfigService {
     lazy val fromConfig = config.getString(key)
     val fromFile        = Using(Source.fromFile(config.getString(s"${key}File")))(_.mkString)
     fromFile.getOrElse(fromConfig)
+  }
+
+  private def getDuration(config: Config, path: String) = {
+    FiniteDuration(config.getDuration(path).getSeconds, TimeUnit.SECONDS)
   }
 
   private def logAndThrow(msg: String)(ex: Throwable) = {

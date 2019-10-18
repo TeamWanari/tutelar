@@ -1,7 +1,10 @@
 package com.wanari.tutelar.core.impl
 
+import java.util.concurrent.TimeUnit
+
 import com.wanari.tutelar.TestBase
 import com.wanari.tutelar.core.AmqpService.AmqpQueueConfig
+import com.wanari.tutelar.core.ExpirationService.{ExpirationDisabled, ExpirationInactivity, ExpirationLifetime}
 import com.wanari.tutelar.core.HookService.{BasicAuthConfig, HookConfig}
 import com.wanari.tutelar.core.impl.database.DatabaseServiceFactory.DatabaseConfig
 import com.wanari.tutelar.core.impl.database.MongoDatabaseService.MongoConfig
@@ -21,7 +24,7 @@ class ConfigServiceSpec extends TestBase {
   "#isModuleEnabled" should {
     val service        = new ConfigServiceImpl()
     val enabledModules = service.getEnabledModules
-    "convert to lowecase" in {
+    "convert to lowercase" in {
       enabledModules should contain("testmodule1")
     }
     "trim config" in {
@@ -150,5 +153,25 @@ class ConfigServiceSpec extends TestBase {
     val service = new ConfigServiceImpl()
     service.getAmqpQueueConfig("email_service") shouldBe AmqpQueueConfig(Some("RK"), Some("EX"), 777)
     Try(service.getAmqpQueueConfig("random")) shouldBe a[Failure[_]]
+  }
+
+  "#providerExpirationConfigs" should {
+    val service = new ConfigServiceImpl {}
+    "load all providers" in {
+      service.providerExpirationConfigs.keySet shouldEqual Set("aaaProvider", "bbbProvider", "cccProvider")
+    }
+    "disabled" in {
+      service.providerExpirationConfigs("aaaProvider") shouldBe ExpirationDisabled
+    }
+    "inactivity" in {
+      service.providerExpirationConfigs("bbbProvider") shouldBe ExpirationInactivity(
+        FiniteDuration(24 * 60 * 60, TimeUnit.SECONDS)
+      )
+    }
+    "lifetime" in {
+      service.providerExpirationConfigs("cccProvider") shouldBe ExpirationLifetime(
+        FiniteDuration(60 * 60, TimeUnit.SECONDS)
+      )
+    }
   }
 }
