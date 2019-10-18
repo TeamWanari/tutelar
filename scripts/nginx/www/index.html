@@ -207,7 +207,7 @@
         function getTOTPData() {
             $.ajax({
                 type: 'GET',
-                url: "/totp/qrCode",
+                url: "/totp/qr-code",
                 success: function (data) {
                     if(qrCode == null) {
                         qrCode = new QRCode(document.getElementById("qrcode"), data.uri);

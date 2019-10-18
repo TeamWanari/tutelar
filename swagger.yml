@@ -346,7 +346,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TokenData'
-  /totp/qrCode:
+  /totp/qr-code:
     get:
       description: Generate QR code for register
       responses:
