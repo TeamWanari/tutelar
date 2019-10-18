@@ -93,6 +93,8 @@ paths:
                   type: object
                 username:
                   type: string
+                refreshToken:
+                  type: string
             examples:
               '0':
                 value: >-
@@ -166,6 +168,8 @@ paths:
                 data:
                   type: object
                 token:
+                  type: string
+                refreshToken:
                   type: string
             examples:
               '0':
@@ -334,6 +338,8 @@ paths:
                 data:
                   type: object
                 username:
+                  type: string
+                refreshToken:
                   type: string
             examples:
               '0':

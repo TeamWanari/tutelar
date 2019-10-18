@@ -70,7 +70,7 @@ class EmailProviderServiceSpec extends TestBase {
             )
           )
         )
-        service.register("emailRegisterToken", "pw", None) shouldBe EitherT.rightT(authenticateResponse)
+        service.register("emailRegisterToken", "pw", None, None) shouldBe EitherT.rightT(authenticateResponse)
 
         verify(jwtServiceMock).validateAndDecode("emailRegisterToken")
 
@@ -87,7 +87,7 @@ class EmailProviderServiceSpec extends TestBase {
             )
           )
         )
-        service.register("", "pw", Some(JsObject("hello" -> JsTrue)))
+        service.register("", "pw", Some(JsObject("hello" -> JsTrue)), None)
 
         verify(hookService).register(any[String], eqTo("new@user"), eqTo("EMAIL"), eqTo(JsObject("hello" -> JsTrue)))(
           any[LogContext]
@@ -103,7 +103,7 @@ class EmailProviderServiceSpec extends TestBase {
               )
             )
           )
-          service.register("emailRegisterToken", "", None) shouldBe EitherT.leftT(WeakPassword())
+          service.register("emailRegisterToken", "", None, None) shouldBe EitherT.leftT(WeakPassword())
         }
         "username is already used" in new TestScope {
           initDb()
@@ -115,7 +115,7 @@ class EmailProviderServiceSpec extends TestBase {
               )
             )
           )
-          service.register(savedAccount.externalId, "pw", None) shouldBe EitherT.leftT(UsernameUsed())
+          service.register(savedAccount.externalId, "pw", None, None) shouldBe EitherT.leftT(UsernameUsed())
         }
         "token is not for register" in new TestScope {
           when(jwtServiceMock.validateAndDecode(any[String])).thenReturn(
@@ -126,12 +126,14 @@ class EmailProviderServiceSpec extends TestBase {
               )
             )
           )
-          service.register("", "pw", Some(JsObject("hello" -> JsTrue))) shouldBe EitherT.leftT(InvalidEmailToken())
+          service.register("", "pw", Some(JsObject("hello" -> JsTrue)), None) shouldBe EitherT.leftT(
+            InvalidEmailToken()
+          )
         }
         "token is wrong" in new TestScope {
           val error: Either[AppError, JsObject] = Left(InvalidJwt())
           when(jwtServiceMock.validateAndDecode(any[String])).thenReturn(EitherT(Success(error)))
-          service.register("", "pw", Some(JsObject("hello" -> JsTrue))) shouldBe EitherT.leftT(InvalidJwt())
+          service.register("", "pw", Some(JsObject("hello" -> JsTrue)), None) shouldBe EitherT.leftT(InvalidJwt())
         }
       }
     }

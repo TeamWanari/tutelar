@@ -31,7 +31,7 @@ class EmailProviderApi(
           post {
             entity(as[RegisterData]) { data =>
               withTrace("Register_email") { implicit ctx =>
-                completeLoginFlowWithJson(service.register(data.token, data.password, data.data))
+                completeLoginFlowWithJson(service.register(data.token, data.password, data.data, data.refreshToken))
               }
             }
           }
@@ -72,9 +72,9 @@ object EmailProviderApi {
       refreshToken: Option[LongTermToken]
   )
   case class EmailData(email: String)
-  case class RegisterData(token: String, password: String, data: Option[JsObject])
+  case class RegisterData(token: String, password: String, data: Option[JsObject], refreshToken: Option[LongTermToken])
   import DefaultJsonProtocol._
   implicit val loginDataFormat: RootJsonFormat[EmailLoginData]  = jsonFormat4(EmailLoginData)
-  implicit val registerDataFormat: RootJsonFormat[RegisterData] = jsonFormat3(RegisterData)
+  implicit val registerDataFormat: RootJsonFormat[RegisterData] = jsonFormat4(RegisterData)
   implicit val emailDataFormat: RootJsonFormat[EmailData]       = jsonFormat1(EmailData)
 }
