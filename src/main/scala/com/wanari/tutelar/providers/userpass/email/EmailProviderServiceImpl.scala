@@ -86,7 +86,7 @@ class EmailProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
   ): ErrorOr[F, TokenData] = {
     for {
       _     <- checkIsExists(email)
-      token <- authService.registerOrLogin(authType, email, encryptPassword(password), data.getOrElse(JsObject()))
+      token <- authService.registerOrLogin(authType, email, encryptPassword(password), data.getOrElse(JsObject()), None) // TODO refresh-token
     } yield token
   }
 

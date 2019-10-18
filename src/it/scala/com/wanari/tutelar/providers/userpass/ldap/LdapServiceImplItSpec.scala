@@ -2,8 +2,8 @@ package com.wanari.tutelar.providers.userpass.ldap
 
 import cats.data.EitherT
 import com.wanari.tutelar.core.AuthService
-import com.wanari.tutelar.core.AuthService.TokenData
 import com.wanari.tutelar.core.DatabaseService.{Account, User}
+import com.wanari.tutelar.core.AuthService.{LongTermToken, TokenData}
 import com.wanari.tutelar.core.Errors.AuthenticationFailed
 import com.wanari.tutelar.providers.userpass.ldap.LdapService.LdapUserListData
 import com.wanari.tutelar.util.LoggerUtil.LogContext
@@ -30,7 +30,11 @@ class LdapServiceImplItSpec extends AnyWordSpecLike with Matchers with AwaitUtil
   private val services = new ItTestServices {
     import configService._
     override implicit lazy val authService: AuthService[Future] = mock[AuthService[Future]]
-    when(authService.registerOrLogin(any[String], any[String], any[String], any[JsObject])(any[LogContext])) thenReturn EitherT
+    when(
+      authService.registerOrLogin(any[String], any[String], any[String], any[JsObject], any[Option[LongTermToken]])(
+        any[LogContext]
+      )
+    ) thenReturn EitherT
       .rightT(TokenData("TOKEN", "REFRESH_TOKEN"))
     override implicit lazy val ldapService: LdapService[Future] = new LdapServiceImpl()
   }

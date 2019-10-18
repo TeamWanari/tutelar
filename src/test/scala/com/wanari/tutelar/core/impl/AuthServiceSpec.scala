@@ -61,12 +61,12 @@ class AuthServiceSpec extends TestBase {
   "#registerOrLogin" when {
     "register" should {
       "return the token" in new TestScope {
-        service.registerOrLogin(authType, externalId, customData, providedData) shouldEqual EitherT.rightT(
+        service.registerOrLogin(authType, externalId, customData, providedData, None) shouldEqual EitherT.rightT(
           TokenData("JWT", "JWT_LONG")
         )
       }
       "create tokens with the userid and hook response" in new TestScope {
-        service.registerOrLogin(authType, externalId, customData, providedData)
+        service.registerOrLogin(authType, externalId, customData, providedData, None)
         verify(longTermTokenServiceMock).encode(
           JsObject(
             "id"        -> JsString("1"),
@@ -77,27 +77,27 @@ class AuthServiceSpec extends TestBase {
         verify(shortTermTokenServiceMock).encode(JsObject("id" -> JsString("1"), "group" -> JsString("reg")))
       }
       "create new user" in new TestScope {
-        service.registerOrLogin(authType, externalId, customData, providedData)
+        service.registerOrLogin(authType, externalId, customData, providedData, None)
         databaseService.users("1") shouldEqual User("1", 1)
       }
       "save the account" in new TestScope {
-        service.registerOrLogin(authType, externalId, customData, providedData)
+        service.registerOrLogin(authType, externalId, customData, providedData, None)
         databaseService.accounts((authType, externalId)) shouldEqual Account(authType, externalId, "1", customData)
       }
       "call hook service" in new TestScope {
-        service.registerOrLogin(authType, externalId, customData, providedData)
+        service.registerOrLogin(authType, externalId, customData, providedData, None)
         verify(hookService).register(eqTo("1"), eqTo(externalId), eqTo(authType), eqTo(providedData))(any[LogContext])
       }
     }
     "login" should {
       "return the token" in new TestScope {
-        service.registerOrLogin(savedAccount.authType, savedAccount.externalId, customData, providedData) shouldEqual EitherT
+        service.registerOrLogin(savedAccount.authType, savedAccount.externalId, customData, providedData, None) shouldEqual EitherT
           .rightT(
             TokenData("JWT", "JWT_LONG")
           )
       }
       "create tokens with the userid and hook response" in new TestScope {
-        service.registerOrLogin(savedAccount.authType, savedAccount.externalId, customData, providedData)
+        service.registerOrLogin(savedAccount.authType, savedAccount.externalId, customData, providedData, None)
         verify(longTermTokenServiceMock).encode(
           JsObject(
             "id"        -> JsString(savedUser.id),
@@ -108,7 +108,7 @@ class AuthServiceSpec extends TestBase {
         verify(shortTermTokenServiceMock).encode(JsObject("id" -> JsString(savedUser.id), "group" -> JsString("log")))
       }
       "update account custom data" in new TestScope {
-        service.registerOrLogin(savedAccount.authType, savedAccount.externalId, customData, providedData)
+        service.registerOrLogin(savedAccount.authType, savedAccount.externalId, customData, providedData, None)
         databaseService.accounts((savedAccount.authType, savedAccount.externalId)) shouldEqual Account(
           savedAccount.authType,
           savedAccount.externalId,
@@ -117,7 +117,7 @@ class AuthServiceSpec extends TestBase {
         )
       }
       "call hook service" in new TestScope {
-        service.registerOrLogin(savedAccount.authType, savedAccount.externalId, customData, providedData)
+        service.registerOrLogin(savedAccount.authType, savedAccount.externalId, customData, providedData, None)
         verify(hookService).login(
           eqTo(savedAccount.userId),
           eqTo(savedAccount.externalId),
@@ -130,7 +130,7 @@ class AuthServiceSpec extends TestBase {
       "be standardized and lowercased" in new TestScope {
         val externalId  = "SPEC_EXT_ID_\u0065\u0301"
         val standarized = "spec_ext_id_\u00e9"
-        service.registerOrLogin(authType, externalId, customData, providedData) shouldEqual EitherT.rightT(
+        service.registerOrLogin(authType, externalId, customData, providedData, None) shouldEqual EitherT.rightT(
           TokenData("JWT", "JWT_LONG")
         )
         databaseService.users("1") shouldEqual User("1", 1)

@@ -36,8 +36,10 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
       authType: String,
       externalId: String,
       customData: String,
-      providedData: JsObject
+      providedData: JsObject,
+      refreshToken: Option[LongTermToken]
   )(implicit ctx: LogContext): ErrorOr[F, TokenData] = {
+    // TODO - if defined check refreshToken and use it for token creation
     val standardizedExternalId = convertToStandardizedLowercase(externalId)
     val result = for {
       account_hookresponse <- createOrUpdateAccount(authType, standardizedExternalId, customData, providedData)
