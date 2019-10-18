@@ -6,7 +6,7 @@ import com.wanari.tutelar.core.ProviderApi._
 import spray.json._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import cats.data.EitherT
-import com.wanari.tutelar.core.AuthService.TokenData
+import com.wanari.tutelar.core.AuthService.{LongTermToken, TokenData}
 import com.wanari.tutelar.core.Errors.AuthenticationFailed
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import org.mockito.ArgumentMatchersSugar._
@@ -31,14 +31,22 @@ class BasicProviderApiSpec extends RouteTestBase {
     }
 
     "forward the username, password and extra data to service" in new TestScope {
-      when(serviceMock.register(any[String], any[String], any[Option[JsObject]])(any[LogContext])) thenReturn EitherT
+      when(
+        serviceMock
+          .register(any[String], any[String], any[Option[JsObject]], any[Option[LongTermToken]])(any[LogContext])
+      ) thenReturn EitherT
         .rightT(TokenData("TOKEN", "REFRESH_TOKEN"))
       postRegisterRequest ~> route ~> check {
-        verify(serviceMock).register(eqTo("user"), eqTo("pw"), eqTo(Some(JsObject("hello" -> JsTrue))))(any[LogContext])
+        verify(serviceMock).register(eqTo("user"), eqTo("pw"), eqTo(Some(JsObject("hello" -> JsTrue))), eqTo(None))(
+          any[LogContext]
+        )
       }
     }
     "return redirect with callback" in new TestScope {
-      when(serviceMock.register(any[String], any[String], any[Option[JsObject]])(any[LogContext])) thenReturn EitherT
+      when(
+        serviceMock
+          .register(any[String], any[String], any[Option[JsObject]], any[Option[LongTermToken]])(any[LogContext])
+      ) thenReturn EitherT
         .rightT(TokenData("TOKEN", "REFRESH_TOKEN"))
       postRegisterRequest ~> route ~> check {
         status shouldEqual StatusCodes.OK
@@ -46,7 +54,10 @@ class BasicProviderApiSpec extends RouteTestBase {
       }
     }
     "return redirect with error" in new TestScope {
-      when(serviceMock.register(any[String], any[String], any[Option[JsObject]])(any[LogContext])) thenReturn EitherT
+      when(
+        serviceMock
+          .register(any[String], any[String], any[Option[JsObject]], any[Option[LongTermToken]])(any[LogContext])
+      ) thenReturn EitherT
         .leftT(AuthenticationFailed())
       postRegisterRequest ~> route ~> check {
         status shouldEqual StatusCodes.Unauthorized

@@ -47,14 +47,26 @@ class TotpServiceImpl[F[_]: MonadError[*[_], Throwable]](
     }
   }
 
-  override def register(userName: String, registerToken: String, password: String, data: Option[JsObject])(
+  override def register(
+      userName: String,
+      registerToken: String,
+      password: String,
+      data: Option[JsObject],
+      refreshToken: Option[LongTermToken]
+  )(
       implicit ctx: LogContext
   ): ErrorOr[F, TokenData] = {
     for {
       totpDataAsString <- decodeToken(registerToken)
       _                <- checkPassword(totpDataAsString, password, config.window)
       _                <- authService.findCustomData(authType, userName).toLeft(()).leftMap(_ => UsernameUsed())
-      token            <- authService.registerOrLogin(authType, userName, totpDataAsString, data.getOrElse(JsObject()), None) // TODO refresh-token
+      token <- authService.registerOrLogin(
+        authType,
+        userName,
+        totpDataAsString,
+        data.getOrElse(JsObject()),
+        refreshToken
+      )
     } yield token
   }
 

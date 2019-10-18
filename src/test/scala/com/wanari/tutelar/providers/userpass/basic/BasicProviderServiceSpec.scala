@@ -52,14 +52,14 @@ class BasicProviderServiceSpec extends TestBase {
   }
   "#register" should {
     "successful" in new TestScope {
-      service.register("newuser", "pw", None) shouldBe EitherT.rightT(authenticateResponse)
+      service.register("newuser", "pw", None, None) shouldBe EitherT.rightT(authenticateResponse)
 
       val newUserData = databaseService.accounts.get(authType -> "newuser")
       newUserData shouldBe a[Some[_]]
       BCrypt.checkpw("pw", newUserData.get.customData) shouldBe true
     }
     "send extra data via hook" in new TestScope {
-      service.register("newuser", "pw", Some(JsObject("hello" -> JsTrue)))
+      service.register("newuser", "pw", Some(JsObject("hello" -> JsTrue)), None)
 
       verify(hookService).register(any[String], eqTo("newuser"), eqTo("BASIC"), eqTo(JsObject("hello" -> JsTrue)))(
         any[LogContext]
@@ -67,11 +67,11 @@ class BasicProviderServiceSpec extends TestBase {
     }
     "failure" when {
       "password is weak" in new TestScope {
-        service.register("newuser", "", None) shouldBe EitherT.leftT(WeakPassword())
+        service.register("newuser", "", None, None) shouldBe EitherT.leftT(WeakPassword())
       }
       "username is already used" in new TestScope {
         initDb()
-        service.register(savedAccount.externalId, "asd", None) shouldBe EitherT.leftT(UsernameUsed())
+        service.register(savedAccount.externalId, "asd", None, None) shouldBe EitherT.leftT(UsernameUsed())
       }
     }
   }

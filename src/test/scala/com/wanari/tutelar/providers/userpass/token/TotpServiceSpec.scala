@@ -61,7 +61,7 @@ class TotpServiceSpec extends TestBase {
     "successful" in new TestScope {
       initMock(jwtServiceMock)
 
-      service.register("newuser", "token", "755224", None)
+      service.register("newuser", "token", "755224", None, None)
       verify(jwtServiceMock).validateAndDecode("token")
 
       val newuserData = databaseService.accounts.get(authType -> "newuser")
@@ -71,7 +71,7 @@ class TotpServiceSpec extends TestBase {
 
     "sends extra data via hook" in new TestScope {
       initMock(jwtServiceMock)
-      service.register("newuser", "token", "755224", Some(JsObject("hello" -> JsTrue)))
+      service.register("newuser", "token", "755224", Some(JsObject("hello" -> JsTrue)), None)
 
       verify(hookService).register(any[String], eqTo("newuser"), eqTo("TOTP"), eqTo(JsObject("hello" -> JsTrue)))(
         any[LogContext]
@@ -82,17 +82,17 @@ class TotpServiceSpec extends TestBase {
       "username is already used" in new TestScope {
         initMock(jwtServiceMock)
         initDb()
-        service.register(savedAccount.externalId, "token", "755224", None) shouldBe EitherT.leftT(UsernameUsed())
+        service.register(savedAccount.externalId, "token", "755224", None, None) shouldBe EitherT.leftT(UsernameUsed())
       }
       "the incoming token is not valid" in new TestScope {
         val error: Either[AppError, JsObject] = Left(InvalidJwt())
         when(jwtServiceMock.validateAndDecode(any[String])).thenReturn(EitherT(Success(error)))
-        service.register("newuser", "token", "755224", None) shouldBe EitherT.leftT(InvalidJwt())
+        service.register("newuser", "token", "755224", None, None) shouldBe EitherT.leftT(InvalidJwt())
       }
 
       "the token + pass pair not match" in new TestScope {
         initMock(jwtServiceMock)
-        service.register("newuser", "token", "755225", None) shouldBe EitherT.leftT(WrongPassword())
+        service.register("newuser", "token", "755225", None, None) shouldBe EitherT.leftT(WrongPassword())
       }
     }
 

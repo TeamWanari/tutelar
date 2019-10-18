@@ -22,7 +22,7 @@ class BasicProviderApi(
           post {
             entity(as[LoginData]) { data =>
               withTrace(s"Register_$servicePath") { implicit ctx =>
-                completeLoginFlowWithJson(service.register(data.username, data.password, data.data))
+                completeLoginFlowWithJson(service.register(data.username, data.password, data.data, data.refreshToken))
               }
             }
           }

@@ -2,7 +2,7 @@ package com.wanari.tutelar.providers.userpass.email
 
 import cats.MonadError
 import cats.data.EitherT
-import com.wanari.tutelar.core.AuthService.TokenData
+import com.wanari.tutelar.core.AuthService.{LongTermToken, TokenData}
 import com.wanari.tutelar.core.Errors.{AppError, ErrorOr, InvalidEmailToken, UserNotFound}
 import com.wanari.tutelar.core.impl.JwtServiceImpl
 import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
@@ -30,12 +30,17 @@ class EmailProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
     jwtService.init
   }
 
-  override def register(registerToken: String, password: String, data: Option[JsObject])(
+  override def register(
+      registerToken: String,
+      password: String,
+      data: Option[JsObject],
+      refreshToken: Option[LongTermToken]
+  )(
       implicit ctx: LogContext
   ): ErrorOr[F, TokenData] = {
     for {
       email <- decodeToken(registerToken, EmailToken.RegisterType)
-      token <- super.register(email, password, data)
+      token <- super.register(email, password, data, refreshToken)
     } yield token
   }
 

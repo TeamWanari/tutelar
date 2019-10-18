@@ -16,7 +16,12 @@ class BasicProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
     with PasswordCryptor {
   protected val authType = "BASIC"
 
-  override def register(username: String, password: String, data: Option[JsObject])(
+  override def register(
+      username: String,
+      password: String,
+      data: Option[JsObject],
+      refreshToken: Option[LongTermToken]
+  )(
       implicit ctx: LogContext
   ): ErrorOr[F, TokenData] = {
     for {
@@ -27,8 +32,8 @@ class BasicProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
         username,
         encryptPassword(password),
         data.getOrElse(JsObject()),
-        None
-      ) // TODO refresh-token
+        refreshToken
+      )
     } yield token
   }
 
