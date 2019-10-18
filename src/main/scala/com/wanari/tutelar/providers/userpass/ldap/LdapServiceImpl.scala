@@ -3,7 +3,7 @@ package com.wanari.tutelar.providers.userpass.ldap
 import java.util.Properties
 
 import cats.data.EitherT
-import com.wanari.tutelar.core.AuthService.TokenData
+import com.wanari.tutelar.core.AuthService.{LongTermToken, TokenData}
 import com.wanari.tutelar.core.DatabaseService.UserIdWithExternalId
 import com.wanari.tutelar.core.Errors.{AuthenticationFailed, ErrorOr}
 import com.wanari.tutelar.core.{AuthService, DatabaseService}
@@ -31,13 +31,13 @@ class LdapServiceImpl(
     context.map(_ => ())
   }
 
-  override def login(username: String, password: String, data: Option[JsObject])(
+  override def login(username: String, password: String, data: Option[JsObject], refreshToken: Option[LongTermToken])(
       implicit ctx: LogContext
   ): ErrorOr[Future, TokenData] = {
     for {
       _          <- validateUserName(username)
       attributes <- EitherT(loginAndGetAttributes(username, password))
-      token      <- authService.registerOrLogin(authType, username, "", JsObject(attributes), None) // TODO refresh-token
+      token      <- authService.registerOrLogin("LDAP", username, "", JsObject(attributes), refreshToken)
     } yield token
   }
 

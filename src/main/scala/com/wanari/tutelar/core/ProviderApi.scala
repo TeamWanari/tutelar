@@ -4,7 +4,7 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives.{complete, onComplete, redirect}
 import akka.http.scaladsl.server.Route
 import com.wanari.tutelar.Api
-import com.wanari.tutelar.core.AuthService.TokenData
+import com.wanari.tutelar.core.AuthService.{LongTermToken, TokenData}
 import com.wanari.tutelar.core.Errors.ErrorOr
 import com.wanari.tutelar.core.ProviderApi._
 import spray.json._
@@ -46,11 +46,11 @@ trait ProviderApi extends Api {
 object ProviderApi {
   case class CallbackConfig(success: String, failure: String)
 
-  case class LoginData(username: String, password: String, data: Option[JsObject])
+  case class LoginData(username: String, password: String, data: Option[JsObject], refreshToken: Option[LongTermToken])
   case class ErrorData(error: AuthError)
 
   import DefaultJsonProtocol._
-  implicit val loginDataFormat: RootJsonFormat[LoginData] = jsonFormat3(LoginData)
+  implicit val loginDataFormat: RootJsonFormat[LoginData] = jsonFormat4(LoginData)
   implicit val tokenDataFormat: RootJsonFormat[TokenData] = jsonFormat2(TokenData)
   implicit val errorDataFormat: RootJsonFormat[ErrorData] = jsonFormat1(ErrorData)
 

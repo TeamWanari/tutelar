@@ -2,7 +2,7 @@ package com.wanari.tutelar.providers.userpass.basic
 import cats.MonadError
 import cats.data.EitherT
 import com.wanari.tutelar.core.AuthService
-import com.wanari.tutelar.core.AuthService.TokenData
+import com.wanari.tutelar.core.AuthService.{LongTermToken, TokenData}
 import com.wanari.tutelar.core.Errors._
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyChecker
 import com.wanari.tutelar.util.LoggerUtil.LogContext
@@ -32,7 +32,7 @@ class BasicProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
     } yield token
   }
 
-  override def login(username: String, password: String, data: Option[JsObject])(
+  override def login(username: String, password: String, data: Option[JsObject], refreshToken: Option[LongTermToken])(
       implicit ctx: LogContext
   ): ErrorOr[F, TokenData] = {
     for {
@@ -40,7 +40,7 @@ class BasicProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
         .findCustomData(authType, username)
         .toRight[AppError](UserNotFound())
         .ensure(AuthenticationFailed())(hash => checkPassword(password, hash))
-      token <- authService.registerOrLogin(authType, username, passwordHash, data.getOrElse(JsObject()), None) // TODO refresh-token
+      token <- authService.registerOrLogin(authType, username, passwordHash, data.getOrElse(JsObject()), refreshToken)
     } yield token
   }
 }

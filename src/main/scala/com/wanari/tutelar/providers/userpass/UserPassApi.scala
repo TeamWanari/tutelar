@@ -18,7 +18,7 @@ trait UserPassApi extends ProviderApi {
         post {
           entity(as[LoginData]) { data =>
             withTrace(s"Login_$servicePath") { implicit ctx =>
-              completeLoginFlowWithJson(service.login(data.username, data.password, data.data))
+              completeLoginFlowWithJson(service.login(data.username, data.password, data.data, data.refreshToken))
             }
           }
         }

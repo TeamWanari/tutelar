@@ -41,17 +41,17 @@ class LdapServiceImplItSpec extends AnyWordSpecLike with Matchers with AwaitUtil
 
   "LdapService" should {
     "alice login" in {
-      await(services.ldapService.login("alice", "alicepw", None).value) shouldEqual Right(
+      await(services.ldapService.login("alice", "alicepw", None, None).value) shouldEqual Right(
         TokenData("TOKEN", "REFRESH_TOKEN")
       )
     }
     "bob login" in {
-      await(services.ldapService.login("bob", "bobpw", None).value) shouldEqual Right(
+      await(services.ldapService.login("bob", "bobpw", None, None).value) shouldEqual Right(
         TokenData("TOKEN", "REFRESH_TOKEN")
       )
     }
     "alice login failed" in {
-      await(services.ldapService.login("alice", "bobpw", None).value) shouldEqual Left(
+      await(services.ldapService.login("alice", "bobpw", None, None).value) shouldEqual Left(
         AuthenticationFailed()
       )
     }

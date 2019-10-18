@@ -3,6 +3,7 @@ package com.wanari.tutelar.providers.userpass.email
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import com.wanari.tutelar.core.AuthService.LongTermToken
 import com.wanari.tutelar.core.Errors._
 import com.wanari.tutelar.core.ProviderApi
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
@@ -21,7 +22,7 @@ class EmailProviderApi(
         post {
           entity(as[EmailLoginData]) { data =>
             withTrace("Login_email") { implicit ctx =>
-              completeLoginFlowWithJson(service.login(data.email, data.password, data.data))
+              completeLoginFlowWithJson(service.login(data.email, data.password, data.data, data.refreshToken))
             }
           }
         }
@@ -64,11 +65,16 @@ class EmailProviderApi(
 }
 
 object EmailProviderApi {
-  case class EmailLoginData(email: String, password: String, data: Option[JsObject])
+  case class EmailLoginData(
+      email: String,
+      password: String,
+      data: Option[JsObject],
+      refreshToken: Option[LongTermToken]
+  )
   case class EmailData(email: String)
   case class RegisterData(token: String, password: String, data: Option[JsObject])
   import DefaultJsonProtocol._
-  implicit val loginDataFormat: RootJsonFormat[EmailLoginData]  = jsonFormat3(EmailLoginData)
+  implicit val loginDataFormat: RootJsonFormat[EmailLoginData]  = jsonFormat4(EmailLoginData)
   implicit val registerDataFormat: RootJsonFormat[RegisterData] = jsonFormat3(RegisterData)
   implicit val emailDataFormat: RootJsonFormat[EmailData]       = jsonFormat1(EmailData)
 }
