@@ -28,7 +28,7 @@ class TotpApi(
             }
           }
         } ~
-          path("qrCode") {
+          path("qr-code") {
             get {
               withTrace(s"QrCode_$servicePath") { implicit ctx =>
                 import TotpServiceImpl._
