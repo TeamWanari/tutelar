@@ -317,6 +317,76 @@ paths:
                           - 'cn=group1,ou=groups,dc=wanari,dc=com'
                           - 'cn=group2,ou=groups,dc=wanari,dc=com'
                         sn: Smith
+  /totp/register:
+    post:
+      description: TOTP register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ["username", "password", "token"]
+              properties:
+                password:
+                  type: string
+                token:
+                  type: string
+                data:
+                  type: object
+                username:
+                  type: string
+            examples:
+              '0':
+                value: >-
+                  {"username":"bob","password":"pw","token": "asdfgh9876", "data":{"fullname":"Bob Name"}}
+      responses:
+        '200':
+          description: User tokens
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenData'
+  /totp/qrCode:
+    get:
+      description: Generate QR code for register
+      responses:
+        '200':
+          description: QR code token and uri
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uri:
+                    type: string
+                  token:
+                    type: string
+  /totp/login:
+    post:
+      description: TOTP login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ["username", "password"]
+              properties:
+                password:
+                  type: string
+                username:
+                  type: string
+                refreshToken:
+                  type: string
+            examples:
+              '0':
+                value: '{"username":"bob","password":"665483"}'
+      responses:
+        '200':
+          description: User tokens
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenData'
   /github/login:
     get:
       description: Login with GitHub
