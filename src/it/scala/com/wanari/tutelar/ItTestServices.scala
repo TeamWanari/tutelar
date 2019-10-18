@@ -47,7 +47,8 @@ class ItTestServices(implicit ec: ExecutionContext) extends Services[Future] {
   override implicit lazy val totpService: TotpService[Future]                = new TotpServiceImpl[Future]()
   override implicit lazy val passwordDifficultyChecker: PasswordDifficultyChecker[Future] =
     new PasswordDifficultyCheckerImpl[Future]
-  override implicit lazy val tracerService: TracerService[Future] = new TracerService[Future]()
-  override implicit lazy val amqpService: AmqpService[Future]     = null
-  override implicit lazy val escherService: EscherService[Future] = null
+  override implicit lazy val tracerService: TracerService[Future]         = new TracerService[Future]()
+  override implicit lazy val amqpService: AmqpService[Future]             = null
+  override implicit lazy val escherService: EscherService[Future]         = null
+  override implicit lazy val expirationService: ExpirationService[Future] = null
 }
