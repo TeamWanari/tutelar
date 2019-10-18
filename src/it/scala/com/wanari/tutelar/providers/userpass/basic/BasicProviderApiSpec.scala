@@ -22,7 +22,7 @@ class BasicProviderApiSpec extends RouteTestBase {
     override lazy val route          = new BasicProviderApi().route()
   }
 
-  val jsonRequest = LoginData("user", "pw", Some(JsObject("hello" -> JsTrue))).toJson.compactPrint
+  val jsonRequest = LoginData("user", "pw", Some(JsObject("hello" -> JsTrue)), None).toJson.compactPrint
   val entity      = HttpEntity(MediaTypes.`application/json`, jsonRequest)
 
   "POST /basic/register" should {

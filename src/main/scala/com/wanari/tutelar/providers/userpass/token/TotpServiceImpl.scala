@@ -4,7 +4,7 @@ import java.security.SecureRandom
 
 import cats.MonadError
 import cats.data.EitherT
-import com.wanari.tutelar.core.AuthService.TokenData
+import com.wanari.tutelar.core.AuthService.{LongTermToken, TokenData}
 import com.wanari.tutelar.core.Errors.{ErrorOr, InvalidAlgo, UserNotFound, UsernameUsed, WrongPassword}
 import com.wanari.tutelar.core.impl.JwtServiceImpl
 import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
@@ -58,13 +58,13 @@ class TotpServiceImpl[F[_]: MonadError[*[_], Throwable]](
     } yield token
   }
 
-  override def login(username: String, password: String, data: Option[JsObject])(
+  override def login(username: String, password: String, data: Option[JsObject], refreshToken: Option[LongTermToken])(
       implicit ctx: LogContext
   ): ErrorOr[F, TokenData] = {
     for {
       savedData <- authService.findCustomData(authType, username).toRight(UserNotFound())
       _         <- checkPassword(savedData, password, config.window)
-      token     <- authService.registerOrLogin(authType, username, savedData, data.getOrElse(JsObject()), None) // TODO refresh-token
+      token     <- authService.registerOrLogin(authType, username, savedData, data.getOrElse(JsObject()), refreshToken)
     } yield token
   }
 

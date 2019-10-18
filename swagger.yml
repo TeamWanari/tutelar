@@ -43,6 +43,7 @@ paths:
           application/json:
             schema:
               type: object
+              required: ["authType"]
               properties:
                 authType:
                   type: string
@@ -61,6 +62,7 @@ paths:
           application/json:
             schema:
               type: object
+              required: ["refreshToken"]
               properties:
                 refreshToken:
                   type: string
@@ -83,6 +85,7 @@ paths:
           application/json:
             schema:
               type: object
+              required: ["username", "password"]
               properties:
                 password:
                   type: string
@@ -109,12 +112,15 @@ paths:
           application/json:
             schema:
               type: object
+              required: ["password", "username"]
               properties:
                 password:
                   type: string
                 data:
                   type: object
                 username:
+                  type: string
+                refreshToken:
                   type: string
             examples:
               '0':
@@ -135,6 +141,7 @@ paths:
           application/json:
             schema:
               type: object
+              required: ["email"]
               properties:
                 email:
                   type: string
@@ -152,6 +159,7 @@ paths:
           application/json:
             schema:
               type: object
+              required: ["token", "password"]
               properties:
                 password:
                   type: string
@@ -179,12 +187,15 @@ paths:
           application/json:
             schema:
               type: object
+              required: ["email", "password"]
               properties:
                 password:
                   type: string
                 data:
                   type: object
                 email:
+                  type: string
+                refreshToken:
                   type: string
             examples:
               '0':
@@ -206,6 +217,7 @@ paths:
           application/json:
             schema:
               type: object
+              required: ["email"]
               properties:
                 email:
                   type: string
@@ -223,6 +235,7 @@ paths:
           application/json:
             schema:
               type: object
+              required: ["token", "password"]
               properties:
                 password:
                   type: string
@@ -250,10 +263,13 @@ paths:
           application/json:
             schema:
               type: object
+              required: ["username", "password"]
               properties:
                 password:
                   type: string
                 username:
+                  type: string
+                refreshToken:
                   type: string
             examples:
               '0':
@@ -314,6 +330,7 @@ paths:
           application/json:
             schema:
               type: object
+              required: ["accessToken"]
               properties:
                 accessToken:
                   type: string
@@ -355,6 +372,7 @@ paths:
           application/json:
             schema:
               type: object
+              required: ["accessToken"]
               properties:
                 accessToken:
                   type: string
@@ -396,6 +414,7 @@ paths:
           application/json:
             schema:
               type: object
+              required: ["accessToken"]
               properties:
                 accessToken:
                   type: string

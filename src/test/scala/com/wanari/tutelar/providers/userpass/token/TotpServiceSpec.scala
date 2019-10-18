@@ -99,11 +99,11 @@ class TotpServiceSpec extends TestBase {
     "#login" should {
       "successful" in new TestScope {
         initDb()
-        service.login(savedAccount.externalId, "755224", None) shouldBe EitherT.rightT(authenticateResponse)
+        service.login(savedAccount.externalId, "755224", None, None) shouldBe EitherT.rightT(authenticateResponse)
       }
       "send extra data via hook" in new TestScope {
         initDb()
-        service.login(savedAccount.externalId, "755224", Some(JsObject("hello" -> JsTrue)))
+        service.login(savedAccount.externalId, "755224", Some(JsObject("hello" -> JsTrue)), None)
         verify(hookService).login(
           eqTo(savedAccount.userId),
           eqTo(savedAccount.externalId),
@@ -113,11 +113,11 @@ class TotpServiceSpec extends TestBase {
       }
       "failure" when {
         "user not found" in new TestScope {
-          service.login(savedAccount.externalId, "755224", None) shouldBe EitherT.leftT(UserNotFound())
+          service.login(savedAccount.externalId, "755224", None, None) shouldBe EitherT.leftT(UserNotFound())
         }
         "wrong password" in new TestScope {
           initDb()
-          service.login(savedAccount.externalId, "755225", None) shouldBe EitherT.leftT(WrongPassword())
+          service.login(savedAccount.externalId, "755225", None, None) shouldBe EitherT.leftT(WrongPassword())
         }
       }
     }

@@ -38,11 +38,11 @@ class EmailProviderServiceSpec extends TestBase {
     "#login" should {
       "successful" in new TestScope {
         initDb()
-        service.login(savedAccount.externalId, "secretpw", None) shouldBe EitherT.rightT(authenticateResponse)
+        service.login(savedAccount.externalId, "secretpw", None, None) shouldBe EitherT.rightT(authenticateResponse)
       }
       "send extra data via hook" in new TestScope {
         initDb()
-        service.login(savedAccount.externalId, "secretpw", Some(JsObject("hello" -> JsTrue)))
+        service.login(savedAccount.externalId, "secretpw", Some(JsObject("hello" -> JsTrue)), None)
         verify(hookService).login(
           eqTo(savedAccount.userId),
           eqTo(savedAccount.externalId),
@@ -52,11 +52,11 @@ class EmailProviderServiceSpec extends TestBase {
       }
       "failure" when {
         "user not found" in new TestScope {
-          service.login(savedAccount.externalId, "secretpw", None) shouldBe EitherT.leftT(UserNotFound())
+          service.login(savedAccount.externalId, "secretpw", None, None) shouldBe EitherT.leftT(UserNotFound())
         }
         "wrong password" in new TestScope {
           initDb()
-          service.login(savedAccount.externalId, "wrongpw", None) shouldBe EitherT.leftT(AuthenticationFailed())
+          service.login(savedAccount.externalId, "wrongpw", None, None) shouldBe EitherT.leftT(AuthenticationFailed())
         }
       }
     }
