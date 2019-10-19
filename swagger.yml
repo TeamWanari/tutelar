@@ -396,6 +396,11 @@ paths:
   /github/login:
     get:
       description: Login with GitHub
+      parameters:
+        - name: refresh_token
+          in: query
+          schema:
+            type: string
       responses:
         default:
           description: Redirect to GitHub login page
@@ -409,6 +414,8 @@ paths:
               required: ["accessToken"]
               properties:
                 accessToken:
+                  type: string
+                refreshToken:
                   type: string
             examples:
               '0':
@@ -438,6 +445,11 @@ paths:
   /facebook/login:
     get:
       description: Login with Facebook
+      parameters:
+        - name: refresh_token
+          in: query
+          schema:
+            type: string
       responses:
         default:
           description: Redirect to Facebook login page
@@ -451,6 +463,8 @@ paths:
               required: ["accessToken"]
               properties:
                 accessToken:
+                  type: string
+                refreshToken:
                   type: string
             examples:
               '0':
@@ -480,6 +494,11 @@ paths:
   /google/login:
     get:
       description: Login with Google
+      parameters:
+        - name: refresh_token
+          in: query
+          schema:
+            type: string
       responses:
         default:
           description: Redirect to Google login page
@@ -493,6 +512,8 @@ paths:
               required: ["accessToken"]
               properties:
                 accessToken:
+                  type: string
+                refreshToken:
                   type: string
             examples:
               '0':

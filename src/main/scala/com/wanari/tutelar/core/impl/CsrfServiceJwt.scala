@@ -28,7 +28,7 @@ class CsrfServiceJwt[F[_]: MonadError[*[_], Throwable]: DateTimeUtil](implicit c
     }
   }
 
-  def checkCsrfToken(auther: String, token: String): ErrorOr[F, Unit] = {
+  def checkCsrfToken(auther: String, token: String): ErrorOr[F, JsObject] = {
     for {
       config <- EitherT.right[AppError](csrfJwtConfig())
       data <- EitherT.fromOption(
@@ -38,7 +38,7 @@ class CsrfServiceJwt[F[_]: MonadError[*[_], Throwable]: DateTimeUtil](implicit c
       _ <- EitherT
         .rightT[F, AppError](!data.fields.get("auther").contains(JsString(auther)))
         .ensure(InvalidCsrfToken())(identity)
-    } yield ()
+    } yield data
   }
 }
 
