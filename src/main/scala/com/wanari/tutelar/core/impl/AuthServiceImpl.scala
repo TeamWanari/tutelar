@@ -39,12 +39,14 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
       providedData: JsObject,
       refreshToken: Option[LongTermToken]
   )(implicit ctx: LogContext): ErrorOr[F, TokenData] = {
-    // TODO - if defined check refreshToken and use it for token creation
+    // TODO - check refreshToken (when defined)
+    val userId: Option[String] = None // TODO: from refreshToken
+
     val standardizedExternalId = convertToStandardizedLowercase(externalId)
     val result = for {
-      account_hookresponse <- createOrUpdateAccount(authType, standardizedExternalId, customData, providedData)
+      account_hookresponse <- createOrUpdateAccount(authType, standardizedExternalId, customData, providedData, userId)
       (account, hookResponse) = account_hookresponse
-      token <- createTokenData(account, hookResponse)
+      token <- createTokenData(account, hookResponse) // TODO: use refreshToken data
     } yield token
     EitherT.right(result)
   }
@@ -106,14 +108,17 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
       authType: String,
       externalId: String,
       customData: String,
-      providedData: JsObject
+      providedData: JsObject,
+      userId: Option[String]
   )(implicit ctx: LogContext): F[(Account, JsObject)] = {
     databaseService
       .findAccountByTypeAndExternalId((authType, externalId))
       .flatMap(
         _.fold(
+          // TODO: link when userId is set
           register(authType, externalId, customData, providedData)
         ) { account =>
+          // TODO: check account.userId == userId when userId is set
           login(account, customData, providedData)
         }
       )
