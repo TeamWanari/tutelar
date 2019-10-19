@@ -102,13 +102,13 @@ class OAuth2ServiceSpec extends TestBase {
     "generateIdentifierUrl correctly" in new Scope {
       when(service.csrfService.getCsrfToken("dummy", JsObject())) thenReturn Try("csrf")
 
-      service.generateIdentifierUrl.get shouldBe Uri(
+      service.generateIdentifierUrl(None).get shouldBe Uri(
         "https://example.com?client_id=clientId&scope=a+b&state=csrf&response_type=code&redirect_uri=https://self.com/test/dummy/callback"
       )
     }
 
     "authenticateWithCallback correctly" in new Scope {
-      when(service.csrfService.checkCsrfToken("dummy", "state")) thenReturn EitherT.rightT(())
+      when(service.csrfService.checkCsrfToken("dummy", "state")) thenReturn EitherT.rightT(JsObject.empty)
       when(service.authService.registerOrLogin("dummy", "id", "token", JsObject("raw" -> JsTrue), None)) thenReturn EitherT
         .rightT(
           TokenData("ToKeN", "refresh")
@@ -126,7 +126,7 @@ class OAuth2ServiceSpec extends TestBase {
         .rightT(
           TokenData("ToKeN", "refresh")
         )
-      service.authenticateWithAccessToken("token") shouldBe EitherT.rightT(TokenData("ToKeN", "refresh"))
+      service.authenticateWithAccessToken("token", None) shouldBe EitherT.rightT(TokenData("ToKeN", "refresh"))
     }
   }
 }

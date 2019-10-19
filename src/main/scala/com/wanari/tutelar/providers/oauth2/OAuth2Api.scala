@@ -8,6 +8,7 @@ import com.wanari.tutelar.core.ProviderApi.CallbackConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Api.{AccessToken, CodeAndState}
 import spray.json._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import com.wanari.tutelar.core.AuthService.LongTermToken
 
 import scala.concurrent.Future
 import scala.util.Success
@@ -23,13 +24,15 @@ trait OAuth2Api extends ProviderApi {
           post {
             entity(as[AccessToken]) { data =>
               withTrace(s"Login_${service.TYPE.toLowerCase}") { implicit ctx =>
-                completeLoginFlowWithJson(service.authenticateWithAccessToken(data.accessToken))
+                completeLoginFlowWithJson(service.authenticateWithAccessToken(data.accessToken, data.refreshToken))
               }
             }
           } ~
-            onComplete(service.generateIdentifierUrl) {
-              case Success(value) => redirect(value, StatusCodes.Found)
-              case _              => complete(StatusCodes.Unauthorized)
+            parameter("refresh_token".?) { refreshToken =>
+              onComplete(service.generateIdentifierUrl(refreshToken)) {
+                case Success(value) => redirect(value, StatusCodes.Found)
+                case _              => complete(StatusCodes.Unauthorized)
+              }
             }
         } ~
           path("callback") {
@@ -53,8 +56,8 @@ object OAuth2Api {
   class GoogleApi(implicit val service: GoogleService[Future], val callbackConfig: CallbackConfig) extends OAuth2Api {}
 
   case class CodeAndState(code: String, state: String)
-  case class AccessToken(accessToken: String)
+  case class AccessToken(accessToken: String, refreshToken: Option[LongTermToken])
 
   import DefaultJsonProtocol._
-  implicit val accessTokenFormat: RootJsonFormat[AccessToken] = jsonFormat1(AccessToken)
+  implicit val accessTokenFormat: RootJsonFormat[AccessToken] = jsonFormat2(AccessToken)
 }

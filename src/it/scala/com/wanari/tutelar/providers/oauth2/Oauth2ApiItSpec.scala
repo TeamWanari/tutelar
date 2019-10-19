@@ -6,7 +6,7 @@ import akka.http.scaladsl.server.MissingQueryParamRejection
 import cats.MonadError
 import cats.data.EitherT
 import com.wanari.tutelar.RouteTestBase
-import com.wanari.tutelar.core.AuthService.TokenData
+import com.wanari.tutelar.core.AuthService.{LongTermToken, TokenData}
 import com.wanari.tutelar.core.Errors.AuthenticationFailed
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import org.mockito.ArgumentMatchersSugar._
@@ -19,14 +19,22 @@ class Oauth2ApiItSpec extends RouteTestBase {
   Seq("facebook", "github", "google").foreach { provider =>
     s"GET /$provider/login" should {
       "return forward" in new BaseTestScope {
-        when(services.getOauthServiceByName(provider).generateIdentifierUrl(any[MonadError[Future, Throwable]])) thenReturn Future
+        when(
+          services
+            .getOauthServiceByName(provider)
+            .generateIdentifierUrl(any[Option[LongTermToken]])(any[MonadError[Future, Throwable]])
+        ) thenReturn Future
           .successful(Uri.Empty)
         Get(s"/$provider/login") ~> route ~> check {
           status shouldEqual StatusCodes.Found
         }
       }
       "return with 401 on bad config" in new BaseTestScope {
-        when(services.getOauthServiceByName(provider).generateIdentifierUrl(any[MonadError[Future, Throwable]])) thenReturn Future
+        when(
+          services
+            .getOauthServiceByName(provider)
+            .generateIdentifierUrl(any[Option[LongTermToken]])(any[MonadError[Future, Throwable]])
+        ) thenReturn Future
           .failed(new Exception())
         Get(s"/$provider/login") ~> route ~> check {
           status shouldEqual StatusCodes.Unauthorized

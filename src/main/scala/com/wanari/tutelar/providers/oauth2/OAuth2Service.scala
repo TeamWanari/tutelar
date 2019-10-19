@@ -3,15 +3,10 @@ package com.wanari.tutelar.providers.oauth2
 import akka.http.scaladsl.model._
 import cats.data.EitherT
 import cats.MonadError
-import com.wanari.tutelar.core.AuthService.TokenData
+import com.wanari.tutelar.core.AuthService.{LongTermToken, TokenData}
 import com.wanari.tutelar.core.Errors.{ErrorOr, InvalidProfileDataMissingKey, InvalidProfileDataNotJsonObject}
 import com.wanari.tutelar.core.{AuthService, CsrfService}
-import com.wanari.tutelar.providers.oauth2.OAuth2Service.{
-  OAuth2Config,
-  ProfileData,
-  TokenRequestHelper,
-  TokenResponseHelper
-}
+import com.wanari.tutelar.providers.oauth2.OAuth2Service._
 import com.wanari.tutelar.util.HttpWrapper
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import spray.json.{JsObject, JsString, JsValue, RootJsonFormat, RootJsonReader}
@@ -28,10 +23,13 @@ trait OAuth2Service[F[_]] {
   protected def createTokenRequest(entityHelper: TokenRequestHelper, selfRedirectUri: Uri): HttpRequest
   protected def getProfile(token: TokenResponseHelper)(implicit ctx: LogContext): F[ProfileData]
 
-  def generateIdentifierUrl(implicit me: MonadError[F, Throwable]): F[Uri] = {
+  private val refreshTokenField = "refreshToken"
+
+  def generateIdentifierUrl(refreshToken: Option[LongTermToken])(implicit me: MonadError[F, Throwable]): F[Uri] = {
     import cats.syntax.functor._
+    val tokenData = refreshToken.fold(JsObject.empty)(token => JsObject(refreshTokenField -> JsString(token)))
     for {
-      state <- csrfService.getCsrfToken(TYPE, JsObject.empty)
+      state <- csrfService.getCsrfToken(TYPE, tokenData)
     } yield {
       redirectUriBase.withQuery(
         Uri.Query(
@@ -57,22 +55,23 @@ trait OAuth2Service[F[_]] {
         )
       )
     }
-
     for {
-      _             <- csrfService.checkCsrfToken(TYPE, state)
+      data <- csrfService.checkCsrfToken(TYPE, state)
+      refreshToken = data.fields.get(refreshTokenField).collect { case JsString(token) => token }
       response      <- EitherT.right(getToken(oAuth2config.clientId, oAuth2config.clientSecret, selfRedirectUri))
       tokenResponse <- EitherT.right(http.unmarshalEntityTo[TokenResponseHelper](response))
       profile       <- EitherT.right(getProfile(tokenResponse))
-      token         <- authService.registerOrLogin(TYPE, profile.id, tokenResponse.access_token, profile.data, None) // TODO refresh-token
+      token         <- authService.registerOrLogin(TYPE, profile.id, tokenResponse.access_token, profile.data, refreshToken)
     } yield token
   }
 
   def authenticateWithAccessToken(
-      accessToken: String
+      accessToken: String,
+      refreshToken: Option[LongTermToken]
   )(implicit me: MonadError[F, Throwable], ctx: LogContext): ErrorOr[F, TokenData] = {
     for {
       profile <- EitherT.right(getProfile(TokenResponseHelper(accessToken)))
-      token   <- authService.registerOrLogin(TYPE, profile.id, accessToken, profile.data, None) // TODO refresh-token
+      token   <- authService.registerOrLogin(TYPE, profile.id, accessToken, profile.data, refreshToken)
     } yield token
   }
 
