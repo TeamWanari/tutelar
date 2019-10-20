@@ -32,7 +32,7 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
     } yield ()
   }
 
-  override def registerOrLogin(
+  override def authenticatedWith(
       authType: String,
       externalId: String,
       customData: String,

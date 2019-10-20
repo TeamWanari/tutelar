@@ -27,7 +27,7 @@ class BasicProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
     for {
       _ <- EitherT.right(passwordDifficultyChecker.isValid(password)).ensure(WeakPassword())(identity)
       _ <- authService.findCustomData(authType, username).toLeft(()).leftMap(_ => UsernameUsed())
-      token <- authService.registerOrLogin(
+      token <- authService.authenticatedWith(
         authType,
         username,
         encryptPassword(password),
@@ -45,7 +45,7 @@ class BasicProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
         .findCustomData(authType, username)
         .toRight[AppError](UserNotFound())
         .ensure(AuthenticationFailed())(hash => checkPassword(password, hash))
-      token <- authService.registerOrLogin(authType, username, passwordHash, data.getOrElse(JsObject()), refreshToken)
+      token <- authService.authenticatedWith(authType, username, passwordHash, data.getOrElse(JsObject()), refreshToken)
     } yield token
   }
 }
