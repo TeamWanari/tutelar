@@ -6,8 +6,7 @@ import com.wanari.tutelar.core.AuthService.{LongTermToken, ShortTermToken, Token
 import com.wanari.tutelar.core.DatabaseService.{Account, User}
 import com.wanari.tutelar.core.Errors._
 import com.wanari.tutelar.core._
-import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl
-import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
+import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.{DateTimeUtil, IdGenerator}
 import spray.json.{JsObject, JsString}

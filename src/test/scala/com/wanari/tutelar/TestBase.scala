@@ -6,7 +6,7 @@ import com.wanari.tutelar.core.AuthService.TokenData
 import com.wanari.tutelar.core.DatabaseService.{Account, User}
 import com.wanari.tutelar.core.impl.AuthServiceImpl
 import com.wanari.tutelar.core.impl.database.MemoryDatabaseService
-import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
+import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.core.{AuthService, HookService, JwtService}
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.{DateTimeUtilCounterImpl, IdGeneratorCounterImpl}

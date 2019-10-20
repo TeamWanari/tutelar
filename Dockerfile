@@ -4,7 +4,7 @@ RUN apk add --no-cache bash && \
     adduser -S -u 1001 tutelar
 USER 1001
 EXPOSE 9000
-ENTRYPOINT ["/app/bin/main"]
+ENTRYPOINT ["/app/bin/tutelar"]
 CMD []
 # Files from Travis build
 COPY --chown=1001:root ./stage /app

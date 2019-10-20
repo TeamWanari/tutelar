@@ -4,10 +4,10 @@ import com.emarsys.escher.akka.http.config.EscherConfig
 import com.wanari.tutelar.core.HookService.HookConfig
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
 import com.wanari.tutelar.core.TracerService.TracerServiceConfig
+import com.wanari.tutelar.core.impl.JwtServiceImpl
 import com.wanari.tutelar.core.impl.database.DatabaseServiceFactory.DatabaseConfig
 import com.wanari.tutelar.core.impl.database.MongoDatabaseService.MongoConfig
 import com.wanari.tutelar.core.impl.database.PostgresDatabaseService
-import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl
 import com.wanari.tutelar.core.{AmqpService, ConfigService, ExpirationService}
 import com.wanari.tutelar.providers.oauth2.OAuth2Service
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl

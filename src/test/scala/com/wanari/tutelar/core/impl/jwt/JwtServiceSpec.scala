@@ -4,7 +4,8 @@ import cats.data.EitherT
 import com.wanari.tutelar.TestBase
 import com.wanari.tutelar.core.Errors.InvalidJwt
 import com.wanari.tutelar.core.JwtService
-import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
+import com.wanari.tutelar.core.impl.JwtServiceImpl
+import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
 import spray.json.{JsObject, JsString}
 
 import scala.concurrent.duration._

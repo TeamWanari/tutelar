@@ -1,4 +1,4 @@
-package com.wanari.tutelar.core.impl.jwt
+package com.wanari.tutelar.core.impl
 
 import java.security.Security
 import java.time.Clock
@@ -7,7 +7,7 @@ import cats.MonadError
 import cats.data.{EitherT, OptionT}
 import com.wanari.tutelar.core.Errors.{AppError, ErrorOr, InvalidJwt, WrongConfig}
 import com.wanari.tutelar.core.JwtService
-import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
+import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import pdi.jwt.algorithms.{JwtAsymmetricAlgorithm, JwtHmacAlgorithm}
 import pdi.jwt.{JwtAlgorithm, JwtClaim, JwtSprayJson}
@@ -17,8 +17,8 @@ import scala.concurrent.duration.Duration
 
 class JwtServiceImpl[F[_]: MonadError[*[_], Throwable]](config: JwtConfig) extends JwtService[F] {
 
-  import cats.syntax.functor._
   import cats.syntax.flatMap._
+  import cats.syntax.functor._
   import com.wanari.tutelar.util.ApplicativeErrorSyntax._
 
   protected implicit val clock = Clock.systemDefaultZone()

@@ -4,8 +4,8 @@ import cats.MonadError
 import cats.data.EitherT
 import com.wanari.tutelar.core.AuthService.TokenData
 import com.wanari.tutelar.core.Errors.{AppError, ErrorOr, InvalidEmailToken, UserNotFound}
-import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl
-import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
+import com.wanari.tutelar.core.impl.JwtServiceImpl
+import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.core.{AuthService, JwtService}
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyChecker
 import com.wanari.tutelar.providers.userpass.basic.BasicProviderServiceImpl

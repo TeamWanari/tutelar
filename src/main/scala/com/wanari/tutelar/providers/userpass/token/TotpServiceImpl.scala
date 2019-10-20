@@ -6,8 +6,8 @@ import cats.MonadError
 import cats.data.EitherT
 import com.wanari.tutelar.core.AuthService.TokenData
 import com.wanari.tutelar.core.Errors.{ErrorOr, InvalidAlgo, UserNotFound, UsernameUsed, WrongPassword}
-import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl
-import com.wanari.tutelar.core.impl.jwt.JwtServiceImpl.JwtConfig
+import com.wanari.tutelar.core.impl.JwtServiceImpl
+import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.core.{AuthService, JwtService}
 import com.wanari.tutelar.providers.userpass.token.OTP.{OTPAlgorithm, OTPKey, TOTP}
 import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl.TotpConfig
