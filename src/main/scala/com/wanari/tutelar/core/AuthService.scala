@@ -10,7 +10,7 @@ import spray.json.JsObject
 
 trait AuthService[F[_]] extends Initable[F] {
   def findCustomData(authType: String, externalId: String): OptionT[F, String]
-  def registerOrLogin(
+  def authenticatedWith(
       authType: String,
       externalId: String,
       customData: String,

@@ -37,7 +37,7 @@ class LdapServiceImpl(
     for {
       _          <- validateUserName(username)
       attributes <- EitherT(loginAndGetAttributes(username, password))
-      token      <- authService.registerOrLogin("LDAP", username, "", JsObject(attributes), refreshToken)
+      token      <- authService.authenticatedWith("LDAP", username, "", JsObject(attributes), refreshToken)
     } yield token
   }
 

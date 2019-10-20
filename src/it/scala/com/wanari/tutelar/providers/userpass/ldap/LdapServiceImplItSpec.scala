@@ -31,7 +31,7 @@ class LdapServiceImplItSpec extends AnyWordSpecLike with Matchers with AwaitUtil
     import configService._
     override implicit lazy val authService: AuthService[Future] = mock[AuthService[Future]]
     when(
-      authService.registerOrLogin(any[String], any[String], any[String], any[JsObject], any[Option[LongTermToken]])(
+      authService.authenticatedWith(any[String], any[String], any[String], any[JsObject], any[Option[LongTermToken]])(
         any[LogContext]
       )
     ) thenReturn EitherT
