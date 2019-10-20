@@ -43,12 +43,11 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
     val userId: Option[String] = None // TODO: from refreshToken
 
     val standardizedExternalId = convertToStandardizedLowercase(externalId)
-    val result = for {
+    for {
       account_hookresponse <- createOrUpdateAccount(authType, standardizedExternalId, customData, providedData, userId)
       (account, hookResponse) = account_hookresponse
       token <- createTokenData(account, hookResponse) // TODO: use refreshToken data
     } yield token
-    EitherT.right(result)
   }
 
   override def findCustomData(authType: String, externalId: String): OptionT[F, String] = {
@@ -77,7 +76,7 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
       externalId: String,
       customData: String,
       providedData: JsObject
-  )(implicit ctx: LogContext): ErrorOr[F, Unit] = {
+  )(implicit ctx: LogContext): ErrorOr[F, (Account, JsObject)] = {
     val standardizedExternalId = convertToStandardizedLowercase(externalId)
     val account                = Account(authType, standardizedExternalId, userId, customData)
     for {
@@ -88,9 +87,9 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
         .right(databaseService.listAccountsByUserId(userId))
         .ensure(UserNotFound())(_.nonEmpty)
         .ensure(UserHadThisAccountType())(_.forall(_.authType != authType))
-      _ <- EitherT.right(databaseService.saveAccount(account))
-      _ <- EitherT.right(hookService.link(userId, standardizedExternalId, authType, providedData))
-    } yield ()
+      _    <- EitherT.right(databaseService.saveAccount(account))
+      data <- EitherT.right(hookService.link(userId, standardizedExternalId, authType, providedData))
+    } yield (account, data)
   }
 
   override def unlink(userId: String, authType: String)(implicit ctx: LogContext): ErrorOr[F, Unit] = {
@@ -110,27 +109,27 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
       customData: String,
       providedData: JsObject,
       userId: Option[String]
-  )(implicit ctx: LogContext): F[(Account, JsObject)] = {
-    databaseService
-      .findAccountByTypeAndExternalId((authType, externalId))
-      .flatMap(
-        _.fold(
-          // TODO: link when userId is set
-          register(authType, externalId, customData, providedData)
-        ) { account =>
-          // TODO: check account.userId == userId when userId is set
-          login(account, customData, providedData)
+  )(implicit ctx: LogContext): ErrorOr[F, (Account, JsObject)] = {
+    EitherT
+      .right(databaseService.findAccountByTypeAndExternalId((authType, externalId)))
+      .flatMap { mbAccount =>
+        (mbAccount, userId) match {
+          case (Some(acc), Some(id)) if acc.userId != id => EitherT.leftT(AccountBelongsToOtherUser())
+          case (Some(acc), _)                            => login(acc, customData, providedData)
+          case (None, None)                              => register(authType, externalId, customData, providedData)
+          case (None, Some(id))                          => link(id, authType, externalId, customData, providedData)
         }
-      )
+      }
   }
 
   private def login(account: Account, customData: String, providedData: JsObject)(
       implicit ctx: LogContext
-  ): F[(Account, JsObject)] = {
-    for {
+  ): ErrorOr[F, (Account, JsObject)] = {
+    val result = for {
       _    <- databaseService.updateCustomData(account.getId, customData)
       data <- hookService.login(account.userId, account.externalId, account.authType, providedData)
     } yield (account, data)
+    EitherT.right(result)
   }
 
   private def register(
@@ -138,8 +137,8 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
       externalId: String,
       customData: String,
       providedData: JsObject
-  )(implicit ctx: LogContext): F[(Account, JsObject)] = {
-    for {
+  )(implicit ctx: LogContext): ErrorOr[F, (Account, JsObject)] = {
+    val result = for {
       id   <- idGenerator.generate()
       time <- timeService.getCurrentTimeMillis
       user    = User(id, time)
@@ -148,10 +147,11 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
       _    <- databaseService.saveAccount(account)
       data <- hookService.register(id, externalId, authType, providedData)
     } yield (account, data)
+    EitherT.right(result)
   }
 
-  private def createTokenData(account: Account, extraData: JsObject): F[TokenData] = {
-    for {
+  private def createTokenData(account: Account, extraData: JsObject): ErrorOr[F, TokenData] = {
+    val result = for {
       sortData  <- createShortTermJwtData(account.userId, extraData)
       longData  <- createLongTermTokenJwtData(account.userId, extraData)
       shortTerm <- shortTermTokenService.encode(sortData)
@@ -159,6 +159,7 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
     } yield {
       TokenData(shortTerm, longTerm)
     }
+    EitherT.right(result)
   }
 
   private def createShortTermJwtData(userId: String, extraData: JsObject): F[JsObject] = {
