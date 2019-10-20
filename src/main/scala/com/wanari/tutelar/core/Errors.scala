@@ -21,13 +21,14 @@ object Errors {
   case class WrongConfig(override val msg: String)   extends ConfigError(msg)
 
   sealed abstract class AuthError(val message: String) extends AppError
-  case class UserNotFound()                            extends AuthError(s"User not found")
+  case class UserNotFound()                            extends AuthError("User not found")
   case class AccountNotFound()                         extends AuthError("Account not found")
   case class AccountUsed()                             extends AuthError("Account already used")
   case class UserHadThisAccountType()                  extends AuthError("User already had this type of account")
   case class UserLastAccount()                         extends AuthError("This account is the users last account")
   case class AuthenticationFailed()                    extends AuthError("Authentication failed, wrong credentials")
-  case class InvalidTokenMissingId()                   extends AuthError(s"Invalid token! Missing id key.")
+  case class InvalidTokenMissingId()                   extends AuthError("Invalid token! Missing id key.")
+  case class AccountBelongsToOtherUser()               extends AuthError("Account belongs to other user!")
 
   sealed abstract class Oauth2Error(val message: String) extends Throwable with AppError
   case class InvalidCsrfToken()                          extends Oauth2Error("Wrong csrf token")

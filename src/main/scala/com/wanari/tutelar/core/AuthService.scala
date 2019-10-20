@@ -3,6 +3,7 @@ package com.wanari.tutelar.core
 import cats.data.OptionT
 import com.wanari.tutelar.Initable
 import com.wanari.tutelar.core.AuthService.{LongTermToken, ShortTermToken, TokenData}
+import com.wanari.tutelar.core.DatabaseService.Account
 import com.wanari.tutelar.core.Errors.ErrorOr
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import spray.json.JsObject
@@ -22,7 +23,7 @@ trait AuthService[F[_]] extends Initable[F] {
   def findUserIdInShortTermToken(token: ShortTermToken): OptionT[F, String]
   def link(userId: String, authType: String, externalId: String, customData: String, providedData: JsObject)(
       implicit ctx: LogContext
-  ): ErrorOr[F, Unit]
+  ): ErrorOr[F, (Account, JsObject)]
   def unlink(userId: String, authType: String)(implicit ctx: LogContext): ErrorOr[F, Unit]
   def refreshToken(token: LongTermToken)(implicit ctx: LogContext): ErrorOr[F, TokenData]
 }
