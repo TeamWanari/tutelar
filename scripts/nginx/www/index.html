@@ -95,11 +95,12 @@
         }
 
         function sendForm(url) {
-           var formData = {
+            var formData = {
                 username: $('#username').val(),
                 password: $('#password').val(),
                 token: $('#token').val(),
-                data: getExtraData()
+                data: getExtraData(),
+                refreshToken: localStorage.refreshtoken
             };
             $.ajax({
                 type: 'POST',
@@ -123,7 +124,8 @@
             var formData = {
                 email: $('#username').val(),
                 password: $('#password').val(),
-                data: getExtraData()
+                data: getExtraData(),
+                refreshToken: localStorage.refreshtoken
             };
             $.ajax({
                 type: 'POST',
@@ -168,7 +170,7 @@
             sendEmailRequest("/email/send-register");
         }
 
-        function sendEmailResetPAsswordRequest() {
+        function sendEmailResetPasswordRequest() {
             sendEmailRequest("/email/send-reset-password");
         }
 
@@ -184,7 +186,8 @@
             var formData = {
                 token: token,
                 password: $('#password').val(),
-                data: getExtraData()
+                data: getExtraData(),
+                refreshToken: localStorage.refreshtoken
             };
             $.ajax({
                 type: 'POST',
@@ -258,6 +261,14 @@
             });
         }
 
+        function oauth2Login(provider) {
+            if (!!localStorage.refreshtoken) {
+                window.location.replace('/' + provider + '/login?refresh_token=' + localStorage.refreshtoken);
+            } else {
+                window.location.replace('/' + provider + '/login');
+            }
+        }
+
         function initButtons() {
             $('#logout').click(logout);
 
@@ -277,19 +288,19 @@
                 sendForm('/totp/login')
             });
             $('#login_github').click(function () {
-                window.location.replace('/github/login');
+                oauth2Login('github');
             });
             $('#login_facebook').click(function () {
-                window.location.replace('/facebook/login');
+                oauth2Login('facebook');
             });
             $('#login_google').click(function () {
-                window.location.replace('/google/login');
+                oauth2Login('google');
             });
 
             $('#send_register_email').click(sendEmailRegisterRequest);
             $('#register_email').click(registerWithEmail);
             $('#login_email').click(sendEmailLogin);
-            $('#send_reset_password_email').click(sendEmailResetPAsswordRequest);
+            $('#send_reset_password_email').click(sendEmailResetPasswordRequest);
             $('#reset_password_email').click(resetPasswordWithEmail);
             $('#generate_qr').click(getTOTPData);
             $('#delete').click(deleteAccount);
@@ -349,8 +360,6 @@
                 $('#userid').text(localStorage.userid);
                 refreshTokenDisplay();
                 $('#authenticated').show();
-            } else {
-                $('#login').show();
             }
             setInterval(checkTutelarStatus, 1000);
         });
@@ -418,7 +427,7 @@
     </style>
 </head>
 <body>
-<div id="login" style="display: none">
+<div>
     <p>
     <div id="qrcode"></div>
     <div>
