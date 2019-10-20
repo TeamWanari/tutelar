@@ -39,11 +39,16 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
       providedData: JsObject,
       refreshToken: Option[LongTermToken]
   )(implicit ctx: LogContext): ErrorOr[F, TokenData] = {
-    // TODO - check refreshToken (when defined)
-    val userId: Option[String] = None // TODO: from refreshToken
+
+    val tokenDataEO: ErrorOr[F, Option[JsObject]] = refreshToken match {
+      case None    => EitherT.rightT(Option.empty[JsObject])
+      case Some(t) => longTermTokenService.validateAndDecode(t).map(Option(_))
+    }
 
     val standardizedExternalId = convertToStandardizedLowercase(externalId)
     for {
+      tokenDataO <- tokenDataEO
+      userId = tokenDataO.flatMap(_.fields.get("id").collect { case JsString(id) => id })
       account_hookresponse <- createOrUpdateAccount(authType, standardizedExternalId, customData, providedData, userId)
       (account, hookResponse) = account_hookresponse
       token <- createTokenData(account, hookResponse) // TODO: use refreshToken data
