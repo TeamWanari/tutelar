@@ -9,7 +9,7 @@ A micro-service for authentication.
  - Username-Password
  - Email-Password
  - LDAP/AD
- - Oauth2 (Facebook, Google, GitHub)
+ - OAuth2 (Facebook, Google, GitHub)
  - Time-based One-time Password
  
 #### Supported JWT formats:

@@ -32,16 +32,16 @@ object Main extends App {
   }
 
   starting.onComplete {
-    case Success(_) => logger.info("LoginService started")
+    case Success(_) => logger.info("Tutelar started")
     case Failure(ex) =>
-      logger.error("LoginService starting failed", ex)
+      logger.error("Tutelar starting failed", ex)
       GlobalTracer.get().close()
       system.terminate()
   }
 
   private def setupShutdownHook(server: Http.ServerBinding): Unit = {
     CoordinatedShutdown(system).addTask(CoordinatedShutdown.PhaseServiceUnbind, "http_shutdown") { () =>
-      logger.info("LoginService shutting down...")
+      logger.info("Tutelar shutting down...")
       server.terminate(hardDeadline = 8.seconds).map(_ => Done)
     }
   }
