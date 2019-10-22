@@ -1,5 +1,6 @@
 package com.wanari.tutelar.core.impl
 
+import java.io.{BufferedWriter, File, FileWriter}
 import java.util.concurrent.TimeUnit
 
 import com.emarsys.escher.akka.http.config.EscherConfig
@@ -11,10 +12,10 @@ import com.wanari.tutelar.core.ExpirationService._
 import com.wanari.tutelar.core.HookService.{BasicAuthConfig, EscherAuthConfig, HookConfig}
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
 import com.wanari.tutelar.core.TracerService.{JaegerConfig, TracerServiceConfig}
+import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.core.impl.database.DatabaseServiceFactory.DatabaseConfig
 import com.wanari.tutelar.core.impl.database.MongoDatabaseService.MongoConfig
 import com.wanari.tutelar.core.impl.database.PostgresDatabaseService.PostgresConfig
-import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
 import com.wanari.tutelar.providers.userpass.email.EmailServiceFactory.EmailServiceFactoryConfig
@@ -36,11 +37,47 @@ class ConfigServiceImpl() extends ConfigService {
 
   private lazy val conf: Config = {
     Try {
-      val config = ConfigFactory.load
-      if (config.isEmpty) throw WrongConfig("application.conf is empty!")
-      config
+      listConfigFilesIfDirectoryExists().fold(ConfigFactory.load()) { configFiles =>
+        if (configFiles.isEmpty) {
+          copyResourceConfigToDirectory()
+          ConfigFactory.load()
+        } else {
+          mergeConfigFiles(configFiles)
+        }
+      }
     }
   }.fold(logAndThrow(""), identity)
+
+  private def mergeConfigFiles(files: Seq[File]): Config = {
+    files
+      .sortBy(_.getName)
+      .map(ConfigFactory.parseFile)
+      .fold(ConfigFactory.empty())(_ withFallback _)
+      .resolve()
+  }
+
+  private def listConfigFilesIfDirectoryExists(): Option[Seq[File]] = {
+    val configDir = new File("/config")
+    if (configDir.exists && configDir.isDirectory) {
+      Some(
+        configDir.listFiles
+          .filter(_.isFile)
+          .filter(_.getName.endsWith(".conf"))
+      )
+    } else {
+      None
+    }
+  }
+
+  private def copyResourceConfigToDirectory(): Unit = {
+    Using.Manager { use =>
+      val in  = use(Source.fromResource("application.conf"))
+      val out = use(new BufferedWriter(new FileWriter("/config/application.conf")))
+      in.iter.foreach { c =>
+        out.write(c)
+      }
+    }
+  }
 
   override lazy val getEnabledModules: Seq[String] = {
     Try {
