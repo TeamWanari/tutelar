@@ -11,6 +11,7 @@ import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.api.{MongoConnection, MongoDriver}
 import reactivemongo.bson.BSONDocument
+import concurrent.duration._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -44,7 +45,10 @@ class DatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUtil wi
 
   override def beforeAll(): Unit = truncateDb()
 
-  override def afterAll(): Unit = truncateDb()
+  override def afterAll(): Unit = {
+    truncateDb()
+    mongoDriver.close(3.seconds)
+  }
 
   private def truncateDb(): Unit = {
     import slick.jdbc.PostgresProfile.api._
