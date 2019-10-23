@@ -1,7 +1,7 @@
 ## Developer home
 
 ### Requirements
-- sbt 1.2.8 
+- sbt
 - docker
 - docker-compose
 - make (optional, but very useful)

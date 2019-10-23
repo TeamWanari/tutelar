@@ -16,6 +16,16 @@ A micro-service for authentication.
  - Symmetric: HMD5, HS224, HS256, HS384, HS512
  - Asymmetric: RS256, RS384, RS512, ES256, ES384, ES512
  
+#### Supported databases:
+ - PostgreSQL
+ - MongoDB
+ - in memory (just for testing)
+ 
+#### Supported logging:
+ - Jaeger tracer
+ - console/file human readable
+ - console/file json (LogstashEncoder)
+
 #### How to run
 See [Docker images](https://hub.docker.com/r/teamwanari/tutelar/tags)
 

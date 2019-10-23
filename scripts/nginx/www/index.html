@@ -31,7 +31,7 @@
         function reRenderQr(usrname) {
             if(qrCode != null) {
                 var splittedqrUri = qrUri.split("/");
-                splittedqrUri[3] = usrname + splittedqrUri[3];
+                splittedqrUri[3] = 'Tutelar DEMO (' + usrname + ')' + splittedqrUri[3];
                 qrCode.clear();
                 qrCode.makeCode(splittedqrUri.join("/"));
             }
@@ -321,6 +321,22 @@
             }
         }
 
+        function checkTutelarStatus() {
+            $.ajax({
+                type: 'GET',
+                url: 'https://lvh.me:9443/healthCheck',
+                success: function (data) {
+                    if (data.success){
+                        $('#tutelar-status').css('background-color', 'green');
+                    } else {
+                        $('#tutelar-status').css('background-color', 'red');
+                    }
+                }
+            }).fail(function () {
+                $('#tutelar-status').css('background-color', 'red');
+            });
+        }
+
         $(window).on('load', function () {
             handleCallbackLogin();
             initButtons();
@@ -336,7 +352,7 @@
             } else {
                 $('#login').show();
             }
-
+            setInterval(checkTutelarStatus, 1000);
         });
     </script>
     <style>
@@ -391,6 +407,14 @@
         #qrcode {
             float:right;
         }
+        #tutelar-status {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: grey;
+            border-radius: 8px;
+            margin-bottom: -3px;
+        }
     </style>
 </head>
 <body>
@@ -428,6 +452,31 @@
         <button id="login_facebook" class="oauth">Login with Facebook</button>
         <button id="login_google" class="oauth">Login with Google</button>
     </p>
+    <hr/>
+    <div style="font-size: 16px">Tutelar status: <div id="tutelar-status"></div>
+        <a href="https://lvh.me:9443/healthCheck">https://lvh.me:9443/healthCheck</a>
+        (<a href="http://localhost:9000/healthCheck">http://localhost:9000/healthCheck</a>)
+    </div>
+    <hr/>
+    <h3>Basic user-pass</h3>
+    Password have to match <code>^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$</code>
+    (Min 8 characters, at least one uppercase one lowercase letter and one number)
+    <h3>LDAP</h3>
+    Login with alice/alicepw and bob/bobpw
+    <h3>Email</h3>
+    Emails send to mock smtp server. You can check the sent emails <a href="http://mailhog.lvh.me:8080">here</a>.<br/>
+    Password have to match <code>^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$</code>
+    (Min 8 characters, at least one uppercase one lowercase letter and one number)
+    <h3>TOTP</h3>
+    <ul>
+        <li>Fill the User field</li>
+        <li>Generate QRCode</li>
+        <li>Scan the QR code with an authenticator app (eg. GoogleAuthenticator)</li>
+        <li>Fill the Pass field with the current code from the authenticator app</li>
+        <li>Register with TOTP</li>
+    </ul>
+    <h3>OAuth2</h3>
+    You have to setup the provider's secrets and enable the modules. <i>TODO link the documentation</i>
 </div>
 
 <div id="authenticated" style="display: none">
