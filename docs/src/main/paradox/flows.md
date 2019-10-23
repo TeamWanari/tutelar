@@ -2,7 +2,7 @@
 
 ## Registration
 
-@@@ seqence-diagram
+@@@ sequence-diagram
 ```raw
 Client->frontend: credentials, userData
 frontend->tutelar: doRegistration( \\n credentials, userData)
@@ -16,7 +16,7 @@ frontend-->Client: success
 
 ## Authentication
 
-@@@ seqence-diagram
+@@@ sequence-diagram
 ```raw
 Client->frontend: credentials
 frontend->tutelar: doAuthentication(credentials)
@@ -30,7 +30,7 @@ frontend-->Client: successful login
 
 ## Authorization
 
-@@@ seqence-diagram
+@@@ sequence-diagram
 ```raw
 Client->frontend: do sth
 frontend->backend: sth(token)

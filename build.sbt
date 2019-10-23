@@ -3,7 +3,7 @@ import org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings
 lazy val ver = version := "1.0.0-SNAPSHOT"
 
 lazy val commonSettings = Seq(
-  scalaVersion := "2.13.0",
+  scalaVersion := "2.13.1",
   organization := "com.wanari",
   scalafmtOnCompile := true,
   ver
@@ -93,8 +93,8 @@ addCommandAlias("testAll", "test it:test")
 enablePlugins(JavaAppPackaging)
 enablePlugins(BuildInfoPlugin)
 
-addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3")
-addCompilerPlugin("io.tryp"       % "splain"          % "0.4.1" cross CrossVersion.patch)
+addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
+addCompilerPlugin("io.tryp"       % "splain"          % "0.5.0" cross CrossVersion.patch)
 
 cancelable in Global := true
 
