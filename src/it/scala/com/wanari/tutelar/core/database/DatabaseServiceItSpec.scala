@@ -56,7 +56,6 @@ class DatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUtil wi
       _ <- db.run(sqlu"TRUNCATE USERS CASCADE;")
       _ <- mongoCollection.delete().one(BSONDocument())
     } yield ())
-
   }
 
   Seq(
@@ -66,7 +65,6 @@ class DatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUtil wi
   ).foreach {
     case (name, service) =>
       name when {
-
         "CheckStatus" in {
           await(service.checkStatus()) shouldEqual true
         }

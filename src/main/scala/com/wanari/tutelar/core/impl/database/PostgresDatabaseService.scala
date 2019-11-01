@@ -9,7 +9,6 @@ import slick.jdbc.PostgresProfile.api._
 import scala.concurrent.{ExecutionContext, Future}
 
 class PostgresDatabaseService(implicit config: PostgresConfig, ec: ExecutionContext) extends DatabaseService[Future] {
-
   private lazy val db: Database = Database.forConfig(config.path, config.config)
 
   override def init: Future[Unit] = {
@@ -111,7 +110,6 @@ class PostgresDatabaseService(implicit config: PostgresConfig, ec: ExecutionCont
 
     def * = (authType, externalId, userId, customData) <> ((Account.apply _).tupled, Account.unapply)
   }
-
 }
 
 object PostgresDatabaseService {

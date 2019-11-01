@@ -48,7 +48,6 @@ class EmailServiceHttpImplSpec extends TestKit(ActorSystem("HookServiceSpec")) w
         captor.getValue.uri.toString() shouldEqual expectedUrl
         captor.getValue.method shouldEqual HttpMethods.POST
         captor.getValue.headers should contain(Authorization(BasicHttpCredentials("_USER_", "_PASS_")))
-
       }
       "send the correct data" in new TestScope {
         service.sendRegisterUrl("to@test", "RegisterTOKEN")
@@ -91,7 +90,6 @@ class EmailServiceHttpImplSpec extends TestKit(ActorSystem("HookServiceSpec")) w
         captor.getValue.uri.toString() shouldEqual expectedUrl
         captor.getValue.method shouldEqual HttpMethods.POST
         captor.getValue.headers should contain(Authorization(BasicHttpCredentials("_USER_", "_PASS_")))
-
       }
       "send the correct data" in new TestScope {
         service.sendResetPasswordUrl("to@test", "ResetTOKEN")

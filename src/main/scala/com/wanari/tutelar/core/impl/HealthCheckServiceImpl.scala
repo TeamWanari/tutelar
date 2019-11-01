@@ -8,7 +8,6 @@ import com.wanari.tutelar.core.HealthCheckService.HealthCheckResult
 import com.wanari.tutelar.core.{DatabaseService, HealthCheckService}
 
 class HealthCheckServiceImpl[F[_]: Monad](implicit databaseService: DatabaseService[F]) extends HealthCheckService[F] {
-
   def getStatus: ErrorOr[F, HealthCheckResult] = {
     for {
       dbStatus <- EitherT.right(databaseService.checkStatus())

@@ -40,7 +40,6 @@ class CsrfServiceJwt[F[_]: MonadError[*[_], Throwable]: DateTimeUtil](implicit c
         .ensure(InvalidCsrfToken())(identity)
     } yield ()
   }
-
 }
 
 object CsrfServiceJwt {

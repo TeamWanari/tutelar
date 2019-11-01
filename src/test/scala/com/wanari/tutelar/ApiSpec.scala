@@ -4,7 +4,6 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 
 class ApiSpec extends TestBase with ScalatestRouteTest {
-
   "#createRoute" when {
     "empty route" in {
       val result = Api.createRoute(Seq.empty)
@@ -35,5 +34,4 @@ class ApiSpec extends TestBase with ScalatestRouteTest {
   }
 
   private def createApi(name: String): Api = () => path(name)(complete("ok"))
-
 }

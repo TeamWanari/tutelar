@@ -32,7 +32,6 @@ import scala.io.Source
 import scala.util.{Try, Using}
 
 class ConfigServiceImpl() extends ConfigService {
-
   private lazy val logger = LoggerFactory.getLogger("CONFIG")
 
   private lazy val conf: Config = {

@@ -9,7 +9,6 @@ import scala.util.Try
 // Most of the implementations came from https://github.com/ejisan/kuro-otp
 // This is a highly refactored, minimalized version of the kuro-otp.
 object OTP {
-
   trait OTPBase {
     def algorithm: OTPAlgorithm
     def digits: Int

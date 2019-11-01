@@ -19,7 +19,6 @@ import spray.json.{JsObject, JsString, JsTrue}
 import scala.concurrent.Future
 
 class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestBase {
-
   override def afterAll: Unit = {
     TestKit.shutdownActorSystem(system)
   }
@@ -58,7 +57,6 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
     }
     implicit lazy val config = HookConfig(baseUrl, BasicAuthConfig("user", "pass"))
     lazy val service         = new HookServiceImpl[Future]()
-
   }
 
   trait EscherTestScope extends TestScope {
@@ -198,5 +196,4 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
     import spray.json.DefaultJsonProtocol._
     await(Unmarshal(captor.getValue.entity).to[JsObject]) shouldEqual expectedRequest
   }
-
 }

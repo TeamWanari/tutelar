@@ -51,5 +51,4 @@ class GithubService[F[_]: Monad](val oAuth2config: OAuth2Config)(
       ret  <- http.unmarshalEntityTo[ProfileData](resp)
     } yield ret
   }
-
 }

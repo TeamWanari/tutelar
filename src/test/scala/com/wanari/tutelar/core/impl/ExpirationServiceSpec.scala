@@ -10,7 +10,6 @@ import com.wanari.tutelar.util.DateTimeUtil
 import scala.concurrent.duration.FiniteDuration
 
 class ExpirationServiceSpec extends TestBase {
-
   trait TestScope {
     val now = 1000L
     implicit val config: Map[String, ExpirationConfig] = Map(
@@ -62,5 +61,4 @@ class ExpirationServiceSpec extends TestBase {
       }
     }
   }
-
 }

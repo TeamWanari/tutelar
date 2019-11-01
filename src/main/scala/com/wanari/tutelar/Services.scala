@@ -63,7 +63,6 @@ trait Services[F[_]] {
 
 class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, materializer: Materializer)
     extends Services[Future] {
-
   import cats.instances.future._
 
   implicit lazy val configService: ConfigService = new ConfigServiceImpl

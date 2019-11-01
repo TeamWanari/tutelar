@@ -16,5 +16,4 @@ trait AuthDirectives {
   }
 
   def userAuth: AuthenticationDirective[String] = authenticateOAuth2Async[String]("", userAuthenticator)
-
 }

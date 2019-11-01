@@ -6,7 +6,6 @@ import org.scalatest.{Matchers, WordSpecLike}
 import scala.util.{Success, Try}
 
 class PasswordDifficultyCheckerImplSpec extends WordSpecLike with Matchers {
-
   trait TestScope {
     import cats.instances.try_._
     lazy val patternConfig                     = ""

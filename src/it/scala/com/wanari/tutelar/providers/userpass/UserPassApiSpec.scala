@@ -58,5 +58,4 @@ class UserPassApiSpec extends RouteTestBase {
       }
     }
   }
-
 }

@@ -15,7 +15,6 @@ class EmailProviderApi(
     implicit val service: EmailProviderService[Future],
     val callbackConfig: CallbackConfig
 ) extends ProviderApi {
-
   override def route(): Route = {
     pathPrefix("email") {
       path("login") {

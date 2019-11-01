@@ -36,5 +36,4 @@ class ExpirationServiceImpl[F[_]: Applicative](
       time + duration.toMillis <= now
     }
   }
-
 }

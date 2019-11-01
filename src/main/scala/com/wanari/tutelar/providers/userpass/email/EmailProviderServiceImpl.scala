@@ -22,7 +22,6 @@ class EmailProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
     getJwtConfig: String => JwtConfig
 ) extends BasicProviderServiceImpl
     with EmailProviderService[F] {
-
   override protected val authType = "EMAIL"
 
   protected val jwtService: JwtService[F] = new JwtServiceImpl[F](getJwtConfig("emailProvider"))

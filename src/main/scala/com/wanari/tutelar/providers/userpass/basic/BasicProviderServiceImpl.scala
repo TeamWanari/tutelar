@@ -14,7 +14,6 @@ class BasicProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
     passwordDifficultyChecker: PasswordDifficultyChecker[F]
 ) extends BasicProviderService[F]
     with PasswordCryptor {
-
   protected val authType = "BASIC"
 
   override def register(username: String, password: String, data: Option[JsObject])(

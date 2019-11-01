@@ -21,7 +21,6 @@ import spray.json.{JsObject, JsTrue}
 import scala.util.{Failure, Try}
 
 class OAuth2ServiceSpec extends TestBase {
-
   "TokenRequestHelper" should {
     "create jsonEntity" in withActorSystem { implicit actorSystem =>
       implicit val materializer = ActorMaterializer()
@@ -134,5 +133,4 @@ class OAuth2ServiceSpec extends TestBase {
       service.authenticateWithAccessToken("token") shouldBe EitherT.rightT(TokenData("ToKeN", "refresh"))
     }
   }
-
 }

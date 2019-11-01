@@ -83,7 +83,6 @@ trait OAuth2Service[F[_]] {
 }
 
 object OAuth2Service {
-
   case class TokenRequestHelper(client_id: String, client_secret: String, code: String, state: String) {
     def jsonEntity: RequestEntity =
       HttpEntity(ContentTypes.`application/json`, tokenRequestHelperFormat.write(this).compactPrint)

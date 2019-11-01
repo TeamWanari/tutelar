@@ -20,7 +20,6 @@ import scala.concurrent.duration._
 import scala.util.{Failure, Try}
 
 class ConfigServiceSpec extends TestBase {
-
   "#isModuleEnabled" should {
     val service        = new ConfigServiceImpl()
     val enabledModules = service.getEnabledModules

@@ -96,7 +96,6 @@ class EmailProviderServiceSpec extends TestBase {
       }
       "failure" when {
         "password is weak" in new TestScope {
-
           when(jwtServiceMock.validateAndDecode(any[String])).thenReturn(
             EitherT.rightT[Try, AppError](
               JsObject(

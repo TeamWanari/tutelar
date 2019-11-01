@@ -5,9 +5,7 @@ import akka.stream.ActorMaterializer
 import com.wanari.tutelar.TestBase
 
 class AkkaHttpWrapperSpec extends TestBase {
-
   "AkkaHttpWrapper" should {
-
     "should unmarshall" in {
       import spray.json._
       import spray.json.DefaultJsonProtocol._
@@ -28,7 +26,5 @@ class AkkaHttpWrapperSpec extends TestBase {
         entity shouldBe test
       }
     }
-
   }
-
 }

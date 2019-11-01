@@ -10,7 +10,6 @@ import com.wanari.tutelar.core.HealthCheckService._
 import scala.concurrent.Future
 
 class HealthCheckItSpec extends RouteTestBase {
-
   trait TestScope {
     def serviceResult: HealthCheckResult
     implicit lazy val service: HealthCheckService[Future] = new HealthCheckService[Future] {

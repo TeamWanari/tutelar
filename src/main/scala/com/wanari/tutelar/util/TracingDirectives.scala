@@ -9,7 +9,6 @@ import scala.util.Try
 
 // source: https://gist.github.com/chadselph/65f21fc86f873d6569f4cfe4f96ce036
 trait TracingDirectives {
-
   def trace(tracer: Tracer, operationName: String): Directive1[Span] = extractRequest.flatMap { req =>
     val parent = Try {
       import scala.jdk.CollectionConverters._

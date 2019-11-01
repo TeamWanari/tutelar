@@ -30,7 +30,6 @@ class AuthServiceSpec extends TestBase {
   val hookResponseRegister = JsObject("group" -> JsString("reg"))
 
   trait TestScope {
-
     implicit val databaseService           = new MemoryDatabaseService[Try]
     implicit val idGenerator               = new IdGeneratorCounterImpl[Try]
     implicit val timeService               = new DateTimeUtilCounterImpl[Try]
@@ -287,5 +286,4 @@ class AuthServiceSpec extends TestBase {
       service.refreshToken("long_term_token") shouldBe EitherT.leftT(InvalidJwt())
     }
   }
-
 }

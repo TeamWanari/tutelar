@@ -60,7 +60,6 @@ class LdapServiceImpl(
       }
       attribute.getID -> jsValue
     }.toMap
-
   }
 
   private def convertToJsValue(value: Any): JsValue = {
@@ -106,7 +105,6 @@ class LdapServiceImpl(
     controls.setSearchScope(SearchControls.SUBTREE_SCOPE)
     controls
   }
-
 }
 
 object LdapServiceImpl {
@@ -119,5 +117,4 @@ object LdapServiceImpl {
       userSearchReturnAttributes: Seq[String],
       userSearchReturnArrayAttributes: Seq[String]
   )
-
 }

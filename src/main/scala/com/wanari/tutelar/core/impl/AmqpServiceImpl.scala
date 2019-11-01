@@ -27,7 +27,6 @@ class AmqpServiceImpl[F[_]: Applicative](implicit config: AmqpConfig, mat: Mater
   }
 
   override def createQueue(queueConfig: AmqpQueueConfig): AmqpQueue = {
-
     val amqpSink: Sink[ByteString, Future[Done]] = {
       AmqpSink.simple(
         convertToWriteSettings(connection, queueConfig)

@@ -14,7 +14,6 @@ class EmailServiceHttpImpl[F[_]: MonadError[*[_], Throwable]](
     implicit http: HttpWrapper[F],
     config: EmailServiceHttpConfig
 ) extends EmailService[F] {
-
   override def sendRegisterUrl(email: String, token: String)(implicit ctx: LogContext): F[Unit] = {
     send(EmailRequestData(email, "register", JsObject(), JsObject("token" -> JsString(token))))
   }
@@ -41,7 +40,6 @@ class EmailServiceHttpImpl[F[_]: MonadError[*[_], Throwable]](
       response <- http.singleRequest(request)
       result   <- response.status.isSuccess().pureUnitOrRise(HttpClientError(response))
     } yield result
-
   }
 }
 

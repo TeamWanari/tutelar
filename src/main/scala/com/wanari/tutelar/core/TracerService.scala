@@ -29,7 +29,6 @@ class TracerService[F[_]: MonadError[*[_], Throwable]](
   private def initJaeger(): Unit = {
     GlobalTracer.registerIfAbsent(configService.jaegerConfig.getTracer)
   }
-
 }
 
 object TracerService {

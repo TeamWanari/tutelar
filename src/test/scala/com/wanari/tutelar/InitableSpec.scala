@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory
 import scala.util.{Success, Try}
 
 class InitableSpec extends TestBase {
-
   trait TestScope {
     var called = false
     var loaded = false
@@ -74,5 +73,4 @@ class InitableSpec extends TestBase {
       }
     }
   }
-
 }

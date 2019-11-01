@@ -7,7 +7,6 @@ import com.wanari.tutelar.{BuildInfo, TestBase}
 import org.mockito.Mockito.when
 
 class HealthCheckServiceSpec extends TestBase {
-
   trait TestScope {
     implicit val configService: ConfigService             = mock[ConfigService]
     implicit val databaseServiceMock: DatabaseService[Id] = mock[DatabaseService[Id]]

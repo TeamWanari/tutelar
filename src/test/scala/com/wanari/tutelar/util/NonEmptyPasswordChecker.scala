@@ -7,5 +7,4 @@ class NonEmptyPasswordChecker[F[_]: ApplicativeError[*[_], Throwable]] extends P
   import cats.syntax.applicative._
 
   override def isValid(password: String): F[Boolean] = (!password.isEmpty).pure
-
 }

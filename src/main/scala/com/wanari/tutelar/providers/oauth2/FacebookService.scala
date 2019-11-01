@@ -56,5 +56,4 @@ class FacebookService[F[_]: Monad](
       ret  <- http.unmarshalEntityTo[ProfileData](resp)
     } yield ret
   }
-
 }

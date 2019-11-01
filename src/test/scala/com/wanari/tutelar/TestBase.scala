@@ -21,7 +21,6 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
 trait TestBase extends WordSpecLike with Matchers with MockitoSugar with BeforeAndAfterAll {
-
   implicit lazy val dummyLogContext = {
     val tracer = NoopTracerFactory.create()
     val span   = tracer.buildSpan("test").start()

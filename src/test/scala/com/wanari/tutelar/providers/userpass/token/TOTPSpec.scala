@@ -5,7 +5,6 @@ import org.apache.commons.codec.binary.Hex
 import org.scalatest.{Matchers, WordSpecLike}
 
 class TOTPSpec extends WordSpecLike with Matchers {
-
   def now(): Long        = System.currentTimeMillis / 1000
   def fromHex(h: String) = OTPKey(new javax.crypto.spec.SecretKeySpec((new Hex).decode(h.getBytes), "RAW"))
 

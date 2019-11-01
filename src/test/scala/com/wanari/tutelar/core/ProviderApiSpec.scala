@@ -12,7 +12,6 @@ import com.wanari.tutelar.core.Errors.AuthenticationFailed
 import com.wanari.tutelar.core.ProviderApi._
 
 class ProviderApiSpec extends TestBase with ScalatestRouteTest {
-
   import cats.instances.future._
 
   val api = new ProviderApi {
