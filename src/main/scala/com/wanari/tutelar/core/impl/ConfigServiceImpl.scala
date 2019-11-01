@@ -60,7 +60,7 @@ class ConfigServiceImpl() extends ConfigService {
     val configDir = new File("/config")
     if (configDir.exists && configDir.isDirectory) {
       Some(
-        configDir.listFiles
+        configDir.listFiles.toSeq
           .filter(_.isFile)
           .filter(_.getName.endsWith(".conf"))
       )
