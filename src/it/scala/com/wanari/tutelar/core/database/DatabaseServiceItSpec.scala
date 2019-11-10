@@ -8,13 +8,13 @@ import com.wanari.tutelar.core.impl.database.MongoDatabaseService.MongoConfig
 import com.wanari.tutelar.core.impl.database.PostgresDatabaseService.PostgresConfig
 import com.wanari.tutelar.core.impl.database.{MemoryDatabaseService, MongoDatabaseService, PostgresDatabaseService}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
-import reactivemongo.api.collections.bson.BSONCollection
+import reactivemongo.api.bson.BSONDocument
+import reactivemongo.api.bson.collection.BSONCollection
 import reactivemongo.api.{MongoConnection, MongoDriver}
-import reactivemongo.bson.BSONDocument
-import concurrent.duration._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.duration._
 
 class DatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUtil with BeforeAndAfterAll {
   import cats.instances.future._
