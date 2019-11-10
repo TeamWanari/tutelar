@@ -9,7 +9,7 @@ import com.wanari.tutelar.core.Errors.{AppError, ErrorOr, InvalidJwt, WrongConfi
 import com.wanari.tutelar.core.JwtService
 import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
 import org.bouncycastle.jce.provider.BouncyCastleProvider
-import pdi.jwt.algorithms.{JwtAsymmetricAlgorithm, JwtHmacAlgorithm}
+import pdi.jwt.algorithms.{JwtAsymmetricAlgorithm, JwtHmacAlgorithm, JwtUnkwownAlgorithm}
 import pdi.jwt.{JwtAlgorithm, JwtClaim, JwtSprayJson}
 import spray.json._
 
@@ -55,6 +55,7 @@ class JwtServiceImpl[F[_]: MonadError[*[_], Throwable]](config: JwtConfig) exten
       set.algo match {
         case a: JwtHmacAlgorithm       => JwtSprayJson.decodeJson(token, set.decodeKey, Seq(a)).toOption
         case a: JwtAsymmetricAlgorithm => JwtSprayJson.decodeJson(token, set.decodeKey, Seq(a)).toOption
+        case _: JwtUnkwownAlgorithm    => throw new IllegalStateException("This excluded at 'settings' init.")
       }
     }
     OptionT(result)
@@ -72,6 +73,7 @@ class JwtServiceImpl[F[_]: MonadError[*[_], Throwable]](config: JwtConfig) exten
       set.algo match {
         case a: JwtHmacAlgorithm       => JwtSprayJson.isValid(token, set.decodeKey, Seq(a))
         case a: JwtAsymmetricAlgorithm => JwtSprayJson.isValid(token, set.decodeKey, Seq(a))
+        case _: JwtUnkwownAlgorithm    => throw new IllegalStateException("This excluded at 'settings' init.")
       }
     }
   }
