@@ -4,7 +4,6 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.ActorMaterializer
 import akka.testkit.TestKit
 import com.wanari.tutelar.TestBase
 import com.wanari.tutelar.core.{EscherService, HookService}
@@ -22,8 +21,6 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
   override def afterAll: Unit = {
     TestKit.shutdownActorSystem(system)
   }
-
-  implicit val mat = ActorMaterializer()
 
   val userId     = "IDID"
   val externalId = "EXTID"

@@ -1,7 +1,6 @@
 package com.wanari.tutelar
 
 import akka.actor.ActorSystem
-import akka.stream.Materializer
 import cats.MonadError
 import com.wanari.tutelar.core._
 import com.wanari.tutelar.core.impl._
@@ -61,8 +60,7 @@ trait Services[F[_]] {
   }
 }
 
-class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, materializer: Materializer)
-    extends Services[Future] {
+class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem) extends Services[Future] {
   import cats.instances.future._
 
   implicit lazy val configService: ConfigService = new ConfigServiceImpl

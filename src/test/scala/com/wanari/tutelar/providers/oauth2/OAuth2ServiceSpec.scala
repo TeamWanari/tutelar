@@ -1,7 +1,6 @@
 package com.wanari.tutelar.providers.oauth2
 
 import akka.http.scaladsl.model._
-import akka.stream.ActorMaterializer
 import cats.data.EitherT
 import com.wanari.tutelar.TestBase
 import com.wanari.tutelar.core.AuthService.TokenData
@@ -23,9 +22,8 @@ import scala.util.{Failure, Try}
 class OAuth2ServiceSpec extends TestBase {
   "TokenRequestHelper" should {
     "create jsonEntity" in withActorSystem { implicit actorSystem =>
-      implicit val materializer = ActorMaterializer()
-      val trh                   = TokenRequestHelper("a", "b", "c", "d")
-      val jsonEntity            = trh.jsonEntity
+      val trh        = TokenRequestHelper("a", "b", "c", "d")
+      val jsonEntity = trh.jsonEntity
       jsonEntity.contentType shouldBe ContentTypes.`application/json`
       await(jsonEntity.httpEntity.toStrict(timeout)).data.utf8String shouldBe
         """{"client_id":"a","client_secret":"b","code":"c","state":"d"}"""
@@ -39,9 +37,8 @@ class OAuth2ServiceSpec extends TestBase {
     }
 
     "create formEntity" in withActorSystem { implicit actorSystem =>
-      implicit val materializer = ActorMaterializer()
-      val trh                   = TokenRequestHelper("a", "b", "c", "d")
-      val formEntity            = trh.formEntity("uri")
+      val trh        = TokenRequestHelper("a", "b", "c", "d")
+      val formEntity = trh.formEntity("uri")
       formEntity.contentType shouldBe MediaTypes.`application/x-www-form-urlencoded`.toContentType
       await(formEntity.httpEntity.toStrict(timeout)).data.utf8String shouldBe
         """state=d&redirect_uri=uri&client_id=a&code=c&client_secret=b&grant_type=authorization_code"""

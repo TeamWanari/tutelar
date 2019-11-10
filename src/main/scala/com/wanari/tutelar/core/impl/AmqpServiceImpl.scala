@@ -1,10 +1,11 @@
 package com.wanari.tutelar.core.impl
 
 import akka.Done
-import akka.stream.alpakka.amqp.scaladsl.AmqpSink
+import akka.actor.ActorSystem
+import akka.stream.OverflowStrategy
 import akka.stream.alpakka.amqp._
+import akka.stream.alpakka.amqp.scaladsl.AmqpSink
 import akka.stream.scaladsl.{Keep, Sink, Source, SourceQueueWithComplete}
-import akka.stream.{Materializer, OverflowStrategy}
 import akka.util.ByteString
 import cats.Applicative
 import com.wanari.tutelar.core.AmqpService
@@ -12,7 +13,7 @@ import com.wanari.tutelar.core.AmqpService.{AmqpConfig, AmqpQueue, AmqpQueueConf
 
 import scala.concurrent.Future
 
-class AmqpServiceImpl[F[_]: Applicative](implicit config: AmqpConfig, mat: Materializer) extends AmqpService[F] {
+class AmqpServiceImpl[F[_]: Applicative](implicit config: AmqpConfig, actorSystem: ActorSystem) extends AmqpService[F] {
   import cats.syntax.applicative._
 
   protected lazy val connection: AmqpConnectionProvider = {
