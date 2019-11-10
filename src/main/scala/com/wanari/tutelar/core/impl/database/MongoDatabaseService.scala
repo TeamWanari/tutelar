@@ -5,9 +5,9 @@ import com.wanari.tutelar.core.DatabaseService
 import com.wanari.tutelar.core.DatabaseService.{Account, AccountId, User}
 import com.wanari.tutelar.core.Errors.WrongConfig
 import com.wanari.tutelar.core.impl.database.MongoDatabaseService.MongoConfig
-import reactivemongo.api.collections.bson.BSONCollection
+import reactivemongo.api.bson.collection.BSONCollection
+import reactivemongo.api.bson.{BSONDocument, BSONDocumentHandler, BSONInteger, Macros}
 import reactivemongo.api.{MongoConnection, MongoDriver}
-import reactivemongo.bson.{BSONDocument, BSONDocumentHandler, BSONInteger, Macros}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -43,7 +43,9 @@ class MongoDatabaseService(implicit config: MongoConfig, ec: ExecutionContext, d
   override def saveAccount(account: Account): Future[Unit] = {
     val selector = userSelector(account.userId)
     val data     = AccountDbModel(account.authType, account.externalId, account.customData)
-    val modifier = BSONDocument("$push" -> BSONDocument("accounts" -> accountHandler.write(data)))
+    val modifier = BSONDocument(
+      "$push" -> BSONDocument("accounts" -> accountHandler.writeOpt(data).getOrElse(BSONDocument.empty))
+    )
     runUnit(_.update.one(selector, modifier))
   }
 
