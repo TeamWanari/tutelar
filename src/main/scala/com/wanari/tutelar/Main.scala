@@ -3,7 +3,6 @@ package com.wanari.tutelar
 import akka.Done
 import akka.actor.{ActorSystem, CoordinatedShutdown}
 import akka.http.scaladsl.Http
-import akka.stream.ActorMaterializer
 import com.wanari.tutelar.util.LoggerUtil
 import io.opentracing.util.GlobalTracer
 import org.slf4j.{Logger, LoggerFactory}
@@ -18,7 +17,6 @@ object Main extends App {
   private implicit lazy val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)
 
   private implicit lazy val system           = ActorSystem("tutelar-system")
-  private implicit lazy val materializer     = ActorMaterializer()
   private implicit lazy val executionContext = system.dispatcher
   import cats.instances.future._
 

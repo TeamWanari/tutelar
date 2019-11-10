@@ -4,7 +4,6 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.model.headers.{Authorization, BasicHttpCredentials}
 import akka.http.scaladsl.model.{HttpMethods, HttpRequest, HttpResponse, StatusCodes}
 import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.ActorMaterializer
 import akka.testkit.TestKit
 import cats.MonadError
 import com.wanari.tutelar.TestBase
@@ -24,8 +23,6 @@ class EmailServiceHttpImplSpec extends TestKit(ActorSystem("HookServiceSpec")) w
   override def afterAll: Unit = {
     TestKit.shutdownActorSystem(system)
   }
-
-  implicit val mat = ActorMaterializer()
 
   trait TestScope {
     implicit lazy val e: MonadError[Try, Throwable] = implicitly
