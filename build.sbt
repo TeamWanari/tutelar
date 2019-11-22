@@ -16,6 +16,11 @@ lazy val root = project
   .in(file("."))
   .aggregate(core)
 
+lazy val remoteRepo = sys.env
+  .get("GITHUB_TOKEN")
+  .fold("git@github.com:TeamWanari/tutelar.git")(
+    token => s"https://x-access-token:$token@github.com/TeamWanari/tutelar.git"
+  )
 lazy val docs = (project in file("docs"))
   .settings(
     name := "paradox-docs",
@@ -24,7 +29,7 @@ lazy val docs = (project in file("docs"))
     scmInfo := Some(
       ScmInfo(url("https://github.com/TeamWanari/tutelar"), "scm:git:git@github.com:TeamWanari/tutelar.git")
     ),
-    git.remoteRepo := scmInfo.value.get.connection.replace("scm:git:", ""),
+    git.remoteRepo := remoteRepo,
     ver
   )
   .enablePlugins(ParadoxPlugin)
