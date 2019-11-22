@@ -20,7 +20,7 @@ jobs:
     - name: Compose up
       run: docker-compose -f docker-compose.travis.yml up -d
     - name: Compile & Test
-      run: docker-compose -f docker-compose.travis.yml exec tutelar sbt --supershell=false -mem 2048 clean compile test it:test stage "; project docs ; makeSite"
+      run: docker-compose -f docker-compose.travis.yml exec -T tutelar sbt --supershell=false -mem 2048 clean compile test it:test stage "; project docs ; makeSite"
     - name: Build docker image
       run: |
         cp -R ./target/universal/stage ./stage
