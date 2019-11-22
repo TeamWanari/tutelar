@@ -1,0 +1,46 @@
+name: Release
+
+on:
+  push:
+    tags:        
+      - v1.*
+jobs:
+  release:
+
+    runs-on: ubuntu-latest
+  
+    env:
+      COMPOSE_INTERACTIVE_NO_CLI: 1
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Get the version
+      id: get_version
+      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+    - name: Compose up
+      run: docker-compose -f docker-compose.travis.yml up -d
+    - name: Compile & Test
+      run: docker-compose -f docker-compose.travis.yml exec -T tutelar sbt --supershell=false -mem 2048 clean compile test it:test stage "; project docs ; makeSite"
+    - name: Build docker image
+      run: |
+        cp -R ./target/universal/stage ./stage
+        chmod -R u=rX,g=rX ./stage && chmod u+x,g+x ./stage/bin/tutelar
+        docker build -t teamwanari/tutelar:${{ steps.get_version.outputs.VERSION }} .
+    - name: Push To DockerHub
+      run: |
+        echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u teamwanari --password-stdin
+        docker push teamwanari/tutelar:${{ steps.get_version.outputs.VERSION }}
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Publish docs
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        sudo chown -R $UID .
+        git config --global user.name "docs"
+        git config --global user.email "docs@tutelar"
+        sbt "; project docs ; ghpagesPushSite"
+        
+        
