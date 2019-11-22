@@ -1,0 +1,26 @@
+name: Tests CI
+
+on:
+  push:
+    branches:    
+      - master 
+  pull_request:
+    branches: 
+      - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Compose up
+      run: docker-compose -f docker-compose.travis.yml up -d
+    - name: Compile & Test
+      run: docker-compose -f docker-compose.travis.yml exec tutelar sbt --supershell=false -mem 2048 clean compile test it:test stage "; project docs ; makeSite"
+    - name: Build docker image
+      run: |
+        cp -R ./target/universal/stage ./stage
+        chmod -R u=rX,g=rX ./stage && chmod u+x,g+x ./stage/bin/tutelar
+        docker build -t teamwanari/tutelar .
