@@ -6,9 +6,10 @@ import com.wanari.tutelar.TestBase
 import com.wanari.tutelar.core.AmqpService.AmqpQueueConfig
 import com.wanari.tutelar.core.ExpirationService.{ExpirationDisabled, ExpirationInactivity, ExpirationLifetime}
 import com.wanari.tutelar.core.HookService.{BasicAuthConfig, HookConfig}
+import com.wanari.tutelar.core.ServiceAuthDirectives
+import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.core.impl.database.DatabaseServiceFactory.DatabaseConfig
 import com.wanari.tutelar.core.impl.database.MongoDatabaseService.MongoConfig
-import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
 import com.wanari.tutelar.providers.userpass.email.EmailServiceFactory.EmailServiceFactoryConfig
@@ -170,6 +171,18 @@ class ConfigServiceSpec extends TestBase {
     "lifetime" in {
       service.providerExpirationConfigs("cccProvider") shouldBe ExpirationLifetime(
         FiniteDuration(60 * 60, TimeUnit.SECONDS)
+      )
+    }
+  }
+
+  "#getServiceAuthConfig" should {
+    val service = new ConfigServiceImpl {}
+    "basic" in {
+      service.getServiceAuthConfig("exampleServiceApiBasic") shouldBe ServiceAuthDirectives.BasicAuthConfig("u", "p")
+    }
+    "escher" in {
+      service.getServiceAuthConfig("exampleServiceApiEscher") shouldBe ServiceAuthDirectives.EscherAuthConfig(
+        List("service1", "service2")
       )
     }
   }

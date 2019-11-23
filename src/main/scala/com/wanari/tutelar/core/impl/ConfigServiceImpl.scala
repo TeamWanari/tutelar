@@ -6,16 +6,16 @@ import java.util.concurrent.TimeUnit
 import com.emarsys.escher.akka.http.config.EscherConfig
 import com.typesafe.config.{Config, ConfigFactory}
 import com.wanari.tutelar.core.AmqpService.{AmqpConfig, AmqpQueueConfig}
-import com.wanari.tutelar.core.ConfigService
 import com.wanari.tutelar.core.Errors.WrongConfig
 import com.wanari.tutelar.core.ExpirationService._
-import com.wanari.tutelar.core.HookService.{BasicAuthConfig, EscherAuthConfig, HookConfig}
+import com.wanari.tutelar.core.HookService.HookConfig
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
 import com.wanari.tutelar.core.TracerService.{JaegerConfig, TracerServiceConfig}
 import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.core.impl.database.DatabaseServiceFactory.DatabaseConfig
 import com.wanari.tutelar.core.impl.database.MongoDatabaseService.MongoConfig
 import com.wanari.tutelar.core.impl.database.PostgresDatabaseService.PostgresConfig
+import com.wanari.tutelar.core.{ConfigService, HookService, ServiceAuthDirectives}
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
 import com.wanari.tutelar.providers.userpass.email.EmailServiceFactory.EmailServiceFactoryConfig
@@ -152,11 +152,11 @@ class ConfigServiceImpl() extends ConfigService {
       val config = conf.getConfig("hook")
       val authConfig = config.getString("authType") match {
         case "basic" =>
-          BasicAuthConfig(
+          HookService.BasicAuthConfig(
             config.getString("basicAuth.username"),
             readFromFileOrConf(config, "basicAuth.password")
           )
-        case "escher" => EscherAuthConfig
+        case "escher" => HookService.EscherAuthConfig
         case t        => throw WrongConfig(s"Unsupported hook type: $t")
       }
       HookConfig(
@@ -285,6 +285,25 @@ class ConfigServiceImpl() extends ConfigService {
         providerName -> expirationConfig
       }.toMap
     }.fold(logAndThrow("ExpirationService"), identity)
+  }
+
+  override implicit def getServiceAuthConfig(path: String): ServiceAuthDirectives.ServiceAuthConfig = {
+    Try {
+      val config   = conf.getConfig(path)
+      val authType = config.getString("auth")
+      authType match {
+        case "basic" =>
+          ServiceAuthDirectives.BasicAuthConfig(
+            config.getString("basic.username"),
+            readFromFileOrConf(config, "basic.password")
+          )
+        case "escher" =>
+          ServiceAuthDirectives.EscherAuthConfig(
+            config.getString("escher.trustedServices").split(",").toList
+          )
+        case t => throw new IllegalArgumentException(s"$t unknown service auth type in $path.")
+      }
+    }.fold(logAndThrow(s"ServiceAuth in $path"), identity)
   }
 
   private def readOauth2Config(name: String): OAuth2Config = {

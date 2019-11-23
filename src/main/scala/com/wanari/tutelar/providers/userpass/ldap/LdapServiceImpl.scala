@@ -6,6 +6,7 @@ import cats.data.EitherT
 import com.wanari.tutelar.core.AuthService
 import com.wanari.tutelar.core.AuthService.TokenData
 import com.wanari.tutelar.core.Errors.{AuthenticationFailed, ErrorOr}
+import com.wanari.tutelar.providers.userpass.ldap.LdapService.LdapUserListData
 import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import javax.naming.Context
@@ -38,8 +39,9 @@ class LdapServiceImpl(
   }
 
   private def validateUserName(username: String): ErrorOr[Future, Unit] = {
-    val invalidChars = Seq('*', '"', ''', ',', '=')
-    EitherT.cond(!invalidChars.exists(username.contains), (), AuthenticationFailed)
+    val invalidChars = Seq('*', '"', '\'', ',', '=')
+    val isValid      = !invalidChars.exists(username.contains(_))
+    EitherT.cond(isValid, (), AuthenticationFailed())
   }
 
   private def loginAndGetAttributes(username: String, password: String) = {
@@ -110,6 +112,22 @@ class LdapServiceImpl(
     controls.setReturningAttributes(returningAttributes.toArray)
     controls.setSearchScope(SearchControls.SUBTREE_SCOPE)
     controls
+  }
+
+  override def listUsers()(implicit ctx: LogContext): ErrorOr[Future, Seq[LdapUserListData]] = {
+    val result = for {
+      ctx <- context
+      userIterator <- Future {
+        ctx.search(config.userSearchBaseDomain, s"${config.userSearchAttribute}=*", controls)
+      }
+    } yield {
+      import scala.jdk.CollectionConverters._
+      userIterator.asScala.toSeq
+        .map(_.getAttributes)
+        .map(attributesConvertToMap)
+        .map(ldapData => LdapUserListData(id = None, ldapData)) // TODO id from tutelar db
+    }
+    EitherT.right(result)
   }
 }
 
