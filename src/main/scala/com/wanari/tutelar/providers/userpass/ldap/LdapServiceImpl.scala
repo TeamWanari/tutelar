@@ -31,9 +31,15 @@ class LdapServiceImpl(
       implicit ctx: LogContext
   ): ErrorOr[Future, TokenData] = {
     for {
+      _          <- validateUserName(username)
       attributes <- EitherT(loginAndGetAttributes(username, password))
       token      <- authService.registerOrLogin("LDAP", username, "", JsObject(attributes))
     } yield token
+  }
+
+  private def validateUserName(username: String): ErrorOr[Future, Unit] = {
+    val invalidChars = Seq('*', '"', ''', ',', '=')
+    EitherT.cond(!invalidChars.exists(username.contains), (), AuthenticationFailed)
   }
 
   private def loginAndGetAttributes(username: String, password: String) = {
