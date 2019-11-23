@@ -5,6 +5,7 @@ import com.wanari.tutelar.core.AmqpService.{AmqpConfig, AmqpQueueConfig}
 import com.wanari.tutelar.core.ExpirationService.ExpirationConfig
 import com.wanari.tutelar.core.HookService.HookConfig
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
+import com.wanari.tutelar.core.ServiceAuthDirectives.ServiceAuthConfig
 import com.wanari.tutelar.core.TracerService.{JaegerConfig, TracerServiceConfig}
 import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.core.impl.database.DatabaseServiceFactory.DatabaseConfig
@@ -39,4 +40,5 @@ trait ConfigService {
   implicit def escherConfig: EscherConfig
   implicit def jaegerConfig: JaegerConfig
   implicit def providerExpirationConfigs: Map[String, ExpirationConfig]
+  implicit def getServiceAuthConfig(path: String): ServiceAuthConfig
 }

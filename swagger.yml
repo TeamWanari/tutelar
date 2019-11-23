@@ -265,6 +265,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TokenData'
+  /ldap/users:
+    get:
+      description: List all LDAP user
+      responses:
+        '200':
+          description: LDAP users with data from LDAP and tutelar id if exists
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    ldapData:
+                      type: object
+                  required:
+                    - ldapData
+              examples:
+                '0':
+                  value:
+                    - id: '93571113-42d5-4e88-b347-95dafda4b6eb'
+                      ldapData:
+                        cn: bob
+                        givenName: Bob
+                        memberOf:
+                          - 'cn=group1,ou=groups,dc=wanari,dc=com'
+                        sn: Dilday
+                    - ldapData:
+                        cn: alice
+                        givenName: Alice
+                        memberOf:
+                          - 'cn=group1,ou=groups,dc=wanari,dc=com'
+                          - 'cn=group2,ou=groups,dc=wanari,dc=com'
+                        sn: Smith
   /github/login:
     get:
       description: Login with GitHub

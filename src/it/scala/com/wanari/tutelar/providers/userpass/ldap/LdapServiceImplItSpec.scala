@@ -4,13 +4,14 @@ import cats.data.EitherT
 import com.wanari.tutelar.core.AuthService
 import com.wanari.tutelar.core.AuthService.TokenData
 import com.wanari.tutelar.core.Errors.AuthenticationFailed
+import com.wanari.tutelar.providers.userpass.ldap.LdapService.LdapUserListData
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.{AwaitUtil, ItTestServices}
 import io.opentracing.noop.NoopTracerFactory
 import org.mockito.ArgumentMatchersSugar.any
 import org.mockito.MockitoSugar
 import org.scalatest.{Matchers, WordSpecLike}
-import spray.json.JsObject
+import spray.json.{JsArray, JsObject, JsString}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -46,6 +47,35 @@ class LdapServiceImplItSpec extends WordSpecLike with Matchers with AwaitUtil wi
     "alice login failed" in {
       await(services.ldapService.login("alice", "bobpw", None).value) shouldEqual Left(
         AuthenticationFailed()
+      )
+    }
+    "list users" in {
+      await(services.ldapService.listUsers().value) shouldEqual Right(
+        Seq(
+          LdapUserListData(
+            None,
+            Map(
+              "givenName" -> JsString("Bob"),
+              "memberOf" -> JsArray(
+                JsString("cn=group1,ou=groups,dc=wanari,dc=com")
+              ),
+              "sn" -> JsString("Dilday"),
+              "cn" -> JsString("bob")
+            )
+          ),
+          LdapUserListData(
+            None,
+            Map(
+              "givenName" -> JsString("Alice"),
+              "memberOf" -> JsArray(
+                JsString("cn=group1,ou=groups,dc=wanari,dc=com"),
+                JsString("cn=group2,ou=groups,dc=wanari,dc=com")
+              ),
+              "sn" -> JsString("Smith"),
+              "cn" -> JsString("alice")
+            )
+          )
+        )
       )
     }
   }
