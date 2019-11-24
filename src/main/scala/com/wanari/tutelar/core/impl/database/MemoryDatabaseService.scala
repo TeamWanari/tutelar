@@ -2,10 +2,11 @@ package com.wanari.tutelar.core.impl.database
 
 import cats.Applicative
 import com.wanari.tutelar.core.DatabaseService
-import com.wanari.tutelar.core.DatabaseService.{Account, AccountId, User}
+import com.wanari.tutelar.core.DatabaseService.{Account, AccountId, User, UserIdWithExternalId}
 
 class MemoryDatabaseService[F[_]: Applicative] extends DatabaseService[F] {
   import cats.syntax.applicative._
+
   import scala.jdk.CollectionConverters._
 
   val users    = new java.util.concurrent.ConcurrentHashMap[String, User].asScala
@@ -45,6 +46,15 @@ class MemoryDatabaseService[F[_]: Applicative] extends DatabaseService[F] {
       .filter(_._2.authType == authType)
       .keys
       .foreach(accounts.remove)
+      .pure
+  }
+
+  override def listUserIdsByAuthType(authType: String): F[Seq[UserIdWithExternalId]] = {
+    accounts.values
+      .collect {
+        case account if account.authType == authType => UserIdWithExternalId(account.userId, account.externalId)
+      }
+      .toSeq
       .pure
   }
 }

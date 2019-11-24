@@ -2,7 +2,7 @@ package com.wanari.tutelar.core.impl.database
 
 import com.typesafe.config.Config
 import com.wanari.tutelar.core.DatabaseService
-import com.wanari.tutelar.core.DatabaseService.{Account, AccountId, User}
+import com.wanari.tutelar.core.DatabaseService.{Account, AccountId, User, UserIdWithExternalId}
 import com.wanari.tutelar.core.impl.database.PostgresDatabaseService.PostgresConfig
 import slick.jdbc.PostgresProfile.api._
 
@@ -77,6 +77,14 @@ class PostgresDatabaseService(implicit config: PostgresConfig, ec: ExecutionCont
       .filter(_.authType === authType)
       .delete
     db.run(query).map(_ => {})
+  }
+
+  override def listUserIdsByAuthType(authType: String): Future[Seq[UserIdWithExternalId]] = {
+    val query = accounts
+      .filter(_.authType === authType)
+      .map(r => (r.userId, r.externalId))
+      .result
+    db.run(query).map(_.map(r => UserIdWithExternalId(r._1, r._2)))
   }
 
   private def deleteAccountsByUserId(userId: String): Future[Unit] = {
