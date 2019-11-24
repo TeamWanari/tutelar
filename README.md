@@ -1,9 +1,8 @@
 # Tutelar
 A micro-service for authentication.
 
-[![Build Status](https://travis-ci.org/TeamWanari/tutelar.svg?branch=master)](https://travis-ci.org/TeamWanari/tutelar)
 ![GitHub tag (latest SemVer pre-release)](https://img.shields.io/github/v/tag/TeamWanari/tutelar?include_prereleases)
-[![Build Status](https://img.shields.io/badge/-Documatation-blue)](https://teamwanari.github.io/tutelar)
+[![Documentation](https://img.shields.io/badge/-Documatation-blue)](https://teamwanari.github.io/tutelar)
 
 #### Supported authentications:
  - Username-Password
