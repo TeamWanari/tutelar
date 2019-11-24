@@ -3,7 +3,7 @@ package com.wanari.tutelar.core.database
 import cats.data.OptionT
 import com.typesafe.config.ConfigFactory
 import com.wanari.tutelar.AwaitUtil
-import com.wanari.tutelar.core.DatabaseService.{Account, User}
+import com.wanari.tutelar.core.DatabaseService.{Account, User, UserIdWithExternalId}
 import com.wanari.tutelar.core.impl.database.MongoDatabaseService.MongoConfig
 import com.wanari.tutelar.core.impl.database.PostgresDatabaseService.PostgresConfig
 import com.wanari.tutelar.core.impl.database.{MemoryDatabaseService, MongoDatabaseService, PostgresDatabaseService}
@@ -183,6 +183,33 @@ class DatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUtil wi
 
             await(service.listAccountsByUserId(user1.id)) shouldEqual Seq(account1)
             await(service.listAccountsByUserId(user2.id)) shouldEqual Seq(account3)
+          }
+          "listUserIdsByAuthType" in {
+            val user1    = User("id7", 1)
+            val user2    = User("id8", 2)
+            val user3    = User("id9", 3)
+            val account1 = Account("type20", "ext1", user1.id, "XXX4")
+            val account2 = Account("type21", "ext1", user1.id, "XXX5")
+            val account3 = Account("type21", "ext2", user2.id, "XXX6")
+            val account4 = Account("type21", "ext3", user3.id, "XXX7")
+
+            await(service.saveUser(user1))
+            await(service.saveUser(user2))
+            await(service.saveUser(user3))
+            await(service.saveAccount(account1))
+            await(service.saveAccount(account2))
+            await(service.saveAccount(account3))
+            await(service.saveAccount(account4))
+
+            await(service.listUserIdsByAuthType("type20")).toSet shouldEqual Set(
+              UserIdWithExternalId(user1.id, account1.externalId)
+            )
+            await(service.listUserIdsByAuthType("type21")).toSet shouldEqual Set(
+              UserIdWithExternalId(user1.id, account2.externalId),
+              UserIdWithExternalId(user2.id, account3.externalId),
+              UserIdWithExternalId(user3.id, account4.externalId)
+            )
+            await(service.listUserIdsByAuthType("typeXX")).toSet shouldEqual Set()
           }
         }
       }

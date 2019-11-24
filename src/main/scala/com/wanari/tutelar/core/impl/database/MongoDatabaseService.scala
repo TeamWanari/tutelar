@@ -2,12 +2,13 @@ package com.wanari.tutelar.core.impl.database
 
 import cats.data.{EitherT, OptionT}
 import com.wanari.tutelar.core.DatabaseService
-import com.wanari.tutelar.core.DatabaseService.{Account, AccountId, User}
+import com.wanari.tutelar.core.DatabaseService.{Account, AccountId, User, UserIdWithExternalId}
 import com.wanari.tutelar.core.Errors.WrongConfig
 import com.wanari.tutelar.core.impl.database.MongoDatabaseService.MongoConfig
+import reactivemongo.api.bson._
 import reactivemongo.api.bson.collection.BSONCollection
-import reactivemongo.api.bson.{BSONDocument, BSONDocumentHandler, BSONInteger, Macros}
-import reactivemongo.api.{MongoConnection, MongoDriver}
+import reactivemongo.api.bson.monocle.field
+import reactivemongo.api.{Cursor, MongoConnection, MongoDriver}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -43,8 +44,8 @@ class MongoDatabaseService(implicit config: MongoConfig, ec: ExecutionContext, d
   override def saveAccount(account: Account): Future[Unit] = {
     val selector = userSelector(account.userId)
     val data     = AccountDbModel(account.authType, account.externalId, account.customData)
-    val modifier = BSONDocument(
-      "$push" -> BSONDocument("accounts" -> accountHandler.writeOpt(data).getOrElse(BSONDocument.empty))
+    val modifier = document(
+      "$push" -> document("accounts" -> accountHandler.writeOpt(data).getOrElse(BSONDocument.empty))
     )
     runUnit(_.update.one(selector, modifier))
   }
@@ -74,7 +75,7 @@ class MongoDatabaseService(implicit config: MongoConfig, ec: ExecutionContext, d
 
   override def updateCustomData(accountId: AccountId, customData: String): Future[Unit] = {
     val selector = accountSelector(accountId)
-    val modifier = BSONDocument("$set" -> BSONDocument("accounts.$.customData" -> customData))
+    val modifier = document("$set" -> document("accounts.$.customData" -> customData))
     runUnit(_.update.one(selector, modifier))
   }
 
@@ -85,8 +86,20 @@ class MongoDatabaseService(implicit config: MongoConfig, ec: ExecutionContext, d
 
   override def deleteAccountByUserAndType(userId: String, authType: String): Future[Unit] = {
     val selector = userSelector(userId)
-    val modifier = BSONDocument("$pull" -> BSONDocument("accounts" -> BSONDocument("authType" -> authType)))
+    val modifier = document("$pull" -> document("accounts" -> document("authType" -> authType)))
     runUnit(_.update.one(selector, modifier))
+  }
+
+  override def listUserIdsByAuthType(authType: String): Future[Seq[UserIdWithExternalId]] = {
+    implicit val reader = readerUserIdWithExternalId(authType)
+
+    val selector  = document("accounts" -> document("$elemMatch" -> document("authType" -> authType)))
+    val projector = Option(document("id" -> 1, "accounts.externalId" -> 1, "accounts.authType" -> 1))
+    usersCollection.flatMap(
+      _.find(selector, projector)
+        .cursor[UserIdWithExternalId]()
+        .collect[List](-1, Cursor.FailOnError[List[UserIdWithExternalId]]())
+    )
   }
 
   private def runUnit(f: BSONCollection => Future[Any]) = {
@@ -98,19 +111,35 @@ class MongoDatabaseService(implicit config: MongoConfig, ec: ExecutionContext, d
   }
 
   private def accountSelector(accountId: AccountId) = {
-    BSONDocument(
-      "accounts" -> BSONDocument("$elemMatch" -> BSONDocument("authType" -> accountId._1, "externalId" -> accountId._2))
-    )
+    document("accounts" -> document("$elemMatch" -> document("authType" -> accountId._1, "externalId" -> accountId._2)))
   }
 
   private def userSelector(userId: String) = {
-    BSONDocument("id" -> userId)
+    document("id" -> userId)
   }
 
   private val fullProjector = {
-    val fields = Seq("id", "createdAt", "accounts")
-    Option(BSONDocument(fields.map(_ -> BSONInteger(1))))
+    Option(document("id" -> 1, "createdAt" -> 1, "accounts" -> 1))
   }
+
+  private def readerUserIdWithExternalId(authType: String): BSONDocumentReader[UserIdWithExternalId] =
+    BSONDocumentReader { doc =>
+      val lensId         = field[String]("id")
+      val lensAccounts   = field[BSONArray]("accounts")
+      val lensAuthType   = field[String]("authType")
+      val lensExternalId = field[String]("externalId")
+
+      val result = for {
+        id <- lensId.getOption(doc)
+        externalId <- lensAccounts.getOption(doc).flatMap { accounts: BSONArray =>
+          accounts.values
+            .collect { case acc: BSONDocument => (lensAuthType.getOption(acc), lensExternalId.getOption(acc)) }
+            .collectFirst { case (Some(auth), Some(externalId)) if auth == authType => externalId }
+        }
+      } yield UserIdWithExternalId(id, externalId)
+
+      result.getOrElse(throw new Exception("Wrong schema"))
+    }
 }
 
 object MongoDatabaseService {
