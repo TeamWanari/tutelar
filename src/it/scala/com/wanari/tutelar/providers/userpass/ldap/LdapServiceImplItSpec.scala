@@ -3,6 +3,7 @@ package com.wanari.tutelar.providers.userpass.ldap
 import cats.data.EitherT
 import com.wanari.tutelar.core.AuthService
 import com.wanari.tutelar.core.AuthService.TokenData
+import com.wanari.tutelar.core.DatabaseService.{Account, User}
 import com.wanari.tutelar.core.Errors.AuthenticationFailed
 import com.wanari.tutelar.providers.userpass.ldap.LdapService.LdapUserListData
 import com.wanari.tutelar.util.LoggerUtil.LogContext
@@ -49,11 +50,27 @@ class LdapServiceImplItSpec extends WordSpecLike with Matchers with AwaitUtil wi
         AuthenticationFailed()
       )
     }
-    "list users" in {
+    "list users with user id from tutelar db" in {
+      val user1    = User("id1", 1)
+      val user2    = User("id2", 2)
+      val user3    = User("ldap_bob_id", 3)
+      val account1 = Account("LDAP", "notbob", user1.id, "")
+      val account2 = Account("type1", "alice", user2.id, "")
+      val account3 = Account("LDAP", "bob", user3.id, "")
+      val account4 = Account("type1", "ext3", user3.id, "")
+
+      await(services.databaseService.saveUser(user1))
+      await(services.databaseService.saveUser(user2))
+      await(services.databaseService.saveUser(user3))
+      await(services.databaseService.saveAccount(account1))
+      await(services.databaseService.saveAccount(account2))
+      await(services.databaseService.saveAccount(account3))
+      await(services.databaseService.saveAccount(account4))
+
       await(services.ldapService.listUsers().value) shouldEqual Right(
         Seq(
           LdapUserListData(
-            None,
+            Some("ldap_bob_id"),
             Map(
               "givenName" -> JsString("Bob"),
               "memberOf" -> JsArray(

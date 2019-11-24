@@ -3,9 +3,10 @@ package com.wanari.tutelar.providers.userpass.ldap
 import java.util.Properties
 
 import cats.data.EitherT
-import com.wanari.tutelar.core.AuthService
 import com.wanari.tutelar.core.AuthService.TokenData
+import com.wanari.tutelar.core.DatabaseService.UserIdWithExternalId
 import com.wanari.tutelar.core.Errors.{AuthenticationFailed, ErrorOr}
+import com.wanari.tutelar.core.{AuthService, DatabaseService}
 import com.wanari.tutelar.providers.userpass.ldap.LdapService.LdapUserListData
 import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
 import com.wanari.tutelar.util.LoggerUtil.LogContext
@@ -18,11 +19,13 @@ import scala.concurrent.{ExecutionContext, Future}
 class LdapServiceImpl(
     implicit ec: ExecutionContext,
     config: LdapConfig,
-    authService: AuthService[Future]
+    authService: AuthService[Future],
+    databaseService: DatabaseService[Future]
 ) extends LdapService[Future] {
-  private lazy val context = getUserInitialDirContext(config.readonlyUserWithNameSpace, config.readonlyUserPassword)
-
   import cats.instances.future._
+
+  private val authType     = "LDAP"
+  private lazy val context = getUserInitialDirContext(config.readonlyUserWithNameSpace, config.readonlyUserPassword)
 
   override def init: Future[Unit] = {
     context.map(_ => ())
@@ -34,7 +37,7 @@ class LdapServiceImpl(
     for {
       _          <- validateUserName(username)
       attributes <- EitherT(loginAndGetAttributes(username, password))
-      token      <- authService.registerOrLogin("LDAP", username, "", JsObject(attributes))
+      token      <- authService.registerOrLogin(authType, username, "", JsObject(attributes))
     } yield token
   }
 
@@ -115,19 +118,31 @@ class LdapServiceImpl(
   }
 
   override def listUsers()(implicit ctx: LogContext): ErrorOr[Future, Seq[LdapUserListData]] = {
+    val registeredLdapUsersF = databaseService.listUserIdsByAuthType(authType)
     val result = for {
       ctx <- context
       userIterator <- Future {
         ctx.search(config.userSearchBaseDomain, s"${config.userSearchAttribute}=*", controls)
       }
+      ldapIdsFromDb <- registeredLdapUsersF
     } yield {
       import scala.jdk.CollectionConverters._
       userIterator.asScala.toSeq
         .map(_.getAttributes)
         .map(attributesConvertToMap)
-        .map(ldapData => LdapUserListData(id = None, ldapData)) // TODO id from tutelar db
+        .map { ldapData =>
+          val userIdOpt = findUserId(ldapIdsFromDb, ldapData)
+          LdapUserListData(userIdOpt, ldapData)
+        }
     }
     EitherT.right(result)
+  }
+
+  private def findUserId(ldapIdsFromDb: Seq[UserIdWithExternalId], ldapData: Map[String, JsValue]): Option[String] = {
+    for {
+      externalId <- ldapData.get(config.userSearchAttribute).collect { case JsString(id) => id }
+      userId     <- ldapIdsFromDb.find(_.externalId == externalId).map(_.userId)
+    } yield userId
   }
 }
 
