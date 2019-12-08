@@ -2,9 +2,10 @@ package com.wanari.tutelar.providers.userpass.token
 
 import com.wanari.tutelar.providers.userpass.token.OTP._
 import org.apache.commons.codec.binary.Hex
-import org.scalatest.{Matchers, WordSpecLike}
+import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.matchers.should.Matchers
 
-class HOTPSpec extends WordSpecLike with Matchers {
+class HOTPSpec extends AnyWordSpecLike with Matchers {
   def fromHex(h: String) = OTPKey(new javax.crypto.spec.SecretKeySpec((new Hex).decode(h.getBytes), "RAW"))
 
   val otpkey = fromHex("3132333435363738393031323334353637383930")

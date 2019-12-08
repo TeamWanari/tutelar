@@ -1,11 +1,12 @@
 package com.wanari.tutelar.providers.userpass
 
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
-import org.scalatest.{Matchers, WordSpecLike}
+import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.matchers.should.Matchers
 
 import scala.util.{Success, Try}
 
-class PasswordDifficultyCheckerImplSpec extends WordSpecLike with Matchers {
+class PasswordDifficultyCheckerImplSpec extends AnyWordSpecLike with Matchers {
   trait TestScope {
     import cats.instances.try_._
     lazy val patternConfig                     = ""

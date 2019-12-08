@@ -12,7 +12,6 @@ import com.wanari.tutelar.util.HttpWrapper
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchersSugar.any
-import org.mockito.Mockito._
 import spray.json.{JsObject, JsString}
 
 import scala.util.{Failure, Success, Try}

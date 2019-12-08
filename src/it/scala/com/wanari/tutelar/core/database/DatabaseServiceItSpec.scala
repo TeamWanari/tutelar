@@ -7,7 +7,9 @@ import com.wanari.tutelar.core.DatabaseService.{Account, User, UserIdWithExterna
 import com.wanari.tutelar.core.impl.database.MongoDatabaseService.MongoConfig
 import com.wanari.tutelar.core.impl.database.PostgresDatabaseService.PostgresConfig
 import com.wanari.tutelar.core.impl.database.{MemoryDatabaseService, MongoDatabaseService, PostgresDatabaseService}
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import reactivemongo.api.bson.BSONDocument
 import reactivemongo.api.bson.collection.BSONCollection
 import reactivemongo.api.{MongoConnection, MongoDriver}
@@ -16,7 +18,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class DatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUtil with BeforeAndAfterAll {
+class DatabaseServiceItSpec extends AnyWordSpecLike with Matchers with AwaitUtil with BeforeAndAfterAll {
   import cats.instances.future._
   import slick.jdbc.PostgresProfile.api.Database
 

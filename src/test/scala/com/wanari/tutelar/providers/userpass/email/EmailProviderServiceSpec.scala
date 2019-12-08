@@ -9,7 +9,6 @@ import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.NonEmptyPasswordChecker
 import org.mindrot.jbcrypt.BCrypt
 import org.mockito.ArgumentMatchersSugar._
-import org.mockito.Mockito.{never, verify, when}
 import spray.json.{JsObject, JsString, JsTrue}
 
 import scala.concurrent.duration.Duration

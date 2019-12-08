@@ -11,7 +11,6 @@ import com.wanari.tutelar.core.HookService.{BasicAuthConfig, EscherAuthConfig, H
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.{AkkaHttpWrapper, HttpWrapper}
 import org.mockito.ArgumentMatchersSugar.any
-import org.mockito.Mockito.{verify, when}
 import org.mockito.ArgumentCaptor
 import spray.json.{JsObject, JsString, JsTrue}
 

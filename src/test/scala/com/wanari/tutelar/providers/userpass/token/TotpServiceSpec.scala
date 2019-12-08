@@ -10,7 +10,6 @@ import com.wanari.tutelar.core.JwtService
 import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl._
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import org.mockito.ArgumentMatchersSugar.{any, eqTo}
-import org.mockito.Mockito.{verify, when}
 import spray.json._
 
 import scala.concurrent.duration.Duration

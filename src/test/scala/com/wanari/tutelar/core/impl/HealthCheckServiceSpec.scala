@@ -4,7 +4,6 @@ import cats.Id
 import com.wanari.tutelar.core.HealthCheckService.HealthCheckResult
 import com.wanari.tutelar.core.{ConfigService, DatabaseService}
 import com.wanari.tutelar.{BuildInfo, TestBase}
-import org.mockito.Mockito.when
 
 class HealthCheckServiceSpec extends TestBase {
   trait TestScope {

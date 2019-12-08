@@ -14,7 +14,6 @@ import com.wanari.tutelar.providers.oauth2.OAuth2Service.{
 import com.wanari.tutelar.util.HttpWrapper
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import org.mockito.ArgumentMatchersSugar._
-import org.mockito.Mockito._
 import spray.json.{JsObject, JsTrue}
 
 import scala.util.{Failure, Try}
