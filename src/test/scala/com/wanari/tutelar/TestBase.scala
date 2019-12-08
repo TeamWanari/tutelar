@@ -12,15 +12,16 @@ import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.{DateTimeUtilCounterImpl, IdGeneratorCounterImpl}
 import io.opentracing.noop.NoopTracerFactory
 import org.mockito.ArgumentMatchersSugar.any
-import org.mockito.Mockito.when
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
-import org.scalatestplus.mockito.MockitoSugar
+import org.mockito.MockitoSugar
+import org.scalatest.BeforeAndAfterAll
 import spray.json.{JsObject, JsString}
+import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
-trait TestBase extends WordSpecLike with Matchers with MockitoSugar with BeforeAndAfterAll {
+trait TestBase extends AnyWordSpecLike with Matchers with MockitoSugar with BeforeAndAfterAll {
   implicit lazy val dummyLogContext = {
     val tracer = NoopTracerFactory.create()
     val span   = tracer.buildSpan("test").start()

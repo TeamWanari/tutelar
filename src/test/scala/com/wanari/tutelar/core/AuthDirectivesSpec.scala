@@ -7,7 +7,6 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import cats.data.OptionT
 import com.wanari.tutelar.TestBase
 import org.mockito.ArgumentMatchersSugar.any
-import org.mockito.Mockito.{never, reset, verify, when}
 import org.scalatest.BeforeAndAfterEach
 
 import scala.concurrent.Future

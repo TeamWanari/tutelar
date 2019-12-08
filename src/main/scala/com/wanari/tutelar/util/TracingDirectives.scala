@@ -17,9 +17,8 @@ trait TracingDirectives {
       // tracer header, or return null for no header. Handle both cases as None
       tracer.extract(Format.Builtin.HTTP_HEADERS, new TextMapAdapter(headers))
     }.filter(_ != null).toOption
-    val span = parent.fold(tracer.buildSpan(operationName).start())(
-      p => tracer.buildSpan(operationName).asChildOf(p).start()
-    )
+    val span =
+      parent.fold(tracer.buildSpan(operationName).start())(p => tracer.buildSpan(operationName).asChildOf(p).start())
     mapResponse { resp =>
       span.setTag("http.status_code", resp.status.intValue())
       span.setTag("http.url", req.effectiveUri(securedConnection = false).toString())

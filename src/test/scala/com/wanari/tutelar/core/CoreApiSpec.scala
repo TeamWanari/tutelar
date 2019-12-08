@@ -12,7 +12,6 @@ import com.wanari.tutelar.core.Errors.InvalidJwt
 import com.wanari.tutelar.core.ProviderApi._
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import org.mockito.ArgumentMatchersSugar.{any, eqTo}
-import org.mockito.Mockito.{reset, verify, when}
 import org.scalatest.BeforeAndAfterEach
 
 import scala.concurrent.Future

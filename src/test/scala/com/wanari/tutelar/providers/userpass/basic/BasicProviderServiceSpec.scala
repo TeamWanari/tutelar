@@ -7,7 +7,6 @@ import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.NonEmptyPasswordChecker
 import org.mindrot.jbcrypt.BCrypt
 import org.mockito.ArgumentMatchersSugar._
-import org.mockito.Mockito.verify
 import spray.json.{JsObject, JsTrue}
 
 import scala.util.Try

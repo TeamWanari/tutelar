@@ -10,7 +10,6 @@ import com.wanari.tutelar.core.ProviderApi._
 import com.wanari.tutelar.providers.userpass.email.EmailProviderApi.{EmailData, EmailLoginData, RegisterData}
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import org.mockito.ArgumentMatchersSugar._
-import org.mockito.Mockito._
 import spray.json._
 
 import scala.concurrent.Future

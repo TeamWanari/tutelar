@@ -11,13 +11,14 @@ import com.wanari.tutelar.{AwaitUtil, ItTestServices}
 import io.opentracing.noop.NoopTracerFactory
 import org.mockito.ArgumentMatchersSugar.any
 import org.mockito.MockitoSugar
-import org.scalatest.{Matchers, WordSpecLike}
+import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.matchers.should.Matchers
 import spray.json.{JsArray, JsObject, JsString}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class LdapServiceImplItSpec extends WordSpecLike with Matchers with AwaitUtil with MockitoSugar {
+class LdapServiceImplItSpec extends AnyWordSpecLike with Matchers with AwaitUtil with MockitoSugar {
   import cats.instances.future._
 
   private implicit lazy val dummyLogContext = {

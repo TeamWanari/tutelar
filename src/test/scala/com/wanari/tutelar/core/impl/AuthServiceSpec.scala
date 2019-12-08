@@ -11,7 +11,6 @@ import com.wanari.tutelar.core.{HookService, JwtService}
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.{DateTimeUtilCounterImpl, IdGeneratorCounterImpl}
 import org.mockito.ArgumentMatchersSugar._
-import org.mockito.Mockito.{verify, when}
 import spray.json.{JsNumber, JsObject, JsString}
 
 import scala.concurrent.duration.Duration

@@ -9,7 +9,6 @@ import com.wanari.tutelar.RouteTestBase
 import com.wanari.tutelar.core.AuthService.TokenData
 import com.wanari.tutelar.core.Errors.AuthenticationFailed
 import com.wanari.tutelar.util.LoggerUtil.LogContext
-import org.mockito.Mockito._
 import org.mockito.ArgumentMatchersSugar._
 
 import scala.concurrent.Future

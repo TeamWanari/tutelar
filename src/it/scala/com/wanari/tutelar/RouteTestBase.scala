@@ -4,7 +4,6 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import com.wanari.tutelar.providers.oauth2.{FacebookService, GithubService, GoogleService}
 import com.wanari.tutelar.providers.userpass.ldap.LdapService
-import org.mockito.Mockito.when
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future

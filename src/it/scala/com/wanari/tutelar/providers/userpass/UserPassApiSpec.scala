@@ -4,7 +4,6 @@ import akka.http.scaladsl.model._
 import com.wanari.tutelar.RouteTestBase
 import com.wanari.tutelar.core.ProviderApi._
 import org.mockito.ArgumentMatchersSugar._
-import org.mockito.Mockito._
 import spray.json._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import cats.data.EitherT

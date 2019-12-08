@@ -9,7 +9,6 @@ import com.wanari.tutelar.RouteTestBase
 import com.wanari.tutelar.providers.userpass.ldap.LdapService.LdapUserListData
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import org.mockito.ArgumentMatchersSugar._
-import org.mockito.Mockito._
 
 import scala.concurrent.Future
 
