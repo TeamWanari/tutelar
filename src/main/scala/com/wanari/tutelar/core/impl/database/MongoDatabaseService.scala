@@ -8,11 +8,11 @@ import com.wanari.tutelar.core.impl.database.MongoDatabaseService.MongoConfig
 import reactivemongo.api.bson._
 import reactivemongo.api.bson.collection.BSONCollection
 import reactivemongo.api.bson.monocle.field
-import reactivemongo.api.{Cursor, MongoConnection, MongoDriver}
+import reactivemongo.api.{AsyncDriver, Cursor, MongoConnection}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class MongoDatabaseService(implicit config: MongoConfig, ec: ExecutionContext, driver: MongoDriver)
+class MongoDatabaseService(implicit config: MongoConfig, ec: ExecutionContext, driver: AsyncDriver)
     extends DatabaseService[Future] {
   import MongoDatabaseService._
   import cats.instances.future._
@@ -21,7 +21,7 @@ class MongoDatabaseService(implicit config: MongoConfig, ec: ExecutionContext, d
     val result: EitherT[Future, Throwable, BSONCollection] = for {
       uri        <- EitherT.fromEither(MongoConnection.parseURI(config.uri).toEither)
       dbname     <- EitherT.fromOption(uri.db, WrongConfig("Database name not found!"))
-      connection <- EitherT.fromEither(driver.connection(uri, None, strictUri = false).toEither)
+      connection <- EitherT(driver.connect(uri).map(Right(_)).recover(Left(_)))
       db         <- EitherT.right(connection.database(dbname))
     } yield db.collection[BSONCollection](config.collection)
 

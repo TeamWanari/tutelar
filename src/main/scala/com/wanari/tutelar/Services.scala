@@ -13,7 +13,7 @@ import com.wanari.tutelar.providers.userpass.token.{TotpService, TotpServiceImpl
 import com.wanari.tutelar.providers.userpass.{PasswordDifficultyChecker, PasswordDifficultyCheckerImpl}
 import com.wanari.tutelar.util._
 import org.slf4j.Logger
-import reactivemongo.api.MongoDriver
+import reactivemongo.api.AsyncDriver
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -67,7 +67,7 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem) exte
   import configService._
 
   implicit lazy val healthCheckService: HealthCheckService[Future]  = new HealthCheckServiceImpl[Future]
-  implicit lazy val mongoDriver: MongoDriver                        = new MongoDriver()
+  implicit lazy val mongoDriver: AsyncDriver                        = new AsyncDriver()
   implicit lazy val databaseService: DatabaseService[Future]        = DatabaseServiceFactory.create()
   implicit lazy val httpWrapper: HttpWrapper[Future]                = new AkkaHttpWrapper()
   implicit lazy val csrfService: CsrfService[Future]                = new CsrfServiceNotChecked[Future]

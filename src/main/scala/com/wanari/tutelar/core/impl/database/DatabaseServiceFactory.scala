@@ -3,14 +3,14 @@ package com.wanari.tutelar.core.impl.database
 import cats.Applicative
 import com.wanari.tutelar.core.Errors.WrongConfig
 import com.wanari.tutelar.core.{ConfigService, DatabaseService}
-import reactivemongo.api.MongoDriver
+import reactivemongo.api.AsyncDriver
 
 import scala.concurrent.{ExecutionContext, Future}
 
 object DatabaseServiceFactory {
   def create()(
       implicit config: ConfigService,
-      driver: MongoDriver,
+      driver: AsyncDriver,
       ev: Applicative[Future],
       ec: ExecutionContext
   ): DatabaseService[Future] = {

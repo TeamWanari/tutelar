@@ -12,7 +12,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import reactivemongo.api.bson.BSONDocument
 import reactivemongo.api.bson.collection.BSONCollection
-import reactivemongo.api.{MongoConnection, MongoDriver}
+import reactivemongo.api.{MongoConnection, AsyncDriver}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -30,7 +30,7 @@ class DatabaseServiceItSpec extends AnyWordSpecLike with Matchers with AwaitUtil
   private implicit val postgresConfig = PostgresConfig(config, "database.postgres")
   private val postgresService         = new PostgresDatabaseService
 
-  private implicit val mongoDriver = new MongoDriver()
+  private implicit val mongoDriver = new AsyncDriver()
   private implicit val mongoConfig = MongoConfig(
     config.getString("database.mongo.uri"),
     config.getString("database.mongo.collection")
@@ -40,7 +40,7 @@ class DatabaseServiceItSpec extends AnyWordSpecLike with Matchers with AwaitUtil
     (for {
       uri        <- OptionT.fromOption(MongoConnection.parseURI(mongoConfig.uri).toOption)
       dbname     <- OptionT.fromOption(uri.db)
-      connection <- OptionT.fromOption(mongoDriver.connection(uri, strictUri = false).toOption)
+      connection <- OptionT(mongoDriver.connect(uri).map(Option(_)).recover(_ => None))
       database   <- OptionT.liftF(connection.database(dbname))
     } yield database.collection[BSONCollection](mongoConfig.collection)).getOrElseF(Future.failed(new Exception("")))
   })
