@@ -9,7 +9,7 @@ import com.wanari.tutelar.core._
 import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.{DateTimeUtil, IdGenerator}
-import spray.json.{JsObject, JsString}
+import spray.json.{JsNumber, JsObject, JsString}
 
 class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
     implicit databaseService: DatabaseService[F],
@@ -145,17 +145,27 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
 
   private def createTokenData(account: Account, extraData: JsObject): F[TokenData] = {
     for {
-      data      <- createJwtData(account, extraData)
-      shortTerm <- shortTermTokenService.encode(data)
-      longTerm  <- longTermTokenService.encode(data)
+      sortData  <- createShortTermJwtData(account, extraData)
+      longData  <- createLongTermTokenJwtData(account, extraData)
+      shortTerm <- shortTermTokenService.encode(sortData)
+      longTerm  <- longTermTokenService.encode(longData)
     } yield {
       TokenData(shortTerm, longTerm)
     }
   }
 
-  private def createJwtData(account: Account, extraData: JsObject): F[JsObject] = {
+  private def createShortTermJwtData(account: Account, extraData: JsObject): F[JsObject] = {
     import com.wanari.tutelar.util.SpraySyntax._
     (extraData + ("id" -> JsString(account.userId))).pure
+  }
+
+  private def createLongTermTokenJwtData(account: Account, extraData: JsObject): F[JsObject] = {
+    timeService.getCurrentTimeMillis.map { time =>
+      import com.wanari.tutelar.util.SpraySyntax._
+      val id        = "id"        -> JsString(account.userId)
+      val createdAt = "createdAt" -> JsNumber(time)
+      extraData + id + createdAt
+    }
   }
 
   private def convertToStandardizedLowercase(s: String): String = {
