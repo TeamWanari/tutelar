@@ -67,7 +67,13 @@ class AuthServiceSpec extends TestBase {
       }
       "create tokens with the userid and hook response" in new TestScope {
         service.registerOrLogin(authType, externalId, customData, providedData)
-        verify(longTermTokenServiceMock).encode(JsObject("id"  -> JsString("1"), "group" -> JsString("reg")))
+        verify(longTermTokenServiceMock).encode(
+          JsObject(
+            "id"        -> JsString("1"),
+            "group"     -> JsString("reg"),
+            "createdAt" -> JsNumber(timeService.counter.get())
+          )
+        )
         verify(shortTermTokenServiceMock).encode(JsObject("id" -> JsString("1"), "group" -> JsString("reg")))
       }
       "create new user" in new TestScope {
@@ -92,7 +98,13 @@ class AuthServiceSpec extends TestBase {
       }
       "create tokens with the userid and hook response" in new TestScope {
         service.registerOrLogin(savedAccount.authType, savedAccount.externalId, customData, providedData)
-        verify(longTermTokenServiceMock).encode(JsObject("id"  -> JsString(savedUser.id), "group" -> JsString("log")))
+        verify(longTermTokenServiceMock).encode(
+          JsObject(
+            "id"        -> JsString(savedUser.id),
+            "group"     -> JsString("log"),
+            "createdAt" -> JsNumber(timeService.counter.get())
+          )
+        )
         verify(shortTermTokenServiceMock).encode(JsObject("id" -> JsString(savedUser.id), "group" -> JsString("log")))
       }
       "update account custom data" in new TestScope {
