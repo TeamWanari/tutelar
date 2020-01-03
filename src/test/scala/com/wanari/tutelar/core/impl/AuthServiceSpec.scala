@@ -265,15 +265,25 @@ class AuthServiceSpec extends TestBase {
       service.refreshToken("long_term_token")
       verify(longTermTokenServiceMock).validateAndDecode("long_term_token")
     }
-    "create new token with the previous token data without exp" in new TestScope {
+    "create new token with the previous token data without exp and refresh the createdAt in longterm token" in new TestScope {
       val originalTokenData =
-        JsObject("id" -> JsString(savedUser.id), "exp" -> JsNumber(111), "randomData" -> JsString("data"))
-      val withoutExp = JsObject("id" -> JsString(savedUser.id), "randomData" -> JsString("data"))
+        JsObject(
+          "id"         -> JsString(savedUser.id),
+          "exp"        -> JsNumber(111),
+          "randomData" -> JsString("data"),
+          "createdAt"  -> JsNumber(999)
+        )
       when(longTermTokenServiceMock.validateAndDecode(any[String]))
         .thenReturn(EitherT.right(Success(originalTokenData)))
 
       service.refreshToken("long_term_token")
-      verify(longTermTokenServiceMock).encode(withoutExp)
+      val withoutExp = JsObject("id" -> JsString(savedUser.id), "randomData" -> JsString("data"))
+      val withoutExpWithCreatedAt = JsObject(
+        "id"         -> JsString(savedUser.id),
+        "randomData" -> JsString("data"),
+        "createdAt"  -> JsNumber(timeService.counter.get())
+      )
+      verify(longTermTokenServiceMock).encode(withoutExpWithCreatedAt)
       verify(shortTermTokenServiceMock).encode(withoutExp)
     }
     "return with new token data" in new TestScope {
