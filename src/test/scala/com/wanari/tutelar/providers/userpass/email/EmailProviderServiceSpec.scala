@@ -22,7 +22,7 @@ class EmailProviderServiceSpec extends TestBase {
     override lazy val authType        = "EMAIL"
     override lazy val savedCustomData = BCrypt.hashpw("secretpw", BCrypt.gensalt())
 
-    implicit val emailService = mock[EmailServiceHttpImpl[Try]]
+    implicit val emailService = mock[EmailService[Try]]
 
     implicit val passwordChecker = new NonEmptyPasswordChecker[Try]
 

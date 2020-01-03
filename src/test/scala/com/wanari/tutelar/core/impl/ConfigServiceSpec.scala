@@ -13,7 +13,11 @@ import com.wanari.tutelar.core.impl.database.MongoDatabaseService.MongoConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
 import com.wanari.tutelar.providers.userpass.email.EmailServiceFactory.EmailServiceFactoryConfig
-import com.wanari.tutelar.providers.userpass.email.EmailServiceHttpImpl.EmailServiceHttpConfig
+import com.wanari.tutelar.providers.userpass.email.EmailServiceSmtpImpl.{
+  EmailServiceSmtpConfig,
+  EmailTemplateConfig,
+  SmtpConfig
+}
 import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
 import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl.TotpConfig
 
@@ -133,15 +137,6 @@ class ConfigServiceSpec extends TestBase {
       "PATTERN"
     )
   }
-  "#emailServiceHttpConfig" in {
-    val service = new ConfigServiceImpl()
-    val config  = service.emailServiceHttpConfig
-    config shouldBe EmailServiceHttpConfig(
-      "URL",
-      "USERNAME",
-      "SECRET"
-    )
-  }
   "#emailServiceFactoryConfig" in {
     val service = new ConfigServiceImpl()
     val config  = service.emailServiceFactoryConfig
@@ -185,5 +180,25 @@ class ConfigServiceSpec extends TestBase {
         List("service1", "service2")
       )
     }
+  }
+
+  "#emailServiceSmtpConfig" in {
+    val service = new ConfigServiceImpl {}
+    service.emailServiceSmtpConfig shouldBe EmailServiceSmtpConfig(
+      SmtpConfig(
+        "HOST",
+        1025,
+        true,
+        "USER",
+        "PASS"
+      ),
+      EmailTemplateConfig(
+        "SENDER_EMAIL",
+        "REGISTER_TITLE",
+        "REGISTER_BODY",
+        "RESET_PASSWORD_TITLE",
+        "RESET_PASSWORD_BODY"
+      )
+    )
   }
 }

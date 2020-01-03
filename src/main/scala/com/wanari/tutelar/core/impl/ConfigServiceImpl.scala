@@ -19,7 +19,11 @@ import com.wanari.tutelar.core.{ConfigService, HookService, ServiceAuthDirective
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
 import com.wanari.tutelar.providers.userpass.email.EmailServiceFactory.EmailServiceFactoryConfig
-import com.wanari.tutelar.providers.userpass.email.EmailServiceHttpImpl.EmailServiceHttpConfig
+import com.wanari.tutelar.providers.userpass.email.EmailServiceSmtpImpl.{
+  EmailServiceSmtpConfig,
+  EmailTemplateConfig,
+  SmtpConfig
+}
 import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
 import com.wanari.tutelar.providers.userpass.token.OTP.OTPAlgorithm
 import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl.TotpConfig
@@ -184,17 +188,6 @@ class ConfigServiceImpl() extends ConfigService {
     }.fold(logAndThrow("E-mail service type selector"), identity)
   }
 
-  override implicit lazy val emailServiceHttpConfig: EmailServiceHttpConfig = {
-    Try {
-      val config = conf.getConfig("userpass.email.http")
-      EmailServiceHttpConfig(
-        config.getString("serviceUrl"),
-        config.getString("serviceUsername"),
-        readFromFileOrConf(config, "servicePassword")
-      )
-    }.fold(logAndThrow("E-mail HTTP service"), identity)
-  }
-
   override implicit lazy val passwordSettings: PasswordSettings = {
     Try {
       val config = conf.getConfig("userpass.passwordDifficulty")
@@ -331,5 +324,26 @@ class ConfigServiceImpl() extends ConfigService {
   private def logAndThrow(msg: String)(ex: Throwable) = {
     logger.error(s"WRONG CONFIG! $msg", ex)
     throw ex
+  }
+
+  override implicit def emailServiceSmtpConfig: EmailServiceSmtpConfig = {
+    Try {
+      val config = conf.getConfig(s"userpass.email.smtp")
+      val smtpConfig: SmtpConfig = SmtpConfig(
+        config.getString("host"),
+        config.getInt("port"),
+        config.getBoolean("ssl"),
+        config.getString("username"),
+        config.getString("password")
+      )
+      val templateConfig = EmailTemplateConfig(
+        config.getString("template.senderAddress"),
+        config.getString("template.registerTitle"),
+        config.getString("template.registerBody"),
+        config.getString("template.resetPasswordTitle"),
+        config.getString("template.resetPasswordBody")
+      )
+      EmailServiceSmtpConfig(smtpConfig, templateConfig)
+    }.fold(logAndThrow(s"EmailService SMTP"), identity)
   }
 }

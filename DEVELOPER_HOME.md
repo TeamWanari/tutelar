@@ -54,7 +54,6 @@ This services starting when you hit `make up`
 - openldap
 - rabbitmq
 - mailhog (smtp mock server with ui)
-- a html email service (send email via html interface)
 - jaeger (tracer service for logs)
 - nginx (reverse proxy for custom local domains + hosting the test client page)
 
@@ -71,7 +70,6 @@ This services starting when you hit `make up`
 | ReverseProxy  |  8080 |
 | Database      |  5432 |
 | LDAP          |   389 |
-| EmailService  |  9010 |
 | SMTP mock UI  |  8025 |
 | Jaeger UI     | 16686 |
 | Jaeger        |  5775 |
