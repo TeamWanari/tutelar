@@ -11,7 +11,7 @@ import com.wanari.tutelar.core.impl.database.PostgresDatabaseService
 import com.wanari.tutelar.core.{AmqpService, ConfigService, ExpirationService, ServiceAuthDirectives}
 import com.wanari.tutelar.providers.oauth2.OAuth2Service
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl
-import com.wanari.tutelar.providers.userpass.email.{EmailServiceFactory, EmailServiceHttpImpl}
+import com.wanari.tutelar.providers.userpass.email.{EmailServiceFactory, EmailServiceHttpImpl, EmailServiceSmtpImpl}
 import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl
 import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl
 import io.jaegertracing.Configuration
@@ -54,6 +54,7 @@ class InitableSpec extends TestBase {
       override def jaegerConfig: Configuration                                                 = ???
       override def providerExpirationConfigs: Map[String, ExpirationService.ExpirationConfig]  = ???
       override def getServiceAuthConfig(path: String): ServiceAuthDirectives.ServiceAuthConfig = ???
+      override def emailServiceSmtpConfig: EmailServiceSmtpImpl.EmailServiceSmtpConfig         = ???
     }
   }
   import cats.instances.try_._

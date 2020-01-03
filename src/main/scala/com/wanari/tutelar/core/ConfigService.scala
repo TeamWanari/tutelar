@@ -15,6 +15,7 @@ import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
 import com.wanari.tutelar.providers.userpass.email.EmailServiceFactory.EmailServiceFactoryConfig
 import com.wanari.tutelar.providers.userpass.email.EmailServiceHttpImpl.EmailServiceHttpConfig
+import com.wanari.tutelar.providers.userpass.email.EmailServiceSmtpImpl.EmailServiceSmtpConfig
 import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
 import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl.TotpConfig
 
@@ -41,4 +42,5 @@ trait ConfigService {
   implicit def jaegerConfig: JaegerConfig
   implicit def providerExpirationConfigs: Map[String, ExpirationConfig]
   implicit def getServiceAuthConfig(path: String): ServiceAuthConfig
+  implicit def emailServiceSmtpConfig: EmailServiceSmtpConfig
 }

@@ -56,6 +56,7 @@ services:
     image: mailhog/mailhog:v1.0.0
     ports:
       - 8025:8025/tcp
+      - 1025:1025/tcp
   jaeger:
     image: jaegertracing/all-in-one:1.15.1
     environment:

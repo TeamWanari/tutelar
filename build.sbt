@@ -86,6 +86,7 @@ lazy val core = (project in file("."))
         "org.bouncycastle"     % "bcprov-jdk15on"              % "1.64",
         "com.emarsys"          %% "escher-akka-http"           % "1.1.0",
         "org.codehaus.janino"  % "janino"                      % "3.1.0",
+        "org.apache.commons"   % "commons-email"               % "1.5",
         "org.scalatest"        %% "scalatest"                  % "3.1.0" % "it,test",
         "org.mockito"          % "mockito-core"                % "3.2.4" % "it,test",
         "org.mockito"          %% "mockito-scala"              % "1.10.2" % "it,test"
