@@ -19,7 +19,6 @@ import com.wanari.tutelar.core.{ConfigService, HookService, ServiceAuthDirective
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
 import com.wanari.tutelar.providers.userpass.email.EmailServiceFactory.EmailServiceFactoryConfig
-import com.wanari.tutelar.providers.userpass.email.EmailServiceHttpImpl.EmailServiceHttpConfig
 import com.wanari.tutelar.providers.userpass.email.EmailServiceSmtpImpl.{
   EmailServiceSmtpConfig,
   EmailTemplateConfig,
@@ -187,17 +186,6 @@ class ConfigServiceImpl() extends ConfigService {
         config.getString("type")
       )
     }.fold(logAndThrow("E-mail service type selector"), identity)
-  }
-
-  override implicit lazy val emailServiceHttpConfig: EmailServiceHttpConfig = {
-    Try {
-      val config = conf.getConfig("userpass.email.http")
-      EmailServiceHttpConfig(
-        config.getString("serviceUrl"),
-        config.getString("serviceUsername"),
-        readFromFileOrConf(config, "servicePassword")
-      )
-    }.fold(logAndThrow("E-mail HTTP service"), identity)
   }
 
   override implicit lazy val passwordSettings: PasswordSettings = {

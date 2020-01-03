@@ -14,7 +14,6 @@ import com.wanari.tutelar.core.impl.database.PostgresDatabaseService.PostgresCon
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
 import com.wanari.tutelar.providers.userpass.email.EmailServiceFactory.EmailServiceFactoryConfig
-import com.wanari.tutelar.providers.userpass.email.EmailServiceHttpImpl.EmailServiceHttpConfig
 import com.wanari.tutelar.providers.userpass.email.EmailServiceSmtpImpl.EmailServiceSmtpConfig
 import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl.LdapConfig
 import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl.TotpConfig
@@ -30,7 +29,6 @@ trait ConfigService {
   implicit def getHookConfig: HookConfig
   implicit def getAmqpConfig: AmqpConfig
   implicit def emailServiceFactoryConfig: EmailServiceFactoryConfig
-  implicit def emailServiceHttpConfig: EmailServiceHttpConfig
   implicit def totpConfig: TotpConfig
   implicit def getAmqpQueueConfig(name: String): AmqpQueueConfig
   def facebookConfig: OAuth2Config

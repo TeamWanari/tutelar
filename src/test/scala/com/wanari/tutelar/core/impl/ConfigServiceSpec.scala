@@ -13,7 +13,6 @@ import com.wanari.tutelar.core.impl.database.MongoDatabaseService.MongoConfig
 import com.wanari.tutelar.providers.oauth2.OAuth2Service.OAuth2Config
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl.PasswordSettings
 import com.wanari.tutelar.providers.userpass.email.EmailServiceFactory.EmailServiceFactoryConfig
-import com.wanari.tutelar.providers.userpass.email.EmailServiceHttpImpl.EmailServiceHttpConfig
 import com.wanari.tutelar.providers.userpass.email.EmailServiceSmtpImpl.{
   EmailServiceSmtpConfig,
   EmailTemplateConfig,
@@ -136,15 +135,6 @@ class ConfigServiceSpec extends TestBase {
     val config  = service.passwordSettings
     config shouldBe PasswordSettings(
       "PATTERN"
-    )
-  }
-  "#emailServiceHttpConfig" in {
-    val service = new ConfigServiceImpl()
-    val config  = service.emailServiceHttpConfig
-    config shouldBe EmailServiceHttpConfig(
-      "URL",
-      "USERNAME",
-      "SECRET"
     )
   }
   "#emailServiceFactoryConfig" in {

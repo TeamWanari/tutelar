@@ -11,7 +11,7 @@ import com.wanari.tutelar.core.impl.database.PostgresDatabaseService
 import com.wanari.tutelar.core.{AmqpService, ConfigService, ExpirationService, ServiceAuthDirectives}
 import com.wanari.tutelar.providers.oauth2.OAuth2Service
 import com.wanari.tutelar.providers.userpass.PasswordDifficultyCheckerImpl
-import com.wanari.tutelar.providers.userpass.email.{EmailServiceFactory, EmailServiceHttpImpl, EmailServiceSmtpImpl}
+import com.wanari.tutelar.providers.userpass.email.{EmailServiceFactory, EmailServiceSmtpImpl}
 import com.wanari.tutelar.providers.userpass.ldap.LdapServiceImpl
 import com.wanari.tutelar.providers.userpass.token.TotpServiceImpl
 import io.jaegertracing.Configuration
@@ -41,7 +41,6 @@ class InitableSpec extends TestBase {
       override def getHookConfig: HookConfig                                                   = ???
       override def getAmqpConfig: AmqpService.AmqpConfig                                       = ???
       override def emailServiceFactoryConfig: EmailServiceFactory.EmailServiceFactoryConfig    = ???
-      override def emailServiceHttpConfig: EmailServiceHttpImpl.EmailServiceHttpConfig         = ???
       override def totpConfig: TotpServiceImpl.TotpConfig                                      = ???
       override def getAmqpQueueConfig(name: String): AmqpService.AmqpQueueConfig               = ???
       override def facebookConfig: OAuth2Service.OAuth2Config                                  = ???
