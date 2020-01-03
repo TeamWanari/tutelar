@@ -145,8 +145,8 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
 
   private def createTokenData(account: Account, extraData: JsObject): F[TokenData] = {
     for {
-      sortData  <- createShortTermJwtData(account, extraData)
-      longData  <- createLongTermTokenJwtData(account, extraData)
+      sortData  <- createShortTermJwtData(account.userId, extraData)
+      longData  <- createLongTermTokenJwtData(account.userId, extraData)
       shortTerm <- shortTermTokenService.encode(sortData)
       longTerm  <- longTermTokenService.encode(longData)
     } yield {
@@ -154,15 +154,15 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
     }
   }
 
-  private def createShortTermJwtData(account: Account, extraData: JsObject): F[JsObject] = {
+  private def createShortTermJwtData(userId: String, extraData: JsObject): F[JsObject] = {
     import com.wanari.tutelar.util.SpraySyntax._
-    (extraData + ("id" -> JsString(account.userId))).pure
+    (extraData + ("id" -> JsString(userId))).pure
   }
 
-  private def createLongTermTokenJwtData(account: Account, extraData: JsObject): F[JsObject] = {
+  private def createLongTermTokenJwtData(userId: String, extraData: JsObject): F[JsObject] = {
     timeService.getCurrentTimeMillis.map { time =>
       import com.wanari.tutelar.util.SpraySyntax._
-      val id        = "id"        -> JsString(account.userId)
+      val id        = "id"        -> JsString(userId)
       val createdAt = "createdAt" -> JsNumber(time)
       extraData + id + createdAt
     }
@@ -180,10 +180,14 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
         decoded.fields.get("id").collect { case JsString(id) => id },
         InvalidTokenMissingId()
       )
-      _         <- EitherT.fromOptionF(databaseService.findUserById(userId), UserNotFound())
-      tokenData <- EitherT.rightT(JsObject(decoded.fields.view.filterKeys(_ != "exp").toList: _*))
-      shortTerm <- EitherT.right(shortTermTokenService.encode(tokenData))
-      longTerm  <- EitherT.right(longTermTokenService.encode(tokenData))
+      _ <- EitherT.fromOptionF(databaseService.findUserById(userId), UserNotFound())
+      tokenData <- EitherT.rightT(
+        JsObject(decoded.fields.view.filterKeys(_ != "exp").filterKeys(_ != "createdAt").toList: _*)
+      )
+      sortData  <- EitherT.right(createShortTermJwtData(userId, tokenData))
+      longData  <- EitherT.right(createLongTermTokenJwtData(userId, tokenData))
+      shortTerm <- EitherT.right(shortTermTokenService.encode(sortData))
+      longTerm  <- EitherT.right(longTermTokenService.encode(longData))
     } yield {
       TokenData(shortTerm, longTerm)
     }
