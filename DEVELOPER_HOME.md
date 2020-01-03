@@ -69,7 +69,7 @@ This services starting when you hit `make up`
 | ReverseProxy  |  9443 |
 | ReverseProxy  |  8080 |
 | Database      |  5432 |
-| LDAP          |   389 |tS
+| LDAP          |   389 |
 | SMTP mock UI  |  8025 |
 | Jaeger UI     | 16686 |
 | Jaeger        |  5775 |
