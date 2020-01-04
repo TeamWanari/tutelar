@@ -38,7 +38,7 @@ class DatabaseServiceItSpec extends AnyWordSpecLike with Matchers with AwaitUtil
   private val mongoService = new MongoDatabaseService
   private val mongoCollection = await({
     (for {
-      uri        <- OptionT.fromOption(MongoConnection.parseURI(mongoConfig.uri).toOption)
+      uri        <- OptionT(MongoConnection.fromString(mongoConfig.uri).map(Option(_)).recover(_ => None))
       dbname     <- OptionT.fromOption(uri.db)
       connection <- OptionT(mongoDriver.connect(uri).map(Option(_)).recover(_ => None))
       database   <- OptionT.liftF(connection.database(dbname))
