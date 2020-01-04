@@ -11,7 +11,7 @@ import com.wanari.tutelar.core.{HookService, JwtService}
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.{DateTimeUtilCounterImpl, IdGeneratorCounterImpl}
 import org.mockito.ArgumentMatchersSugar._
-import spray.json.{JsNumber, JsObject, JsString}
+import spray.json.{JsArray, JsNumber, JsObject, JsString}
 
 import scala.concurrent.duration.Duration
 import scala.util.{Success, Try}
@@ -23,7 +23,7 @@ class AuthServiceSpec extends TestBase {
   val externalId           = "ext_id"
   val customData           = "customData"
   val savedUser            = User("99999", 98765)
-  val savedAccount         = Account(authType, "saved_ext_id", savedUser.id, "somedata")
+  val savedAccount         = Account("AUTH_TYPE_SAVED", "saved_ext_id", savedUser.id, "somedata")
   val providedData         = JsObject("userdata" -> JsString("helo"))
   val hookResponseLogin    = JsObject("group" -> JsString("log"))
   val hookResponseRegister = JsObject("group" -> JsString("reg"))
@@ -69,12 +69,73 @@ class AuthServiceSpec extends TestBase {
         service.authenticatedWith(authType, externalId, customData, providedData, None)
         verify(longTermTokenServiceMock).encode(
           JsObject(
-            "id"        -> JsString("1"),
-            "group"     -> JsString("reg"),
+            "id" -> JsString("1"),
+            "providers" -> JsArray(
+              JsObject(
+                "name"    -> JsString(authType),
+                "loginAt" -> JsNumber(timeService.counter.get())
+              )
+            ),
+            "data"      -> JsObject("group" -> JsString("reg")),
             "createdAt" -> JsNumber(timeService.counter.get())
           )
         )
-        verify(shortTermTokenServiceMock).encode(JsObject("id" -> JsString("1"), "group" -> JsString("reg")))
+        verify(shortTermTokenServiceMock).encode(
+          JsObject(
+            "id"    -> JsString("1"),
+            "group" -> JsString("reg"),
+            "providers" -> JsArray(
+              JsString(authType)
+            )
+          )
+        )
+      }
+      "link to account" in new TestScope {
+        val longTermTokenData = JsObject(
+          "id" -> JsString(savedUser.id),
+          "providers" -> JsArray(
+            JsObject(
+              "name"    -> JsString(savedAccount.authType),
+              "loginAt" -> JsNumber(678)
+            )
+          ),
+          "data"      -> JsObject("group" -> JsString("old_group_data")),
+          "createdAt" -> JsNumber(777)
+        )
+        when(longTermTokenServiceMock.validateAndDecode(any[String]))
+          .thenReturn(EitherT.right(Success(longTermTokenData)))
+
+        val longTermToken = "long_term_token"
+
+        service.authenticatedWith(authType, externalId, customData, providedData, Option(longTermToken))
+        verify(longTermTokenServiceMock).validateAndDecode(longTermToken)
+        verify(longTermTokenServiceMock).encode(
+          JsObject(
+            "id" -> JsString(savedUser.id),
+            "providers" -> JsArray(
+              JsObject(
+                "name"    -> JsString(savedAccount.authType),
+                "loginAt" -> JsNumber(678)
+              ),
+              JsObject(
+                "name"    -> JsString(authType),
+                "loginAt" -> JsNumber(timeService.counter.get())
+              )
+            ),
+            "data"      -> JsObject("group" -> JsString("log")),
+            "createdAt" -> JsNumber(timeService.counter.get())
+          )
+        )
+        verify(shortTermTokenServiceMock).encode(
+          JsObject(
+            "id"    -> JsString(savedUser.id),
+            "group" -> JsString("log"),
+            "providers" -> JsArray(
+              JsString(savedAccount.authType),
+              JsString(authType)
+            )
+          )
+        )
       }
       "create new user" in new TestScope {
         service.authenticatedWith(authType, externalId, customData, providedData, None)
@@ -100,12 +161,26 @@ class AuthServiceSpec extends TestBase {
         service.authenticatedWith(savedAccount.authType, savedAccount.externalId, customData, providedData, None)
         verify(longTermTokenServiceMock).encode(
           JsObject(
-            "id"        -> JsString(savedUser.id),
-            "group"     -> JsString("log"),
+            "id" -> JsString(savedUser.id),
+            "providers" -> JsArray(
+              JsObject(
+                "name"    -> JsString(savedAccount.authType),
+                "loginAt" -> JsNumber(timeService.counter.get())
+              )
+            ),
+            "data"      -> JsObject("group" -> JsString("log")),
             "createdAt" -> JsNumber(timeService.counter.get())
           )
         )
-        verify(shortTermTokenServiceMock).encode(JsObject("id" -> JsString(savedUser.id), "group" -> JsString("log")))
+        verify(shortTermTokenServiceMock).encode(
+          JsObject(
+            "id"    -> JsString(savedUser.id),
+            "group" -> JsString("log"),
+            "providers" -> JsArray(
+              JsString(savedAccount.authType)
+            )
+          )
+        )
       }
       "update account custom data" in new TestScope {
         service.authenticatedWith(savedAccount.authType, savedAccount.externalId, customData, providedData, None)
@@ -121,7 +196,7 @@ class AuthServiceSpec extends TestBase {
         verify(hookService).login(
           eqTo(savedAccount.userId),
           eqTo(savedAccount.externalId),
-          eqTo(authType),
+          eqTo(savedAccount.authType),
           eqTo(providedData)
         )(any[LogContext])
       }
@@ -259,46 +334,56 @@ class AuthServiceSpec extends TestBase {
   }
 
   "#refresh-token" when {
+    import com.wanari.tutelar.util.SpraySyntax._
+
+    val originalTokenData =
+      JsObject(
+        "id" -> JsString(savedUser.id),
+        "providers" -> JsArray(
+          JsObject(
+            "name"    -> JsString(savedAccount.authType),
+            "loginAt" -> JsNumber(888)
+          )
+        ),
+        "data"      -> JsObject("randomData" -> JsString("data")),
+        "createdAt" -> JsNumber(999)
+      )
+
     "validate as long term token" in new TestScope {
       when(longTermTokenServiceMock.validateAndDecode(any[String]))
         .thenReturn(EitherT.right(Success(JsObject("id" -> JsString(savedUser.id)))))
       service.refreshToken("long_term_token")
       verify(longTermTokenServiceMock).validateAndDecode("long_term_token")
     }
-    "create new token with the previous token data without exp and refresh the createdAt in longterm token" in new TestScope {
-      val originalTokenData =
-        JsObject(
-          "id"         -> JsString(savedUser.id),
-          "exp"        -> JsNumber(111),
-          "randomData" -> JsString("data"),
-          "createdAt"  -> JsNumber(999)
-        )
+    "create new token with the previous token data refresh the createdAt in longterm token" in new TestScope {
       when(longTermTokenServiceMock.validateAndDecode(any[String]))
         .thenReturn(EitherT.right(Success(originalTokenData)))
 
       service.refreshToken("long_term_token")
-      val withoutExp = JsObject("id" -> JsString(savedUser.id), "randomData" -> JsString("data"))
-      val withoutExpWithCreatedAt = JsObject(
+      val expectedRefreshToken = originalTokenData + ("createdAt" -> JsNumber(timeService.counter.get()))
+      val expectedShortToken = JsObject(
         "id"         -> JsString(savedUser.id),
         "randomData" -> JsString("data"),
-        "createdAt"  -> JsNumber(timeService.counter.get())
+        "providers" -> JsArray(
+          JsString(savedAccount.authType)
+        )
       )
-      verify(longTermTokenServiceMock).encode(withoutExpWithCreatedAt)
-      verify(shortTermTokenServiceMock).encode(withoutExp)
+      verify(longTermTokenServiceMock).encode(expectedRefreshToken)
+      verify(shortTermTokenServiceMock).encode(expectedShortToken)
     }
     "return with new token data" in new TestScope {
       when(longTermTokenServiceMock.validateAndDecode(any[String]))
-        .thenReturn(EitherT.right(Success(JsObject("id" -> JsString(savedUser.id)))))
+        .thenReturn(EitherT.right(Success(originalTokenData)))
       service.refreshToken("long_term_token") shouldBe EitherT.rightT(TokenData("JWT", "JWT_LONG"))
     }
-    "fail if not contains id" in new TestScope {
+    "fail if invalid data" in new TestScope {
       when(longTermTokenServiceMock.validateAndDecode(any[String]))
         .thenReturn(EitherT.right(Success(JsObject("notid" -> JsString(savedUser.id)))))
-      service.refreshToken("long_term_token") shouldBe EitherT.leftT(InvalidTokenMissingId())
+      service.refreshToken("long_term_token") shouldBe EitherT.leftT(InvalidToken())
     }
     "fail if user not found" in new TestScope {
       when(longTermTokenServiceMock.validateAndDecode(any[String]))
-        .thenReturn(EitherT.right(Success(JsObject("id" -> JsString("random_id")))))
+        .thenReturn(EitherT.right(Success(originalTokenData + ("id" -> JsString("random_id")))))
       service.refreshToken("long_term_token") shouldBe EitherT.leftT(UserNotFound())
     }
     "fail if validate failed" in new TestScope {

@@ -27,7 +27,7 @@ object Errors {
   case class UserHadThisAccountType()                  extends AuthError("User already had this type of account")
   case class UserLastAccount()                         extends AuthError("This account is the users last account")
   case class AuthenticationFailed()                    extends AuthError("Authentication failed, wrong credentials")
-  case class InvalidTokenMissingId()                   extends AuthError("Invalid token! Missing id key.")
+  case class InvalidToken()                            extends AuthError("Invalid token")
   case class AccountBelongsToOtherUser()               extends AuthError("Account belongs to other user!")
 
   sealed abstract class Oauth2Error(val message: String) extends Throwable with AppError

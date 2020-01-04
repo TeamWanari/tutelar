@@ -9,7 +9,11 @@ import com.wanari.tutelar.core._
 import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.{DateTimeUtil, IdGenerator}
-import spray.json.{JsNumber, JsObject, JsString}
+import spray.json._
+import spray.json.DefaultJsonProtocol._
+import AuthServiceImpl._
+
+import scala.util.Try
 
 class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
     implicit databaseService: DatabaseService[F],
@@ -18,7 +22,6 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
     timeService: DateTimeUtil[F],
     getJwtConfig: String => JwtConfig
 ) extends AuthService[F] {
-  import cats.syntax.applicative._
   import cats.syntax.flatMap._
   import cats.syntax.functor._
 
@@ -40,18 +43,23 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
       refreshToken: Option[LongTermToken]
   )(implicit ctx: LogContext): ErrorOr[F, TokenData] = {
 
-    val tokenDataEO: ErrorOr[F, Option[JsObject]] = refreshToken match {
-      case None    => EitherT.rightT(Option.empty[JsObject])
-      case Some(t) => longTermTokenService.validateAndDecode(t).map(Option(_))
+    val refreshTokenDataEO: ErrorOr[F, Option[LongTermTokenData]] = refreshToken match {
+      case None    => EitherT.rightT(Option.empty)
+      case Some(t) => parseRefreshToken(t)
     }
 
     val standardizedExternalId = convertToStandardizedLowercase(externalId)
     for {
-      tokenDataO <- tokenDataEO
-      userId = tokenDataO.flatMap(_.fields.get("id").collect { case JsString(id) => id })
-      account_hookresponse <- createOrUpdateAccount(authType, standardizedExternalId, customData, providedData, userId)
+      tokenDataO <- refreshTokenDataEO
+      account_hookresponse <- createOrUpdateAccount(
+        authType,
+        standardizedExternalId,
+        customData,
+        providedData,
+        tokenDataO.map(_.id)
+      )
       (account, hookResponse) = account_hookresponse
-      token <- createTokenData(account, hookResponse) // TODO: use refreshToken data
+      token <- createTokenDataForAuthenticated(account, hookResponse, tokenDataO)
     } yield token
   }
 
@@ -108,6 +116,16 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
     } yield ()
   }
 
+  override def refreshToken(token: LongTermToken)(implicit ctx: LogContext): ErrorOr[F, TokenData] = {
+    for {
+      refreshDataO <- parseRefreshToken(token)
+      refreshData  <- EitherT.fromOption(refreshDataO, InvalidToken())
+      _            <- EitherT.fromOptionF(databaseService.findUserById(refreshData.id), UserNotFound())
+      time         <- EitherT.right(timeService.getCurrentTimeMillis)
+      tokenData    <- EitherT.right(convertToTokenData(refreshData.copy(createdAt = time)))
+    } yield tokenData
+  }
+
   private def createOrUpdateAccount(
       authType: String,
       externalId: String,
@@ -155,29 +173,36 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
     EitherT.right(result)
   }
 
-  private def createTokenData(account: Account, extraData: JsObject): ErrorOr[F, TokenData] = {
+  private def createTokenDataForAuthenticated(
+      account: Account,
+      hookData: JsObject,
+      refreshTokenData: Option[LongTermTokenData]
+  ): ErrorOr[F, TokenData] = {
     val result = for {
-      sortData  <- createShortTermJwtData(account.userId, extraData)
-      longData  <- createLongTermTokenJwtData(account.userId, extraData)
-      shortTerm <- shortTermTokenService.encode(sortData)
-      longTerm  <- longTermTokenService.encode(longData)
-    } yield {
-      TokenData(shortTerm, longTerm)
-    }
+      longData <- createLongTermTokenJwtDataForAuthenticated(
+        account.authType,
+        account.userId,
+        hookData,
+        refreshTokenData
+      )
+      tokenData <- convertToTokenData(longData)
+    } yield tokenData
     EitherT.right(result)
   }
 
-  private def createShortTermJwtData(userId: String, extraData: JsObject): F[JsObject] = {
-    import com.wanari.tutelar.util.SpraySyntax._
-    (extraData + ("id" -> JsString(userId))).pure
-  }
-
-  private def createLongTermTokenJwtData(userId: String, extraData: JsObject): F[JsObject] = {
+  private def createLongTermTokenJwtDataForAuthenticated(
+      authType: String,
+      userId: String,
+      hookData: JsObject,
+      refreshTokenData: Option[LongTermTokenData]
+  ): F[LongTermTokenData] = {
     timeService.getCurrentTimeMillis.map { time =>
-      import com.wanari.tutelar.util.SpraySyntax._
-      val id        = "id"        -> JsString(userId)
-      val createdAt = "createdAt" -> JsNumber(time)
-      extraData + id + createdAt
+      val providers = refreshTokenData
+        .map(_.providers)
+        .getOrElse(Seq.empty)
+        .filterNot(_.name == authType) :+ ProviderData(authType, time)
+
+      LongTermTokenData(userId, time, providers, hookData)
     }
   }
 
@@ -186,23 +211,38 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
     Normalizer.normalize(s, Normalizer.Form.NFC).toLowerCase
   }
 
-  override def refreshToken(token: LongTermToken)(implicit ctx: LogContext): ErrorOr[F, TokenData] = {
+  private def parseRefreshToken(token: String): ErrorOr[F, Option[LongTermTokenData]] = {
+    longTermTokenService
+      .validateAndDecode(token)
+      .map(data => Try(data.convertTo[LongTermTokenData]).toOption)
+  }
+
+  private def convertToTokenData(longTermTokenData: LongTermTokenData): F[TokenData] = {
     for {
-      decoded <- longTermTokenService.validateAndDecode(token)
-      userId <- EitherT.fromOption(
-        decoded.fields.get("id").collect { case JsString(id) => id },
-        InvalidTokenMissingId()
-      )
-      _ <- EitherT.fromOptionF(databaseService.findUserById(userId), UserNotFound())
-      tokenData <- EitherT.rightT(
-        JsObject(decoded.fields.view.filterKeys(_ != "exp").filterKeys(_ != "createdAt").toList: _*)
-      )
-      sortData  <- EitherT.right(createShortTermJwtData(userId, tokenData))
-      longData  <- EitherT.right(createLongTermTokenJwtData(userId, tokenData))
-      shortTerm <- EitherT.right(shortTermTokenService.encode(sortData))
-      longTerm  <- EitherT.right(longTermTokenService.encode(longData))
+      shortTerm <- shortTermTokenService.encode(longTermTokenData.asShortTermToken)
+      longTerm  <- longTermTokenService.encode(longTermTokenData.toJson.asJsObject)
     } yield {
       TokenData(shortTerm, longTerm)
     }
   }
+}
+
+object AuthServiceImpl {
+  private case class ShortTermTokenBaseData(id: String, providers: Seq[String])
+  private case class LongTermTokenData(id: String, createdAt: Long, providers: Seq[ProviderData], data: JsObject) {
+    def asShortTermToken: JsObject = {
+      val baseData = ShortTermTokenBaseData(
+        id,
+        providers.map(_.name)
+      ).toJson.asJsObject
+
+      JsObject(data.fields ++ baseData.fields)
+    }
+  }
+  private case class ProviderData(name: String, loginAt: Long)
+  private implicit val formatterProviderData: RootJsonFormat[ProviderData] = jsonFormat2(ProviderData)
+  private implicit val formatterShortTermTokenBaseData: RootJsonFormat[ShortTermTokenBaseData] = jsonFormat2(
+    ShortTermTokenBaseData
+  )
+  private implicit val formatterLongTermTokenData: RootJsonFormat[LongTermTokenData] = jsonFormat4(LongTermTokenData)
 }
