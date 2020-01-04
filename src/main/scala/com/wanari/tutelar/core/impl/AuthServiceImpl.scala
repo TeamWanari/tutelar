@@ -20,6 +20,7 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
     hookService: HookService[F],
     idGenerator: IdGenerator[F],
     timeService: DateTimeUtil[F],
+    expirationService: ExpirationService[F],
     getJwtConfig: String => JwtConfig
 ) extends AuthService[F] {
   import cats.syntax.flatMap._
@@ -118,12 +119,42 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
 
   override def refreshToken(token: LongTermToken)(implicit ctx: LogContext): ErrorOr[F, TokenData] = {
     for {
-      refreshDataO <- parseRefreshToken(token)
-      refreshData  <- EitherT.fromOption(refreshDataO, InvalidToken())
-      _            <- EitherT.fromOptionF(databaseService.findUserById(refreshData.id), UserNotFound())
-      time         <- EitherT.right(timeService.getCurrentTimeMillis)
-      tokenData    <- EitherT.right(convertToTokenData(refreshData.copy(createdAt = time)))
+      refreshTokenO   <- parseRefreshToken(token)
+      refreshToken    <- EitherT.fromOption(refreshTokenO, InvalidToken())
+      _               <- EitherT.fromOptionF(databaseService.findUserById(refreshToken.id), UserNotFound())
+      newRefreshToken <- createNewRefreshToken(refreshToken)
+      tokenData       <- EitherT.right(convertToTokenData(newRefreshToken))
     } yield tokenData
+  }
+
+  private def createNewRefreshToken(
+      data: LongTermTokenData
+  )(implicit ctx: LogContext): ErrorOr[F, LongTermTokenData] = {
+    for {
+      token <- removeExpiredProviders(data)
+      time  <- EitherT.right[AppError](timeService.getCurrentTimeMillis)
+    } yield token.copy(createdAt = time)
+  }
+
+  private def removeExpiredProviders(
+      data: LongTermTokenData
+  )(implicit ctx: LogContext): ErrorOr[F, LongTermTokenData] = {
+    import cats.syntax.traverse._
+    import cats.instances.list._
+
+    val providersF = data.providers.toList
+      .traverse[F, (Boolean, ProviderData)] { provider: ProviderData =>
+        expirationService.isExpired(provider.name, data.createdAt, provider.loginAt).map(_ -> provider)
+      }
+      .map(_.collect {
+        case (false, provider) => provider
+      })
+
+    for {
+      providers <- EitherT.right(providersF).ensure(LoginExpired(): AppError)(_.nonEmpty)
+    } yield {
+      data.copy(providers = providers)
+    }
   }
 
   private def createOrUpdateAccount(
