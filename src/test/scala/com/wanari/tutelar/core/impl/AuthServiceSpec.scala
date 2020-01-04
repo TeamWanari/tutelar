@@ -7,7 +7,7 @@ import com.wanari.tutelar.core.DatabaseService.{Account, User}
 import com.wanari.tutelar.core.Errors._
 import com.wanari.tutelar.core.impl.database.MemoryDatabaseService
 import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
-import com.wanari.tutelar.core.{HookService, JwtService}
+import com.wanari.tutelar.core.{ExpirationService, HookService, JwtService}
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.{DateTimeUtilCounterImpl, IdGeneratorCounterImpl}
 import org.mockito.ArgumentMatchersSugar._
@@ -35,6 +35,13 @@ class AuthServiceSpec extends TestBase {
     implicit val longTermTokenServiceMock  = mock[JwtService[Try]]
     implicit val shortTermTokenServiceMock = mock[JwtService[Try]]
     implicit val hookService               = mock[HookService[Try]]
+
+    def expirationServiceIsExpire(providerName: String) = false
+    implicit val expirationService = new ExpirationService[Try] {
+      override def isExpired(providerName: String, lastActivityAt: Long, loginAt: Long)(
+          implicit ctx: LogContext
+      ): Try[Boolean] = Success(expirationServiceIsExpire(providerName))
+    }
 
     databaseService.saveUser(savedUser)
     databaseService.saveAccount(savedAccount)
@@ -343,6 +350,10 @@ class AuthServiceSpec extends TestBase {
           JsObject(
             "name"    -> JsString(savedAccount.authType),
             "loginAt" -> JsNumber(888)
+          ),
+          JsObject(
+            "name"    -> JsString("EXPIRED_PROVIDER"),
+            "loginAt" -> JsNumber(1000)
           )
         ),
         "data"      -> JsObject("randomData" -> JsString("data")),
@@ -361,6 +372,33 @@ class AuthServiceSpec extends TestBase {
 
       service.refreshToken("long_term_token")
       val expectedRefreshToken = originalTokenData + ("createdAt" -> JsNumber(timeService.counter.get()))
+      val expectedShortToken = JsObject(
+        "id"         -> JsString(savedUser.id),
+        "randomData" -> JsString("data"),
+        "providers" -> JsArray(
+          JsString(savedAccount.authType),
+          JsString("EXPIRED_PROVIDER")
+        )
+      )
+      verify(longTermTokenServiceMock).encode(expectedRefreshToken)
+      verify(shortTermTokenServiceMock).encode(expectedShortToken)
+    }
+    "remove expired providers" in new TestScope {
+      override def expirationServiceIsExpire(providerName: String): Boolean = providerName == "EXPIRED_PROVIDER"
+      when(longTermTokenServiceMock.validateAndDecode(any[String]))
+        .thenReturn(EitherT.right(Success(originalTokenData)))
+      service.refreshToken("long_term_token")
+      val expectedRefreshToken = JsObject(
+        "id" -> JsString(savedUser.id),
+        "providers" -> JsArray(
+          JsObject(
+            "name"    -> JsString(savedAccount.authType),
+            "loginAt" -> JsNumber(888)
+          )
+        ),
+        "data"      -> JsObject("randomData" -> JsString("data")),
+        "createdAt" -> JsNumber(timeService.counter.get())
+      )
       val expectedShortToken = JsObject(
         "id"         -> JsString(savedUser.id),
         "randomData" -> JsString("data"),
@@ -390,6 +428,12 @@ class AuthServiceSpec extends TestBase {
       when(longTermTokenServiceMock.validateAndDecode(any[String]))
         .thenReturn(EitherT.left(Success(InvalidJwt())))
       service.refreshToken("long_term_token") shouldBe EitherT.leftT(InvalidJwt())
+    }
+    "fail when expire all provider login" in new TestScope {
+      override def expirationServiceIsExpire(providerName: String): Boolean = true
+      when(longTermTokenServiceMock.validateAndDecode(any[String]))
+        .thenReturn(EitherT.right(Success(originalTokenData)))
+      service.refreshToken("long_term_token") shouldBe EitherT.leftT(LoginExpired())
     }
   }
 }

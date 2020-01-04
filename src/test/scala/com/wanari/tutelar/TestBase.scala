@@ -7,7 +7,7 @@ import com.wanari.tutelar.core.DatabaseService.{Account, User}
 import com.wanari.tutelar.core.impl.AuthServiceImpl
 import com.wanari.tutelar.core.impl.database.MemoryDatabaseService
 import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
-import com.wanari.tutelar.core.{AuthService, HookService, JwtService}
+import com.wanari.tutelar.core.{AuthService, ExpirationService, HookService, JwtService}
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.{DateTimeUtilCounterImpl, IdGeneratorCounterImpl}
 import io.opentracing.noop.NoopTracerFactory
@@ -76,6 +76,12 @@ trait TestBase extends AnyWordSpecLike with Matchers with MockitoSugar with Befo
       .thenReturn(hookResponseLogin.pure[F])
 
     implicit def dummyConfigFunction(name: String): JwtConfig = null
+
+    implicit val expirationService = new ExpirationService[F] {
+      override def isExpired(providerName: String, lastActivityAt: Long, loginAt: Long)(
+          implicit ctx: LogContext
+      ): F[Boolean] = false.pure[F]
+    }
 
     implicit lazy val authService: AuthService[F] = new AuthServiceImpl[F]() {
       override protected val longTermTokenService: JwtService[F]  = longTermTokenServiceMock
