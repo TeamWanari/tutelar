@@ -122,18 +122,31 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
       refreshTokenO   <- parseRefreshToken(token)
       refreshToken    <- EitherT.fromOption(refreshTokenO, InvalidToken())
       _               <- EitherT.fromOptionF(databaseService.findUserById(refreshToken.id), UserNotFound())
-      newRefreshToken <- createNewRefreshToken(refreshToken)
+      hookData        <- EitherT.right(hookService.refreshToken(refreshToken.id))
+      newRefreshToken <- createNewRefreshToken(refreshToken, hookData)
       tokenData       <- EitherT.right(convertToTokenData(newRefreshToken))
     } yield tokenData
   }
 
   private def createNewRefreshToken(
-      data: LongTermTokenData
+      data: LongTermTokenData,
+      hookData: JsObject
   )(implicit ctx: LogContext): ErrorOr[F, LongTermTokenData] = {
     for {
       token <- removeExpiredProviders(data)
+      data  <- combinedJsonDataWithHookData(data.data, hookData)
       time  <- EitherT.right[AppError](timeService.getCurrentTimeMillis)
-    } yield token.copy(createdAt = time)
+    } yield token.copy(createdAt = time, data = data)
+  }
+
+  private def combinedJsonDataWithHookData(oldData: JsObject, hookData: JsObject)(
+      implicit ctx: LogContext
+  ): ErrorOr[F, JsObject] = {
+    if (hookData.fields.isEmpty) {
+      EitherT.pure(oldData)
+    } else {
+      EitherT.pure(hookData)
+    }
   }
 
   private def removeExpiredProviders(
