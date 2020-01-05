@@ -33,6 +33,18 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
 
   val baseUrl = "https://baseurl/path"
 
+  val noUrlConfig = HookConfig(
+    "",
+    Seq("register", "login", "modify", "link", "unlink", "delete", "refresh"),
+    BasicAuthConfig("user", "pass")
+  )
+
+  val noModulConfig = HookConfig(
+    baseUrl,
+    Seq.empty,
+    BasicAuthConfig("user", "pass")
+  )
+
   trait TestScope {
     import cats.instances.future._
     import system.dispatcher
@@ -51,12 +63,21 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
       override def singleRequest(httpRequest: HttpRequest)(implicit ctx: LogContext): Future[HttpResponse] =
         httpMock.singleRequest(httpRequest)(ctx)
     }
-    implicit lazy val config = HookConfig(baseUrl, BasicAuthConfig("user", "pass"))
-    lazy val service         = new HookServiceImpl[Future]()
+    implicit lazy val config = HookConfig(
+      baseUrl,
+      Seq("register", "login", "modify", "link", "unlink", "delete", "refresh"),
+      BasicAuthConfig("user", "pass")
+    )
+    lazy val service = new HookServiceImpl[Future]()
   }
 
   trait EscherTestScope extends TestScope {
-    override lazy val config = HookConfig(baseUrl, EscherAuthConfig)
+    override lazy val config =
+      HookConfig(
+        baseUrl,
+        Seq("register", "login", "modify", "link", "unlink", "delete", "refresh"),
+        EscherAuthConfig
+      )
   }
 
   type ServiceFunc = HookService[Future] => (String, String, String, JsObject) => Future[JsObject]
@@ -191,6 +212,29 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
     }
   }
 
+  case class TestCaseWrapper[A](name: String, func: HookServiceImpl[Future] => Future[A], ret: A)
+  Seq(
+    TestCaseWrapper("register", s => s.register(userId, "", "", JsObject.empty), JsObject.empty),
+    TestCaseWrapper("login", s => s.login(userId, "", "", JsObject.empty), JsObject.empty),
+    TestCaseWrapper("modify", s => s.modify(userId, "", "", JsObject.empty), ()),
+    TestCaseWrapper("link", s => s.link(userId, "", "", JsObject.empty), JsObject.empty),
+    TestCaseWrapper("unlink", s => s.unlink(userId, "", ""), ()),
+    TestCaseWrapper("delete", s => s.delete(userId), ()),
+    TestCaseWrapper("refreshToken", s => s.refreshToken(userId), JsObject.empty)
+  ).foreach {
+    case TestCaseWrapper(name, func, ret) =>
+      s"$name works if no baseUrl" in new TestScope {
+        override lazy val config: HookConfig = noUrlConfig
+        await(func(service)) shouldBe ret
+        validateNoRequest(httpMock)
+      }
+      s"$name works if modulesDisabled" in new TestScope {
+        override lazy val config: HookConfig = noModulConfig
+        await(func(service)) shouldBe ret
+        validateNoRequest(httpMock)
+      }
+  }
+
   def validateBasicAuth(httpMock: HttpWrapper[Future]): Unit = {
     val captor: ArgumentCaptor[HttpRequest] = ArgumentCaptor.forClass(classOf[HttpRequest])
     verify(httpMock).singleRequest(captor.capture())(any[LogContext])
@@ -213,5 +257,9 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
     import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
     import spray.json.DefaultJsonProtocol._
     await(Unmarshal(captor.getValue.entity).to[JsObject]) shouldEqual expectedRequest
+  }
+
+  def validateNoRequest(httpMock: HttpWrapper[Future]): Unit = {
+    verify(httpMock, never).singleRequest(any[HttpRequest])(any[LogContext])
   }
 }

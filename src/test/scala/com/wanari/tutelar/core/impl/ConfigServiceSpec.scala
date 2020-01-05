@@ -73,6 +73,7 @@ class ConfigServiceSpec extends TestBase {
     val config  = service.getHookConfig
     config shouldEqual HookConfig(
       "https://backend/hook",
+      Seq("register", "login", "modify", "link", "unlink", "delete", "refresh"),
       BasicAuthConfig("user", "pass")
     )
   }
