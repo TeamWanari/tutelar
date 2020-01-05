@@ -165,6 +165,7 @@ class ConfigServiceImpl() extends ConfigService {
       }
       HookConfig(
         config.getString("baseUrl"),
+        config.getString("enabled").split(',').map(_.trim.toLowerCase).filterNot(_.isEmpty).toSeq,
         authConfig
       )
     }.fold(logAndThrow("Hook"), identity)

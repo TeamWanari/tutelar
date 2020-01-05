@@ -17,7 +17,7 @@ object HookService {
   sealed trait AuthConfig
   case class BasicAuthConfig(username: String, password: String) extends AuthConfig
   case object EscherAuthConfig                                   extends AuthConfig
-  case class HookConfig(baseUrl: String, authConfig: AuthConfig)
+  case class HookConfig(baseUrl: String, enabled: Seq[String], authConfig: AuthConfig)
 
   case class HookUserData(id: String, externalId: String, authType: String, data: Option[JsObject])
   case class HookDeleteData(id: String)

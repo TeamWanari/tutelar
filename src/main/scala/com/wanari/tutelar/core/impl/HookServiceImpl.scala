@@ -85,7 +85,8 @@ class HookServiceImpl[F[_]: MonadError[*[_], Throwable]](
   private def sendHook(endpoint: String, data: JsValue)(implicit ctx: LogContext): F[HttpResponse] = {
     import com.wanari.tutelar.util.ApplicativeErrorSyntax._
     val baseUrl = config.baseUrl
-    if (baseUrl.isEmpty) {
+    val enabled = config.enabled
+    if (baseUrl.isEmpty || !enabled.contains(endpoint.drop(1))) {
       HookDisabled().raise[F, HttpResponse]
     } else {
       val url     = baseUrl + endpoint
