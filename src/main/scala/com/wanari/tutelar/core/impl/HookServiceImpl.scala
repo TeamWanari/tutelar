@@ -61,6 +61,11 @@ class HookServiceImpl[F[_]: MonadError[*[_], Throwable]](
     sendHookWithoutResponse("/delete", dto)
   }
 
+  override def refreshToken(id: String)(implicit ctx: LogContext): F[JsObject] = {
+    val dto = HookRefreshData(id).toJson
+    sendHookAndParse("/refresh", dto)
+  }
+
   private def sendHookWithoutResponse(endpoint: String, dto: JsValue)(implicit ctx: LogContext): F[Unit] = {
     sendHook(endpoint, dto)
       .map(_ => {})

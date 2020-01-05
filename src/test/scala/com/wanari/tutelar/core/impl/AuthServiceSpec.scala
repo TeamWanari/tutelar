@@ -369,7 +369,8 @@ class AuthServiceSpec extends TestBase {
     "create new token with the previous token data refresh the createdAt in longterm token" in new TestScope {
       when(longTermTokenServiceMock.validateAndDecode(any[String]))
         .thenReturn(EitherT.right(Success(originalTokenData)))
-
+      when(hookService.refreshToken(any[String])(any[LogContext]))
+        .thenReturn(Success(JsObject.empty))
       service.refreshToken("long_term_token")
       val expectedRefreshToken = originalTokenData + ("createdAt" -> JsNumber(timeService.counter.get()))
       val expectedShortToken = JsObject(
@@ -383,10 +384,32 @@ class AuthServiceSpec extends TestBase {
       verify(longTermTokenServiceMock).encode(expectedRefreshToken)
       verify(shortTermTokenServiceMock).encode(expectedShortToken)
     }
+    "create new token data from hook" in new TestScope {
+      when(longTermTokenServiceMock.validateAndDecode(any[String]))
+        .thenReturn(EitherT.right(Success(originalTokenData)))
+      when(hookService.refreshToken(any[String])(any[LogContext]))
+        .thenReturn(Success(JsObject("new" -> JsString("data"))))
+      service.refreshToken("long_term_token")
+      val expectedRefreshToken = originalTokenData +
+        ("createdAt" -> JsNumber(timeService.counter.get())) +
+        ("data"      -> JsObject("new" -> JsString("data")))
+      val expectedShortToken = JsObject(
+        "id"  -> JsString(savedUser.id),
+        "new" -> JsString("data"),
+        "providers" -> JsArray(
+          JsString(savedAccount.authType),
+          JsString("EXPIRED_PROVIDER")
+        )
+      )
+      verify(longTermTokenServiceMock).encode(expectedRefreshToken)
+      verify(shortTermTokenServiceMock).encode(expectedShortToken)
+    }
     "remove expired providers" in new TestScope {
       override def expirationServiceIsExpire(providerName: String): Boolean = providerName == "EXPIRED_PROVIDER"
       when(longTermTokenServiceMock.validateAndDecode(any[String]))
         .thenReturn(EitherT.right(Success(originalTokenData)))
+      when(hookService.refreshToken(any[String])(any[LogContext]))
+        .thenReturn(Success(JsObject.empty))
       service.refreshToken("long_term_token")
       val expectedRefreshToken = JsObject(
         "id" -> JsString(savedUser.id),
@@ -412,27 +435,32 @@ class AuthServiceSpec extends TestBase {
     "return with new token data" in new TestScope {
       when(longTermTokenServiceMock.validateAndDecode(any[String]))
         .thenReturn(EitherT.right(Success(originalTokenData)))
+      when(hookService.refreshToken(any[String])(any[LogContext])).thenReturn(Success(JsObject.empty))
       service.refreshToken("long_term_token") shouldBe EitherT.rightT(TokenData("JWT", "JWT_LONG"))
     }
     "fail if invalid data" in new TestScope {
       when(longTermTokenServiceMock.validateAndDecode(any[String]))
         .thenReturn(EitherT.right(Success(JsObject("notid" -> JsString(savedUser.id)))))
+      when(hookService.refreshToken(any[String])(any[LogContext])).thenReturn(Success(JsObject.empty))
       service.refreshToken("long_term_token") shouldBe EitherT.leftT(InvalidToken())
     }
     "fail if user not found" in new TestScope {
       when(longTermTokenServiceMock.validateAndDecode(any[String]))
         .thenReturn(EitherT.right(Success(originalTokenData + ("id" -> JsString("random_id")))))
+      when(hookService.refreshToken(any[String])(any[LogContext])).thenReturn(Success(JsObject.empty))
       service.refreshToken("long_term_token") shouldBe EitherT.leftT(UserNotFound())
     }
     "fail if validate failed" in new TestScope {
       when(longTermTokenServiceMock.validateAndDecode(any[String]))
         .thenReturn(EitherT.left(Success(InvalidJwt())))
+      when(hookService.refreshToken(any[String])(any[LogContext])).thenReturn(Success(JsObject.empty))
       service.refreshToken("long_term_token") shouldBe EitherT.leftT(InvalidJwt())
     }
     "fail when expire all provider login" in new TestScope {
       override def expirationServiceIsExpire(providerName: String): Boolean = true
       when(longTermTokenServiceMock.validateAndDecode(any[String]))
         .thenReturn(EitherT.right(Success(originalTokenData)))
+      when(hookService.refreshToken(any[String])(any[LogContext])).thenReturn(Success(JsObject.empty))
       service.refreshToken("long_term_token") shouldBe EitherT.leftT(LoginExpired())
     }
   }

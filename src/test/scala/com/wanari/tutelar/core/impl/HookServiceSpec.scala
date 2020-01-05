@@ -169,6 +169,28 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
     }
   }
 
+  "#refreshToken" when {
+    "call the backend" should {
+      "add auth header - basic" in new TestScope {
+        await(service.refreshToken(userId))
+        validateBasicAuth(httpMock)
+      }
+
+      "sign request - escher" in new EscherTestScope {
+        await(service.refreshToken(userId))
+        validateEscherAuth(httpMock)
+      }
+
+      "send the user id" in new TestScope {
+        await(service.refreshToken(userId))
+        validateRequest(httpMock)(
+          expectedUrl = s"$baseUrl/refresh",
+          expectedRequest = JsObject("id" -> JsString(userId))
+        )
+      }
+    }
+  }
+
   def validateBasicAuth(httpMock: HttpWrapper[Future]): Unit = {
     val captor: ArgumentCaptor[HttpRequest] = ArgumentCaptor.forClass(classOf[HttpRequest])
     verify(httpMock).singleRequest(captor.capture())(any[LogContext])

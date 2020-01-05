@@ -10,6 +10,7 @@ trait HookService[F[_]] {
   def link(id: String, externalId: String, authType: String, data: JsObject)(implicit ctx: LogContext): F[JsObject]
   def unlink(id: String, externalId: String, authType: String)(implicit ctx: LogContext): F[Unit]
   def delete(id: String)(implicit ctx: LogContext): F[Unit]
+  def refreshToken(id: String)(implicit ctx: LogContext): F[JsObject]
 }
 
 object HookService {
@@ -20,8 +21,10 @@ object HookService {
 
   case class HookUserData(id: String, externalId: String, authType: String, data: Option[JsObject])
   case class HookDeleteData(id: String)
+  case class HookRefreshData(id: String)
 
   import spray.json.DefaultJsonProtocol._
-  implicit val hookRequestDataFormat: RootJsonFormat[HookUserData]  = jsonFormat4(HookUserData)
-  implicit val hookDeleteDataFormat: RootJsonFormat[HookDeleteData] = jsonFormat1(HookDeleteData)
+  implicit val hookRequestDataFormat: RootJsonFormat[HookUserData]    = jsonFormat4(HookUserData)
+  implicit val hookDeleteDataFormat: RootJsonFormat[HookDeleteData]   = jsonFormat1(HookDeleteData)
+  implicit val hookRefreshDataFormat: RootJsonFormat[HookRefreshData] = jsonFormat1(HookRefreshData)
 }
