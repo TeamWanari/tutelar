@@ -1,18 +1,20 @@
 package com.wanari.tutelar.core.impl
 
 import akka.http.scaladsl.model.HttpMethods._
-import akka.http.scaladsl.model.headers.BasicHttpCredentials
+import akka.http.scaladsl.model.headers.{BasicHttpCredentials, OAuth2BearerToken}
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpRequest, HttpResponse}
 import cats.MonadError
 import com.wanari.tutelar.core.HookService._
-import com.wanari.tutelar.core.{EscherService, HookService}
+import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
+import com.wanari.tutelar.core.{EscherService, HookService, JwtService}
 import com.wanari.tutelar.util.HttpWrapper
 import com.wanari.tutelar.util.LoggerUtil.{LogContext, Logger}
 
 class HookServiceImpl[F[_]: MonadError[*[_], Throwable]](
     implicit config: HookConfig,
     http: HttpWrapper[F],
-    escher: EscherService[F]
+    escher: EscherService[F],
+    getJwtConfig: String => JwtConfig
 ) extends HookService[F] {
   import cats.syntax.applicative._
   import cats.syntax.applicativeError._
@@ -21,7 +23,15 @@ class HookServiceImpl[F[_]: MonadError[*[_], Throwable]](
   import spray.json.DefaultJsonProtocol._
   import spray.json._
 
-  private val logger = new Logger("HookService")
+  private val logger                           = new Logger("HookService")
+  protected lazy val jwtService: JwtService[F] = new JwtServiceImpl[F](getJwtConfig("hook"))
+
+  override def init: F[Unit] = {
+    config.authConfig match {
+      case JwtAuthConfig => jwtService.init
+      case _             => ().pure[F]
+    }
+  }
 
   override def register(id: String, externalId: String, authType: String, data: JsObject)(
       implicit ctx: LogContext
@@ -108,6 +118,10 @@ class HookServiceImpl[F[_]: MonadError[*[_], Throwable]](
         request.addCredentials(BasicHttpCredentials(username, password)).pure[F]
       case EscherAuthConfig =>
         escher.signRequest("hook", request)
+      case JwtAuthConfig =>
+        jwtService.encode(JsObject.empty).map { token =>
+          request.addCredentials(OAuth2BearerToken(token))
+        }
     }
   }
 

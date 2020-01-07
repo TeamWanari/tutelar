@@ -154,6 +154,7 @@ class ConfigServiceImpl() extends ConfigService {
             readFromFileOrConf(config, "basicAuth.password")
           )
         case "escher" => HookService.EscherAuthConfig
+        case "jwt"    => HookService.JwtAuthConfig
         case t        => throw WrongConfig(s"Unsupported hook type: $t")
       }
       HookConfig(

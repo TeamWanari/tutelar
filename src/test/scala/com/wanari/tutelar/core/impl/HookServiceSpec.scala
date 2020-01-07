@@ -6,8 +6,9 @@ import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.testkit.TestKit
 import com.wanari.tutelar.TestBase
-import com.wanari.tutelar.core.{EscherService, HookService}
-import com.wanari.tutelar.core.HookService.{BasicAuthConfig, EscherAuthConfig, HookConfig}
+import com.wanari.tutelar.core.{EscherService, HookService, JwtService}
+import com.wanari.tutelar.core.HookService.{BasicAuthConfig, EscherAuthConfig, HookConfig, JwtAuthConfig}
+import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.{AkkaHttpWrapper, HttpWrapper}
 import org.mockito.ArgumentMatchersSugar.any
@@ -15,6 +16,7 @@ import org.mockito.ArgumentCaptor
 import spray.json.{JsObject, JsString, JsTrue}
 
 import scala.concurrent.Future
+import scala.concurrent.duration.Duration
 
 class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestBase {
   override def afterAll: Unit = {
@@ -63,21 +65,26 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
       override def singleRequest(httpRequest: HttpRequest)(implicit ctx: LogContext): Future[HttpResponse] =
         httpMock.singleRequest(httpRequest)(ctx)
     }
-    implicit lazy val config = HookConfig(
+    implicit def config = HookConfig(
       baseUrl,
       Seq("register", "login", "modify", "link", "unlink", "delete", "refresh"),
       BasicAuthConfig("user", "pass")
     )
-    lazy val service = new HookServiceImpl[Future]()
+    val jwtServiceMock = mock[JwtService[Future]]
+
+    implicit def getJwtService(name: String): JwtConfig = ???
+    lazy val service = new HookServiceImpl[Future]() {
+      override lazy val jwtService = jwtServiceMock
+    }
   }
 
   trait EscherTestScope extends TestScope {
-    override lazy val config =
-      HookConfig(
-        baseUrl,
-        Seq("register", "login", "modify", "link", "unlink", "delete", "refresh"),
-        EscherAuthConfig
-      )
+    override def config = super.config.copy(authConfig = EscherAuthConfig)
+  }
+
+  trait JwtTestScope extends TestScope {
+    when(jwtServiceMock.encode(any[JsObject], any[Option[Duration]])).thenReturn(Future.successful("TOKEN"))
+    override def config = super.config.copy(authConfig = JwtAuthConfig)
   }
 
   type ServiceFunc = HookService[Future] => (String, String, String, JsObject) => Future[JsObject]
@@ -97,6 +104,11 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
           "sign request - escher" in new EscherTestScope {
             await(getFunc(service)(userId, externalId, authType, userInfo))
             validateEscherAuth(httpMock)
+          }
+
+          "add auth header - jwt" in new JwtTestScope {
+            await(getFunc(service)(userId, externalId, authType, userInfo))
+            validateJwtAuth(httpMock)
           }
 
           "send the user data and return the response" in new TestScope {
@@ -127,6 +139,11 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
         validateEscherAuth(httpMock)
       }
 
+      "add auth header - jwt" in new JwtTestScope {
+        await(service.modify(userId, externalId, authType, userInfo))
+        validateJwtAuth(httpMock)
+      }
+
       "send the user data" in new TestScope {
         await(service.modify(userId, externalId, authType, userInfo))
         validateRequest(httpMock)(
@@ -152,6 +169,11 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
       "sign request - escher" in new EscherTestScope {
         await(service.unlink(userId, externalId, authType))
         validateEscherAuth(httpMock)
+      }
+
+      "add auth header - jwt" in new JwtTestScope {
+        await(service.unlink(userId, externalId, authType))
+        validateJwtAuth(httpMock)
       }
 
       "send the user id and auth type" in new TestScope {
@@ -180,6 +202,11 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
         validateEscherAuth(httpMock)
       }
 
+      "add auth header - jwt" in new JwtTestScope {
+        await(service.delete(userId))
+        validateJwtAuth(httpMock)
+      }
+
       "send the user id" in new TestScope {
         await(service.delete(userId))
         validateRequest(httpMock)(
@@ -200,6 +227,11 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
       "sign request - escher" in new EscherTestScope {
         await(service.refreshToken(userId, JsObject.empty))
         validateEscherAuth(httpMock)
+      }
+
+      "add auth header - jwt" in new JwtTestScope {
+        await(service.refreshToken(userId, JsObject.empty))
+        validateJwtAuth(httpMock)
       }
 
       "send the user id" in new TestScope {
@@ -239,6 +271,12 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
     val captor: ArgumentCaptor[HttpRequest] = ArgumentCaptor.forClass(classOf[HttpRequest])
     verify(httpMock).singleRequest(captor.capture())(any[LogContext])
     captor.getValue.getHeader("Authorization").get().value() shouldEqual "Basic dXNlcjpwYXNz"
+  }
+
+  def validateJwtAuth(httpMock: HttpWrapper[Future]): Unit = {
+    val captor: ArgumentCaptor[HttpRequest] = ArgumentCaptor.forClass(classOf[HttpRequest])
+    verify(httpMock).singleRequest(captor.capture())(any[LogContext])
+    captor.getValue.getHeader("Authorization").get().value() shouldEqual "Bearer TOKEN"
   }
 
   def validateEscherAuth(httpMock: HttpWrapper[Future]): Unit = {
