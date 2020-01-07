@@ -122,7 +122,7 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
       refreshTokenO   <- parseRefreshToken(token)
       refreshToken    <- EitherT.fromOption(refreshTokenO, InvalidToken())
       _               <- EitherT.fromOptionF(databaseService.findUserById(refreshToken.id), UserNotFound())
-      hookData        <- EitherT.right(hookService.refreshToken(refreshToken.id))
+      hookData        <- EitherT.right(hookService.refreshToken(refreshToken.id, refreshToken.data))
       newRefreshToken <- createNewRefreshToken(refreshToken, hookData)
       tokenData       <- EitherT.right(convertToTokenData(newRefreshToken))
     } yield tokenData
@@ -139,9 +139,7 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
     } yield token.copy(createdAt = time, data = data)
   }
 
-  private def combinedJsonDataWithHookData(oldData: JsObject, hookData: JsObject)(
-      implicit ctx: LogContext
-  ): ErrorOr[F, JsObject] = {
+  private def combinedJsonDataWithHookData(oldData: JsObject, hookData: JsObject): ErrorOr[F, JsObject] = {
     if (hookData.fields.isEmpty) {
       EitherT.pure(oldData)
     } else {
