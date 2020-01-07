@@ -193,20 +193,20 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
   "#refreshToken" when {
     "call the backend" should {
       "add auth header - basic" in new TestScope {
-        await(service.refreshToken(userId))
+        await(service.refreshToken(userId, JsObject.empty))
         validateBasicAuth(httpMock)
       }
 
       "sign request - escher" in new EscherTestScope {
-        await(service.refreshToken(userId))
+        await(service.refreshToken(userId, JsObject.empty))
         validateEscherAuth(httpMock)
       }
 
       "send the user id" in new TestScope {
-        await(service.refreshToken(userId))
+        await(service.refreshToken(userId, JsObject("super" -> JsString("data"))))
         validateRequest(httpMock)(
           expectedUrl = s"$baseUrl/refresh",
-          expectedRequest = JsObject("id" -> JsString(userId))
+          expectedRequest = JsObject("id" -> JsString(userId), "data" -> JsObject("super" -> JsString("data")))
         )
       }
     }
@@ -220,7 +220,7 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
     TestCaseWrapper("link", s => s.link(userId, "", "", JsObject.empty), JsObject.empty),
     TestCaseWrapper("unlink", s => s.unlink(userId, "", ""), ()),
     TestCaseWrapper("delete", s => s.delete(userId), ()),
-    TestCaseWrapper("refreshToken", s => s.refreshToken(userId), JsObject.empty)
+    TestCaseWrapper("refreshToken", s => s.refreshToken(userId, JsObject.empty), JsObject.empty)
   ).foreach {
     case TestCaseWrapper(name, func, ret) =>
       s"$name works if no baseUrl" in new TestScope {

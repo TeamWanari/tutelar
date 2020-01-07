@@ -83,14 +83,7 @@ class ConfigServiceImpl() extends ConfigService {
   }
 
   override lazy val getEnabledModules: Seq[String] = {
-    Try {
-      conf
-        .getString("modulesEnabled")
-        .split(',')
-        .map(_.trim.toLowerCase)
-        .filterNot(_.isEmpty)
-        .toSeq
-    }.fold(logAndThrow("Enabled modules"), identity)
+    Try(getListConfig(conf, "modulesEnabled")).fold(logAndThrow("Enabled modules"), identity)
   }
 
   override implicit lazy val getPostgresConfig: PostgresConfig = {
@@ -165,7 +158,7 @@ class ConfigServiceImpl() extends ConfigService {
       }
       HookConfig(
         config.getString("baseUrl"),
-        config.getString("enabled").split(',').map(_.trim.toLowerCase).filterNot(_.isEmpty).toSeq,
+        getListConfig(config, "enabled"),
         authConfig
       )
     }.fold(logAndThrow("Hook"), identity)
@@ -346,5 +339,14 @@ class ConfigServiceImpl() extends ConfigService {
       )
       EmailServiceSmtpConfig(smtpConfig, templateConfig)
     }.fold(logAndThrow(s"EmailService SMTP"), identity)
+  }
+
+  private def getListConfig(conf: Config, key: String): Seq[String] = {
+    conf
+      .getString(key)
+      .split(',')
+      .map(_.trim.toLowerCase)
+      .filterNot(_.isEmpty)
+      .toSeq
   }
 }
