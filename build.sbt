@@ -1,6 +1,6 @@
 import org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings
 
-lazy val ver = version := "1.0.0-SNAPSHOT"
+lazy val ver = version := "1.0.0-alpha-9"
 
 lazy val commonSettings = Seq(
   scalaVersion := "2.13.1",
