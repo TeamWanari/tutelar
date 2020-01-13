@@ -15,7 +15,7 @@ import io.opentracing.Tracer
 import io.opentracing.util.GlobalTracer
 import org.slf4j.Logger
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 trait Api {
   private val tracer: Tracer                                    = GlobalTracer.get()
@@ -35,7 +35,7 @@ object Api {
       .fold(Api.emptyRoute)(_ ~ _)
   }
 
-  def createApi(services: Services[Future])(implicit logger: Logger): Route = {
+  def createApi(services: Services[Future])(implicit logger: Logger, ec: ExecutionContext): Route = {
     import com.wanari.tutelar.providers.oauth2.OAuth2Api._
     import services._
     import services.configService._

@@ -181,6 +181,11 @@ class ConfigServiceSpec extends TestBase {
         List("service1", "service2")
       )
     }
+    "jwt" in {
+      service.getServiceAuthConfig("exampleServiceApiJwt") shouldBe ServiceAuthDirectives.JwtAuthConfig(
+        service.getJwtConfigByName("example")
+      )
+    }
   }
 
   "#emailServiceSmtpConfig" in {

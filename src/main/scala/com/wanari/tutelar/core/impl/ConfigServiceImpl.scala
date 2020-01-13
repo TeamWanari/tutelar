@@ -10,6 +10,7 @@ import com.wanari.tutelar.core.Errors.WrongConfig
 import com.wanari.tutelar.core.ExpirationService._
 import com.wanari.tutelar.core.HookService.HookConfig
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
+import com.wanari.tutelar.core.ServiceAuthDirectives.JwtAuthConfig
 import com.wanari.tutelar.core.TracerService.{JaegerConfig, TracerServiceConfig}
 import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.core.impl.database.DatabaseServiceFactory.DatabaseConfig
@@ -127,9 +128,9 @@ class ConfigServiceImpl() extends ConfigService {
       JwtConfig(
         getDuration(config, "expirationTime"),
         config.getString("algorithm"),
-        readFromFileOrConf(config, "secret"),
-        readFromFileOrConf(config, "privateKey"),
-        readFromFileOrConf(config, "publicKey")
+        Try(readFromFileOrConf(config, "secret")).getOrElse(""),
+        Try(readFromFileOrConf(config, "privateKey")).getOrElse(""),
+        Try(readFromFileOrConf(config, "publicKey")).getOrElse("")
       )
     }.fold(logAndThrow(s"JWT for $name"), identity)
   }
@@ -289,6 +290,9 @@ class ConfigServiceImpl() extends ConfigService {
           ServiceAuthDirectives.EscherAuthConfig(
             config.getString("escher.trustedServices").split(",").toList
           )
+        case "jwt" =>
+          val configName = config.getString("jwt.configName")
+          JwtAuthConfig(getJwtConfigByName(configName))
         case t => throw new IllegalArgumentException(s"$t unknown service auth type in $path.")
       }
     }.fold(logAndThrow(s"ServiceAuth in $path"), identity)

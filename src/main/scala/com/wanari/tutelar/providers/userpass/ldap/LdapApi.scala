@@ -11,21 +11,23 @@ import com.wanari.tutelar.providers.userpass.ldap.LdapService.LdapUserListData
 import spray.json.DefaultJsonProtocol._
 import spray.json._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class LdapApi(
     implicit val service: LdapService[Future],
     val callbackConfig: CallbackConfig,
     val getServiceAuthConfig: String => ServiceAuthConfig,
-    val escherConfig: EscherConfig
+    val escherConfig: EscherConfig,
+    val ec: ExecutionContext
 ) extends UserPassApi
     with ServiceAuthDirectives {
-  override val servicePath: String = "ldap"
+  override val servicePath: String                     = "ldap"
+  override protected def authConfig: ServiceAuthConfig = getServiceAuthConfig("ldap.ldapApi")
 
   override def route(): Route = {
     super.route() ~ pathPrefix(servicePath) {
       path("users") {
-        authenticateService(authConfigPath = "ldap.ldapApi") {
+        authenticateService {
           get {
             withTrace(s"List_users_$servicePath") { implicit ctx =>
               service.listUsers().toComplete
