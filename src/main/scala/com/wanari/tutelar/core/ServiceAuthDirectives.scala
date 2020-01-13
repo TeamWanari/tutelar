@@ -2,8 +2,8 @@ package com.wanari.tutelar.core
 
 import akka.http.scaladsl.server.Directive0
 import akka.http.scaladsl.server.Directives.{
-  Authenticator,
   AsyncAuthenticator,
+  Authenticator,
   authenticateBasic,
   authenticateOAuth2Async,
   reject
@@ -62,4 +62,5 @@ object ServiceAuthDirectives {
   case class BasicAuthConfig(username: String, password: String) extends ServiceAuthConfig
   case class EscherAuthConfig(trustedServices: List[String])     extends ServiceAuthConfig
   case class JwtAuthConfig(jwtConfig: JwtConfig)                 extends ServiceAuthConfig
+  case object AccessBlocked                                      extends ServiceAuthConfig
 }

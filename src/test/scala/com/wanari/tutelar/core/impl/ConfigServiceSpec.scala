@@ -186,6 +186,9 @@ class ConfigServiceSpec extends TestBase {
         service.getJwtConfigByName("example")
       )
     }
+    "blocked" in {
+      service.getServiceAuthConfig("exampleServiceApiBlocked") shouldBe ServiceAuthDirectives.AccessBlocked
+    }
   }
 
   "#emailServiceSmtpConfig" in {

@@ -10,7 +10,7 @@ import com.wanari.tutelar.core.Errors.WrongConfig
 import com.wanari.tutelar.core.ExpirationService._
 import com.wanari.tutelar.core.HookService.HookConfig
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
-import com.wanari.tutelar.core.ServiceAuthDirectives.JwtAuthConfig
+import com.wanari.tutelar.core.ServiceAuthDirectives.{AccessBlocked, JwtAuthConfig}
 import com.wanari.tutelar.core.TracerService.{JaegerConfig, TracerServiceConfig}
 import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.core.impl.database.DatabaseServiceFactory.DatabaseConfig
@@ -293,6 +293,8 @@ class ConfigServiceImpl() extends ConfigService {
         case "jwt" =>
           val configName = config.getString("jwt.configName")
           JwtAuthConfig(getJwtConfigByName(configName))
+        case "blocked" =>
+          AccessBlocked
         case t => throw new IllegalArgumentException(s"$t unknown service auth type in $path.")
       }
     }.fold(logAndThrow(s"ServiceAuth in $path"), identity)
