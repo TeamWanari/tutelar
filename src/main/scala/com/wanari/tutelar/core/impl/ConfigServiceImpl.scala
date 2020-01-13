@@ -90,7 +90,12 @@ class ConfigServiceImpl() extends ConfigService {
   override implicit lazy val getPostgresConfig: PostgresConfig = {
     Try {
       val config = conf.getConfig("database.postgres")
-      PostgresConfig(config, "")
+      val url    = readFromFileOrConf(config, "url").replaceAll("\n", "")
+      val databaseConfig = config
+        .withoutPath("url")
+        .withoutPath("urlFile")
+        .withFallback(ConfigFactory.parseString(s"""url = "$url""""))
+      PostgresConfig(databaseConfig, "")
     }.fold(logAndThrow("PostgreSQL"), identity)
   }
 
