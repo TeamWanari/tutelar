@@ -45,8 +45,8 @@ class AmqpServiceImpl[F[_]: Applicative](implicit config: AmqpConfig, actorSyste
   }
 
   private def convertToWriteSettings(connectionProvider: AmqpConnectionProvider, queueConfig: AmqpQueueConfig) = {
-    val ws0 = AmqpWriteSettings(connectionProvider)
-    val ws1 = queueConfig.exchange.map(ws0.withExchange).getOrElse(ws0)
-    queueConfig.routingKey.map(ws1.withRoutingKey).getOrElse(ws1)
+    AmqpWriteSettings(connectionProvider)
+      .withRoutingKey(queueConfig.queueName)
+      .withDeclaration(QueueDeclaration(queueConfig.queueName))
   }
 }

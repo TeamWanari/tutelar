@@ -6,8 +6,6 @@ import com.typesafe.config.Config
 import com.wanari.tutelar.Initable
 import com.wanari.tutelar.core.AmqpService.{AmqpQueue, AmqpQueueConfig}
 
-import scala.util.Try
-
 trait AmqpService[F[_]] extends Initable[F] {
   def createQueue(queueConfig: AmqpQueueConfig): AmqpQueue
 }
@@ -15,13 +13,12 @@ trait AmqpService[F[_]] extends Initable[F] {
 object AmqpService {
   case class AmqpConfig(uri: String)
 
-  case class AmqpQueueConfig(routingKey: Option[String], exchange: Option[String], bufferSize: Int)
+  case class AmqpQueueConfig(queueName: String, bufferSize: Int)
 
   object AmqpQueueConfig {
     def apply(config: Config): AmqpQueueConfig = {
       AmqpQueueConfig(
-        Try(config.getString("routing-key")).toOption,
-        Try(config.getString("exchange")).toOption,
+        config.getString("queue-name"),
         config.getInt("buffer-size")
       )
     }

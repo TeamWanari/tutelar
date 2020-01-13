@@ -147,7 +147,7 @@ class ConfigServiceSpec extends TestBase {
   }
   "#getAmqpQueueConfig" in {
     val service = new ConfigServiceImpl()
-    service.getAmqpQueueConfig("email_service") shouldBe AmqpQueueConfig(Some("RK"), Some("EX"), 777)
+    service.getAmqpQueueConfig("email_service") shouldBe AmqpQueueConfig("NAME", 777)
     Try(service.getAmqpQueueConfig("random")) shouldBe a[Failure[_]]
   }
 
