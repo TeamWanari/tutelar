@@ -43,6 +43,10 @@ class ExpirationServiceSpec extends TestBase {
             service.isExpired("provider_inactivity_500ms", lastActivityAt = time, loginAt = now) shouldBe expected
           }
       }
+      "Use lowercase provider name. (ExpirationInactivity lastActivityAt 0 - true)" in new TestScope {
+        service.isExpired("provider_inactivity_500ms", lastActivityAt = 0, loginAt = now) shouldBe true
+      }
+
       times.foreach { time =>
         s"ExpirationInactivity loginAt do not matter $time" in new TestScope {
           service.isExpired("provider_inactivity_500ms", lastActivityAt = now, loginAt = time) shouldBe false

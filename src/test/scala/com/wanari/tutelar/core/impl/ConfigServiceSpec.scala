@@ -153,19 +153,19 @@ class ConfigServiceSpec extends TestBase {
 
   "#providerExpirationConfigs" should {
     val service = new ConfigServiceImpl {}
-    "load all providers" in {
-      service.providerExpirationConfigs.keySet shouldEqual Set("aaaProvider", "bbbProvider", "cccProvider")
+    "load all providers as lowercase" in {
+      service.providerExpirationConfigs.keySet shouldEqual Set("aaaprovider", "bbbprovider", "cccprovider")
     }
     "disabled" in {
-      service.providerExpirationConfigs("aaaProvider") shouldBe ExpirationDisabled
+      service.providerExpirationConfigs("aaaprovider") shouldBe ExpirationDisabled
     }
     "inactivity" in {
-      service.providerExpirationConfigs("bbbProvider") shouldBe ExpirationInactivity(
+      service.providerExpirationConfigs("bbbprovider") shouldBe ExpirationInactivity(
         FiniteDuration(24 * 60 * 60, TimeUnit.SECONDS)
       )
     }
     "lifetime" in {
-      service.providerExpirationConfigs("cccProvider") shouldBe ExpirationLifetime(
+      service.providerExpirationConfigs("cccprovider") shouldBe ExpirationLifetime(
         FiniteDuration(60 * 60, TimeUnit.SECONDS)
       )
     }

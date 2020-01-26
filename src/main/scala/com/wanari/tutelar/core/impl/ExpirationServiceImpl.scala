@@ -24,7 +24,7 @@ class ExpirationServiceImpl[F[_]: Applicative](
       logger.warn(s"Not found expiration config for: $providerName.")
       ExpirationDisabled
     }
-    providerExpirationConfigs.getOrElse(providerName, notFoundConfigFallback) match {
+    providerExpirationConfigs.getOrElse(providerName.toLowerCase, notFoundConfigFallback) match {
       case ExpirationDisabled             => false.pure[F]
       case ExpirationInactivity(duration) => isItOlderThan(lastActivityAt, duration)
       case ExpirationLifetime(duration)   => isItOlderThan(loginAt, duration)

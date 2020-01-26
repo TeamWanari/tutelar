@@ -268,7 +268,7 @@ class ConfigServiceImpl() extends ConfigService {
     Try {
       import scala.jdk.CollectionConverters._
       val config    = conf.getConfig("providerLoginExpiration")
-      val providers = config.root().keySet().asScala
+      val providers = config.root().keySet().asScala.map(_.toLowerCase)
       providers.map { providerName =>
         val expirationConfig = config.getString(s"$providerName.type") match {
           case ""           => ExpirationDisabled
