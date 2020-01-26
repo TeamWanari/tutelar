@@ -60,10 +60,10 @@ trait Services[F[_]] {
   }
 }
 
-class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem) extends Services[Future] {
+class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, override val configService: ConfigService)
+    extends Services[Future] {
   import cats.instances.future._
 
-  implicit lazy val configService: ConfigService = new ConfigServiceImpl
   import configService._
 
   implicit lazy val healthCheckService: HealthCheckService[Future]  = new HealthCheckServiceImpl[Future]

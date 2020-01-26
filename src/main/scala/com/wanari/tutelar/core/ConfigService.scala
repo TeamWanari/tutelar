@@ -1,6 +1,7 @@
 package com.wanari.tutelar.core
 
 import com.emarsys.escher.akka.http.config.EscherConfig
+import com.typesafe.config.Config
 import com.wanari.tutelar.core.AmqpService.{AmqpConfig, AmqpQueueConfig}
 import com.wanari.tutelar.core.ExpirationService.ExpirationConfig
 import com.wanari.tutelar.core.HookService.HookConfig
@@ -41,4 +42,5 @@ trait ConfigService {
   implicit def providerExpirationConfigs: Map[String, ExpirationConfig]
   implicit def getServiceAuthConfig(path: String): ServiceAuthConfig
   implicit def emailServiceSmtpConfig: EmailServiceSmtpConfig
+  def getConfigForAkka: Config
 }

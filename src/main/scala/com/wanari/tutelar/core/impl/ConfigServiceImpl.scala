@@ -41,7 +41,7 @@ class ConfigServiceImpl() extends ConfigService {
 
   private lazy val conf: Config = {
     Try {
-      listConfigFilesIfDirectoryExists().fold(ConfigFactory.load()) { configFiles =>
+      val applicationConfig = listConfigFilesIfDirectoryExists().fold(ConfigFactory.load()) { configFiles =>
         if (configFiles.isEmpty) {
           copyResourceConfigToDirectory()
           ConfigFactory.load()
@@ -49,6 +49,8 @@ class ConfigServiceImpl() extends ConfigService {
           mergeConfigFiles(configFiles)
         }
       }
+      val extraConfig = ConfigFactory.load("extra.conf")
+      applicationConfig.withFallback(extraConfig)
     }
   }.fold(logAndThrow(""), identity)
 
@@ -67,6 +69,7 @@ class ConfigServiceImpl() extends ConfigService {
         configDir.listFiles.toSeq
           .filter(_.isFile)
           .filter(_.getName.endsWith(".conf"))
+          .sortBy(_.getName)
       )
     } else {
       None
@@ -361,4 +364,6 @@ class ConfigServiceImpl() extends ConfigService {
       .filterNot(_.isEmpty)
       .toSeq
   }
+
+  override val getConfigForAkka: Config = conf
 }

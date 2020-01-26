@@ -1,6 +1,7 @@
 package com.wanari.tutelar
 
 import com.emarsys.escher.akka.http.config.EscherConfig
+import com.typesafe.config.Config
 import com.wanari.tutelar.core.HookService.HookConfig
 import com.wanari.tutelar.core.ProviderApi.CallbackConfig
 import com.wanari.tutelar.core.TracerService.TracerServiceConfig
@@ -54,6 +55,7 @@ class InitableSpec extends TestBase {
       override def providerExpirationConfigs: Map[String, ExpirationService.ExpirationConfig]  = ???
       override def getServiceAuthConfig(path: String): ServiceAuthDirectives.ServiceAuthConfig = ???
       override def emailServiceSmtpConfig: EmailServiceSmtpImpl.EmailServiceSmtpConfig         = ???
+      override def getConfigForAkka: Config                                                    = ???
     }
   }
   import cats.instances.try_._

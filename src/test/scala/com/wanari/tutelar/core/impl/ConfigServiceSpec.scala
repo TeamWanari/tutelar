@@ -25,6 +25,17 @@ import scala.concurrent.duration._
 import scala.util.{Failure, Try}
 
 class ConfigServiceSpec extends TestBase {
+
+  "extra.conf" should {
+    val service = new ConfigServiceImpl()
+    "from the application.conf" in {
+      service.getConfigForAkka.getString("extraConf_1") shouldEqual "tutelar not extra"
+    }
+    "fallback to extra.conf" in {
+      service.getConfigForAkka.getString("extraConf_2") shouldEqual "tutelar extra 2"
+    }
+  }
+
   "#isModuleEnabled" should {
     val service        = new ConfigServiceImpl()
     val enabledModules = service.getEnabledModules
