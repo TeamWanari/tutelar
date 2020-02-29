@@ -119,9 +119,7 @@ class HookServiceImpl[F[_]: MonadError[*[_], Throwable]](
       case EscherAuthConfig =>
         escher.signRequest("hook", request)
       case JwtAuthConfig =>
-        jwtService.encode(JsObject.empty).map { token =>
-          request.addCredentials(OAuth2BearerToken(token))
-        }
+        jwtService.encode(JsObject.empty).map { token => request.addCredentials(OAuth2BearerToken(token)) }
     }
   }
 

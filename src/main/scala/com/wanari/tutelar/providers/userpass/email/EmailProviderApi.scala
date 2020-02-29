@@ -38,9 +38,7 @@ class EmailProviderApi(
         } ~ path("send-register") {
         post {
           entity(as[EmailData]) { data =>
-            withTrace("SendRegister_email") { implicit ctx =>
-              service.sendRegister(data.email).toComplete
-            }
+            withTrace("SendRegister_email") { implicit ctx => service.sendRegister(data.email).toComplete }
           }
         }
       } ~ path("reset-password") {
@@ -54,9 +52,7 @@ class EmailProviderApi(
       } ~ path("send-reset-password") {
         post {
           entity(as[EmailData]) { data =>
-            withTrace("SendResetPassword_email") { implicit ctx =>
-              service.sendResetPassword(data.email).toComplete
-            }
+            withTrace("SendResetPassword_email") { implicit ctx => service.sendResetPassword(data.email).toComplete }
           }
         }
       }

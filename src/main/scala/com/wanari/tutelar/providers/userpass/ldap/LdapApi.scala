@@ -29,9 +29,7 @@ class LdapApi(
       path("users") {
         authenticateService {
           get {
-            withTrace(s"List_users_$servicePath") { implicit ctx =>
-              service.listUsers().toComplete
-            }
+            withTrace(s"List_users_$servicePath") { implicit ctx => service.listUsers().toComplete }
           }
         }
       }

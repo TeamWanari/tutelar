@@ -32,8 +32,6 @@ class ExpirationServiceImpl[F[_]: Applicative](
   }
 
   private def isItOlderThan(time: Long, duration: Duration): F[Boolean] = {
-    dateTime.getCurrentTimeMillis.map { now =>
-      time + duration.toMillis <= now
-    }
+    dateTime.getCurrentTimeMillis.map { now => time + duration.toMillis <= now }
   }
 }

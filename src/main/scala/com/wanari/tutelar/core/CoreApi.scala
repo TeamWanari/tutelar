@@ -18,17 +18,13 @@ class CoreApi(implicit val authService: AuthService[Future]) extends Api with Au
       userAuth { userId =>
         path("delete") {
           post {
-            withTrace("Delete_core") { implicit ctx =>
-              authService.deleteUser(userId).toComplete
-            }
+            withTrace("Delete_core") { implicit ctx => authService.deleteUser(userId).toComplete }
           }
         } ~
           path("unlink") {
             post {
               entity(as[UnlinkData]) { data =>
-                withTrace("Unlink_core") { implicit ctx =>
-                  authService.unlink(userId, data.authType).toComplete
-                }
+                withTrace("Unlink_core") { implicit ctx => authService.unlink(userId, data.authType).toComplete }
               }
             }
           }
@@ -36,9 +32,7 @@ class CoreApi(implicit val authService: AuthService[Future]) extends Api with Au
         path("refresh-token") {
           post {
             entity(as[RefreshTokenData]) { data =>
-              withTrace("RefreshToken_core") { implicit ctx =>
-                authService.refreshToken(data.refreshToken).toComplete
-              }
+              withTrace("RefreshToken_core") { implicit ctx => authService.refreshToken(data.refreshToken).toComplete }
             }
           }
         }

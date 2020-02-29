@@ -25,9 +25,7 @@ class AuthDirectivesSpec extends TestBase with ScalatestRouteTest with BeforeAnd
       override val authService: AuthService[Future] = authServiceMock
     }
 
-    val route = authDirectives.userAuth { userId =>
-      complete(userId)
-    }
+    val route = authDirectives.userAuth { userId => complete(userId) }
   }
 
   "AuthDirectives" should {

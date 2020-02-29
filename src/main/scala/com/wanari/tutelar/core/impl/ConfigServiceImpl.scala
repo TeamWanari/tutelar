@@ -80,9 +80,7 @@ class ConfigServiceImpl() extends ConfigService {
     Using.Manager { use =>
       val in  = use(Source.fromResource("application.conf"))
       val out = use(new BufferedWriter(new FileWriter("/config/application.conf")))
-      in.iter.foreach { c =>
-        out.write(c)
-      }
+      in.iter.foreach { c => out.write(c) }
     }
   }
 

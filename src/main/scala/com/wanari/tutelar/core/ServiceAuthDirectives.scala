@@ -41,9 +41,7 @@ trait ServiceAuthDirectives extends EscherDirectives {
           case Provided(token) =>
             service
               .validate(token)
-              .map { result =>
-                if (result) Some({}) else None
-              }
+              .map { result => if (result) Some({}) else None }
               .recover {
                 case x =>
                   println(x)
