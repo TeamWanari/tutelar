@@ -1,7 +1,7 @@
 package com.wanari.tutelar.core.impl
 
 import akka.http.scaladsl.model.HttpMethods._
-import akka.http.scaladsl.model.headers.{BasicHttpCredentials, OAuth2BearerToken}
+import akka.http.scaladsl.model.headers.{BasicHttpCredentials, OAuth2BearerToken, RawHeader}
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpRequest, HttpResponse}
 import cats.MonadError
 import com.wanari.tutelar.core.HookService._
@@ -116,6 +116,8 @@ class HookServiceImpl[F[_]: MonadError[*[_], Throwable]](
     authConfig match {
       case BasicAuthConfig(username, password) =>
         request.addCredentials(BasicHttpCredentials(username, password)).pure[F]
+      case CustomHeaderAuthConfig(headername, secret) =>
+        request.addHeader(RawHeader(headername, secret)).pure[F]
       case EscherAuthConfig =>
         escher.signRequest("hook", request)
       case JwtAuthConfig =>

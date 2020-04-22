@@ -6,13 +6,19 @@ import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.testkit.TestKit
 import com.wanari.tutelar.TestBase
-import com.wanari.tutelar.core.{EscherService, HookService, JwtService}
-import com.wanari.tutelar.core.HookService.{BasicAuthConfig, EscherAuthConfig, HookConfig, JwtAuthConfig}
+import com.wanari.tutelar.core.HookService.{
+  BasicAuthConfig,
+  CustomHeaderAuthConfig,
+  EscherAuthConfig,
+  HookConfig,
+  JwtAuthConfig
+}
 import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
+import com.wanari.tutelar.core.{EscherService, HookService, JwtService}
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.{AkkaHttpWrapper, HttpWrapper}
-import org.mockito.ArgumentMatchersSugar.any
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchersSugar.any
 import spray.json.{JsObject, JsString, JsTrue}
 
 import scala.concurrent.Future
@@ -78,6 +84,11 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
     }
   }
 
+  trait CustomHeaderTestScope extends TestScope {
+    val customHeaderAuthConfig = CustomHeaderAuthConfig("Custom-Header-Auth", "top secret")
+    override def config        = super.config.copy(authConfig = customHeaderAuthConfig)
+  }
+
   trait EscherTestScope extends TestScope {
     override def config = super.config.copy(authConfig = EscherAuthConfig)
   }
@@ -99,6 +110,11 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
           "add auth header - basic" in new TestScope {
             await(getFunc(service)(userId, externalId, authType, userInfo))
             validateBasicAuth(httpMock)
+          }
+
+          "add custom header - custom header" in new CustomHeaderTestScope {
+            await(getFunc(service)(userId, externalId, authType, userInfo))
+            validateCustomHeaderAuth(httpMock)
           }
 
           "sign request - escher" in new EscherTestScope {
@@ -134,6 +150,11 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
         validateBasicAuth(httpMock)
       }
 
+      "add custom header - custom header" in new CustomHeaderTestScope {
+        await(service.modify(userId, externalId, authType, userInfo))
+        validateCustomHeaderAuth(httpMock)
+      }
+
       "sign request - escher" in new EscherTestScope {
         await(service.modify(userId, externalId, authType, userInfo))
         validateEscherAuth(httpMock)
@@ -164,6 +185,11 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
       "add auth header - basic" in new TestScope {
         await(service.unlink(userId, externalId, authType))
         validateBasicAuth(httpMock)
+      }
+
+      "add custom header - custom header" in new CustomHeaderTestScope {
+        await(service.unlink(userId, externalId, authType))
+        validateCustomHeaderAuth(httpMock)
       }
 
       "sign request - escher" in new EscherTestScope {
@@ -197,6 +223,11 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
         validateBasicAuth(httpMock)
       }
 
+      "add custom header - custom header" in new CustomHeaderTestScope {
+        await(service.delete(userId))
+        validateCustomHeaderAuth(httpMock)
+      }
+
       "sign request - escher" in new EscherTestScope {
         await(service.delete(userId))
         validateEscherAuth(httpMock)
@@ -222,6 +253,11 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
       "add auth header - basic" in new TestScope {
         await(service.refreshToken(userId, JsObject.empty))
         validateBasicAuth(httpMock)
+      }
+
+      "add custom header - custom header" in new CustomHeaderTestScope {
+        await(service.refreshToken(userId, JsObject.empty))
+        validateCustomHeaderAuth(httpMock)
       }
 
       "sign request - escher" in new EscherTestScope {
@@ -271,6 +307,12 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
     val captor: ArgumentCaptor[HttpRequest] = ArgumentCaptor.forClass(classOf[HttpRequest])
     verify(httpMock).singleRequest(captor.capture())(any[LogContext])
     captor.getValue.getHeader("Authorization").get().value() shouldEqual "Basic dXNlcjpwYXNz"
+  }
+
+  def validateCustomHeaderAuth(httpMock: HttpWrapper[Future]): Unit = {
+    val captor: ArgumentCaptor[HttpRequest] = ArgumentCaptor.forClass(classOf[HttpRequest])
+    verify(httpMock).singleRequest(captor.capture())(any[LogContext])
+    captor.getValue.getHeader("Custom-Header-Auth").get().value() shouldEqual "top secret"
   }
 
   def validateJwtAuth(httpMock: HttpWrapper[Future]): Unit = {
