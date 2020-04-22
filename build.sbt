@@ -101,7 +101,7 @@ enablePlugins(JavaAppPackaging)
 enablePlugins(BuildInfoPlugin)
 
 addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
-addCompilerPlugin("io.tryp"       % "splain"          % "0.5.1" cross CrossVersion.patch)
+addCompilerPlugin("io.tryp"       % "splain"          % "0.5.2" cross CrossVersion.patch)
 
 cancelable in Global := true
 
