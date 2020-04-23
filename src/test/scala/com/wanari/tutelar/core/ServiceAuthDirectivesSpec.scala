@@ -1,14 +1,20 @@
 package com.wanari.tutelar.core
 
-import akka.http.scaladsl.model.headers.{BasicHttpCredentials, OAuth2BearerToken}
+import akka.http.javadsl.server.AuthorizationFailedRejection
+import akka.http.scaladsl.model.headers.{BasicHttpCredentials, OAuth2BearerToken, RawHeader}
 import akka.http.scaladsl.model.{HttpRequest, StatusCodes}
-import akka.http.scaladsl.server.{AuthenticationFailedRejection, Route}
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.{AuthenticationFailedRejection, Route}
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import com.emarsys.escher.akka.http.config.EscherConfig
 import com.typesafe.config.ConfigFactory
 import com.wanari.tutelar.TestBase
-import com.wanari.tutelar.core.ServiceAuthDirectives.{BasicAuthConfig, EscherAuthConfig, JwtAuthConfig}
+import com.wanari.tutelar.core.ServiceAuthDirectives.{
+  BasicAuthConfig,
+  CustomHeaderAuthConfig,
+  EscherAuthConfig,
+  JwtAuthConfig
+}
 import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
 import org.scalatest.concurrent.ScalaFutures
 
@@ -19,6 +25,18 @@ class ServiceAuthDirectivesSpec extends TestBase with ScalatestRouteTest with Sc
   trait BasicTestScope extends ServiceAuthDirectives {
     implicit val ec: ExecutionContext                       = implicitly
     val authConfig: ServiceAuthDirectives.ServiceAuthConfig = BasicAuthConfig("user", "pass")
+    lazy val escherConfig: EscherConfig                     = null
+
+    val route: Route = path("test") {
+      authenticateService {
+        complete("")
+      }
+    }
+  }
+
+  trait CustomHeaderTestScope extends ServiceAuthDirectives {
+    implicit val ec: ExecutionContext                       = implicitly
+    val authConfig: ServiceAuthDirectives.ServiceAuthConfig = CustomHeaderAuthConfig("Custom-Header-Auth", "top secret")
     lazy val escherConfig: EscherConfig                     = null
 
     val route: Route = path("test") {
@@ -70,6 +88,23 @@ class ServiceAuthDirectivesSpec extends TestBase with ScalatestRouteTest with Sc
       }
       "ok" in new BasicTestScope {
         Get("/test") ~> addCredentials(BasicHttpCredentials("user", "pass")) ~> route ~> check {
+          status shouldEqual StatusCodes.OK
+        }
+      }
+    }
+    "custom header auth" should {
+      "reject if wrong credentials" in new CustomHeaderTestScope {
+        Get("/test") ~> addHeader(RawHeader("Custom-Header-Auth", "bad secret")) ~> route ~> check {
+          rejection shouldBe an[AuthorizationFailedRejection]
+        }
+      }
+      "reject if credentials missing" in new CustomHeaderTestScope {
+        Get("/test") ~> route ~> check {
+          rejection shouldBe an[AuthorizationFailedRejection]
+        }
+      }
+      "ok" in new CustomHeaderTestScope {
+        Get("/test") ~> addHeader(RawHeader("Custom-Header-Auth", "top secret")) ~> route ~> check {
           status shouldEqual StatusCodes.OK
         }
       }

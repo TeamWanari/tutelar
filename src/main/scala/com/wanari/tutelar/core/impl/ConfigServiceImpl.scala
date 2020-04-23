@@ -160,6 +160,11 @@ class ConfigServiceImpl() extends ConfigService {
             config.getString("basicAuth.username"),
             readFromFileOrConf(config, "basicAuth.password")
           )
+        case "custom_header" =>
+          HookService.CustomHeaderAuthConfig(
+            config.getString("customHeader.headername"),
+            readFromFileOrConf(config, "customHeader.secret")
+          )
         case "escher" => HookService.EscherAuthConfig
         case "jwt"    => HookService.JwtAuthConfig
         case t        => throw WrongConfig(s"Unsupported hook type: $t")

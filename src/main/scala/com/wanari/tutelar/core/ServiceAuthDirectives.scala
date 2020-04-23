@@ -1,21 +1,17 @@
 package com.wanari.tutelar.core
 
-import akka.http.scaladsl.server.Directive0
+import akka.http.scaladsl.server.{AuthorizationFailedRejection, Directive0}
 import akka.http.scaladsl.server.Directives.{
   AsyncAuthenticator,
   Authenticator,
   authenticateBasic,
-  authenticateOAuth2Async,
-  reject
+  authenticateOAuth2Async
 }
 import akka.http.scaladsl.server.directives.Credentials.Provided
+import akka.http.scaladsl.server.directives.HeaderDirectives._
+import akka.http.scaladsl.server.directives.RouteDirectives.reject
 import com.emarsys.escher.akka.http.EscherDirectives
-import com.wanari.tutelar.core.ServiceAuthDirectives.{
-  BasicAuthConfig,
-  EscherAuthConfig,
-  JwtAuthConfig,
-  ServiceAuthConfig
-}
+import com.wanari.tutelar.core.ServiceAuthDirectives._
 import com.wanari.tutelar.core.impl.JwtServiceImpl
 import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
 
@@ -32,6 +28,11 @@ trait ServiceAuthDirectives extends EscherDirectives {
           case _                                                      => None
         }
         authenticateBasic("", authenticator).map(_ => ())
+      case CustomHeaderAuthConfig(headername, secret) =>
+        val rejection = AuthorizationFailedRejection
+        optionalHeaderValueByName(headername)
+          .map(_.getOrElse(rejection))
+          .require(secret.equals, rejection)
       case EscherAuthConfig(trustedServices) =>
         escherAuthenticate(trustedServices)
       case JwtAuthConfig(jwtConfig) =>
@@ -57,8 +58,9 @@ trait ServiceAuthDirectives extends EscherDirectives {
 
 object ServiceAuthDirectives {
   sealed trait ServiceAuthConfig
-  case class BasicAuthConfig(username: String, password: String) extends ServiceAuthConfig
-  case class EscherAuthConfig(trustedServices: List[String])     extends ServiceAuthConfig
-  case class JwtAuthConfig(jwtConfig: JwtConfig)                 extends ServiceAuthConfig
-  case object AccessBlocked                                      extends ServiceAuthConfig
+  case class BasicAuthConfig(username: String, password: String)        extends ServiceAuthConfig
+  case class CustomHeaderAuthConfig(headername: String, secret: String) extends ServiceAuthConfig
+  case class EscherAuthConfig(trustedServices: List[String])            extends ServiceAuthConfig
+  case class JwtAuthConfig(jwtConfig: JwtConfig)                        extends ServiceAuthConfig
+  case object AccessBlocked                                             extends ServiceAuthConfig
 }
