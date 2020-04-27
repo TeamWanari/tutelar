@@ -16,7 +16,7 @@
 ### Setup OAuth2 providers (optional)
 You have to add the providers configs to `.env` file (or create the `.env` file if not exists yet) 
 
-_TODO: how to get GitHub/Google/Facebook OAuth2 credentials_
+_TODO: how to get GitHub/Google/Facebook/Microsoft OAuth2 credentials_
 
 ```
 GITHUB_CLIENT_ID=REPLACE_IT
@@ -25,10 +25,12 @@ GOOGLE_CLIENT_ID=REPLACE_IT
 GOOGLE_CLIENT_SECRET=REPLACE_IT
 FACEBOOK_CLIENT_ID=REPLACE_IT
 FACEBOOK_CLIENT_SECRET=REPLACE_IT
+MICROSOFT_CLIENT_ID=REPLACE_IT
+MICROSOFT_CLIENT_SECRET=REPLACE_IT
 ```
 And add this line too:
 ```
-MODULES_ENABLED=health,basic,email,ldap,totp,facebook,google,github
+MODULES_ENABLED=health,basic,email,ldap,totp,facebook,google,github,microsoft
 ```
 
 ### Basic sbt tasks

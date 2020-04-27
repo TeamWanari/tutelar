@@ -5,6 +5,7 @@
 * [Github](github.md)
 * [Facebook](facebook.md)
 * [Google](google.md)
+* [Microsoft](microsoft.md)
 * [LDAP](ldap.md)
 * [Basic](basic.md)
 

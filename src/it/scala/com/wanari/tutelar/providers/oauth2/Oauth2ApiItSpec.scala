@@ -16,7 +16,7 @@ import scala.concurrent.Future
 class Oauth2ApiItSpec extends RouteTestBase {
   import cats.instances.future._
 
-  Seq("facebook", "github", "google").foreach { provider =>
+  Seq("facebook", "github", "google", "microsoft").foreach { provider =>
     s"GET /$provider/login" should {
       "return forward" in new BaseTestScope {
         when(

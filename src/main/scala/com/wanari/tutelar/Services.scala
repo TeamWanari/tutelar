@@ -5,7 +5,7 @@ import cats.MonadError
 import com.wanari.tutelar.core._
 import com.wanari.tutelar.core.impl._
 import com.wanari.tutelar.core.impl.database._
-import com.wanari.tutelar.providers.oauth2.{FacebookService, GithubService, GoogleService}
+import com.wanari.tutelar.providers.oauth2.{FacebookService, GithubService, GoogleService, MicrosoftService}
 import com.wanari.tutelar.providers.userpass.basic.{BasicProviderService, BasicProviderServiceImpl}
 import com.wanari.tutelar.providers.userpass.email._
 import com.wanari.tutelar.providers.userpass.ldap.{LdapService, LdapServiceImpl}
@@ -23,6 +23,7 @@ trait Services[F[_]] {
   implicit def facebookService: FacebookService[F]
   implicit def githubService: GithubService[F]
   implicit def googleService: GoogleService[F]
+  implicit def microsoftService: MicrosoftService[F]
   implicit def databaseService: DatabaseService[F]
   implicit def idGenerator: IdGenerator[F]
   implicit def dateTimeService: DateTimeUtil[F]
@@ -66,14 +67,16 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, over
 
   import configService._
 
-  implicit lazy val healthCheckService: HealthCheckService[Future]  = new HealthCheckServiceImpl[Future]
-  implicit lazy val mongoDriver: AsyncDriver                        = new AsyncDriver()
-  implicit lazy val databaseService: DatabaseService[Future]        = DatabaseServiceFactory.create()
-  implicit lazy val httpWrapper: HttpWrapper[Future]                = new AkkaHttpWrapper()
-  implicit lazy val csrfService: CsrfService[Future]                = new CsrfServiceNotChecked[Future]
-  implicit lazy val facebookService: FacebookService[Future]        = new FacebookService[Future](configService.facebookConfig)
-  implicit lazy val githubService: GithubService[Future]            = new GithubService[Future](configService.githubConfig)
-  implicit lazy val googleService: GoogleService[Future]            = new GoogleService[Future](configService.googleConfig)
+  implicit lazy val healthCheckService: HealthCheckService[Future] = new HealthCheckServiceImpl[Future]
+  implicit lazy val mongoDriver: AsyncDriver                       = new AsyncDriver()
+  implicit lazy val databaseService: DatabaseService[Future]       = DatabaseServiceFactory.create()
+  implicit lazy val httpWrapper: HttpWrapper[Future]               = new AkkaHttpWrapper()
+  implicit lazy val csrfService: CsrfService[Future]               = new CsrfServiceNotChecked[Future]
+  implicit lazy val facebookService: FacebookService[Future]       = new FacebookService[Future](configService.facebookConfig)
+  implicit lazy val githubService: GithubService[Future]           = new GithubService[Future](configService.githubConfig)
+  implicit lazy val googleService: GoogleService[Future]           = new GoogleService[Future](configService.googleConfig)
+  implicit lazy val microsoftService: MicrosoftService[Future] =
+    new MicrosoftService[Future](configService.microsoftConfig)
   implicit lazy val idGenerator: IdGenerator[Future]                = new IdGeneratorImpl[Future]
   implicit lazy val dateTimeService: DateTimeUtil[Future]           = new DateTimeUtilImpl[Future]
   implicit lazy val hookService: HookService[Future]                = new HookServiceImpl[Future]

@@ -44,14 +44,15 @@ object Api {
     logger.info(s"Load api for modules: ${modules.mkString(",")}")
 
     val api = modules.collect {
-      case "health"   => new HealthCheckApi()
-      case "github"   => new GithubApi()
-      case "facebook" => new FacebookApi()
-      case "google"   => new GoogleApi()
-      case "ldap"     => new LdapApi()
-      case "basic"    => new BasicProviderApi()
-      case "email"    => new EmailProviderApi()
-      case "totp"     => new TotpApi()
+      case "health"    => new HealthCheckApi()
+      case "github"    => new GithubApi()
+      case "facebook"  => new FacebookApi()
+      case "google"    => new GoogleApi()
+      case "microsoft" => new MicrosoftApi()
+      case "ldap"      => new LdapApi()
+      case "basic"     => new BasicProviderApi()
+      case "email"     => new EmailProviderApi()
+      case "totp"      => new TotpApi()
     } :+ new CoreApi
 
     cors() {

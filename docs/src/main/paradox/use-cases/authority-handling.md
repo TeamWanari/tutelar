@@ -6,7 +6,7 @@ You want to keep track if the user can do things on your site or not (without hi
 ### Useable with:
  - email auth
  - user+pass auth
- - google/fb/github
+ - google/fb/github/microsoft
  - ldap
  
 ### Needed hook implementations:

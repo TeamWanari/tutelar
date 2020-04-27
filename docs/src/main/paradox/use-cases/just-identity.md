@@ -7,7 +7,7 @@ Or maybe you have a special on-boarding process which works with only a remote i
 ### Useable with:
  - email auth
  - user+pass auth
- - google/fb/github
+ - google/fb/github/microsoft
  - ldap
  
 ### Needed hook implementations:

@@ -35,6 +35,7 @@ trait ConfigService {
   def facebookConfig: OAuth2Config
   def githubConfig: OAuth2Config
   def googleConfig: OAuth2Config
+  def microsoftConfig: OAuth2Config
   implicit def ldapConfig: LdapConfig
   implicit def passwordSettings: PasswordSettings
   implicit def escherConfig: EscherConfig

@@ -254,9 +254,10 @@ class ConfigServiceImpl() extends ConfigService {
     }.fold(logAndThrow("Escher"), identity)
   }
 
-  override lazy val facebookConfig: OAuth2Config = readOauth2Config("facebook")
-  override lazy val githubConfig: OAuth2Config   = readOauth2Config("github")
-  override lazy val googleConfig: OAuth2Config   = readOauth2Config("google")
+  override lazy val facebookConfig: OAuth2Config  = readOauth2Config("facebook")
+  override lazy val githubConfig: OAuth2Config    = readOauth2Config("github")
+  override lazy val googleConfig: OAuth2Config    = readOauth2Config("google")
+  override lazy val microsoftConfig: OAuth2Config = readOauth2Config("microsoft")
 
   override implicit lazy val jaegerConfig: JaegerConfig = {
     Try {

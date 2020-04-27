@@ -296,6 +296,9 @@
             $('#login_google').click(function () {
                 oauth2Login('google');
             });
+            $('#login_microsoft').click(function () {
+                oauth2Login('microsoft');
+            });
 
             $('#send_register_email').click(sendEmailRegisterRequest);
             $('#register_email').click(registerWithEmail);
@@ -460,6 +463,7 @@
         <button id="login_github" class="oauth">Login with GitHub</button>
         <button id="login_facebook" class="oauth">Login with Facebook</button>
         <button id="login_google" class="oauth">Login with Google</button>
+        <button id="login_microsoft" class="oauth">Login with Microsoft</button>
     </p>
     <hr/>
     <div style="font-size: 16px">Tutelar status: <div id="tutelar-status"></div>
