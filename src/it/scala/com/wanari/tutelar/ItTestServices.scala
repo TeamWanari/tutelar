@@ -3,7 +3,13 @@ package com.wanari.tutelar
 import com.wanari.tutelar.core._
 import com.wanari.tutelar.core.impl.database.MemoryDatabaseService
 import com.wanari.tutelar.core.impl.{AuthServiceImpl, ConfigServiceImpl, HealthCheckServiceImpl, HookServiceImpl}
-import com.wanari.tutelar.providers.oauth2.{FacebookService, GithubService, GoogleService, OAuth2Service}
+import com.wanari.tutelar.providers.oauth2.{
+  FacebookService,
+  GithubService,
+  GoogleService,
+  MicrosoftService,
+  OAuth2Service
+}
 import com.wanari.tutelar.providers.userpass.{PasswordDifficultyChecker, PasswordDifficultyCheckerImpl}
 import com.wanari.tutelar.providers.userpass.basic.{BasicProviderService, BasicProviderServiceImpl}
 import com.wanari.tutelar.providers.userpass.email._
@@ -24,18 +30,20 @@ class ItTestServices(implicit ec: ExecutionContext) extends Services[Future] {
   override implicit lazy val dateTimeService: DateTimeUtil[Future] = new DateTimeUtilCounterImpl[Future]
   override implicit lazy val authService: AuthService[Future]      = new AuthServiceImpl[Future]
 
-  override implicit lazy val facebookService: FacebookService[Future] = null
-  override implicit lazy val githubService: GithubService[Future]     = null
-  override implicit lazy val googleService: GoogleService[Future]     = null
+  override implicit lazy val facebookService: FacebookService[Future]   = null
+  override implicit lazy val githubService: GithubService[Future]       = null
+  override implicit lazy val googleService: GoogleService[Future]       = null
+  override implicit lazy val microsoftService: MicrosoftService[Future] = null
 
   implicit lazy val httpWrapper: HttpWrapper[Future]     = null
   override implicit val hookService: HookService[Future] = new HookServiceImpl[Future]
 
   def getOauthServiceByName(provider: String): OAuth2Service[Future] = {
     provider match {
-      case "facebook" => facebookService
-      case "github"   => githubService
-      case "google"   => googleService
+      case "facebook"  => facebookService
+      case "github"    => githubService
+      case "google"    => googleService
+      case "microsoft" => microsoftService
     }
   }
 

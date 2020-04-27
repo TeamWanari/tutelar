@@ -54,6 +54,8 @@ object OAuth2Api {
       extends OAuth2Api {}
   class GithubApi(implicit val service: GithubService[Future], val callbackConfig: CallbackConfig) extends OAuth2Api {}
   class GoogleApi(implicit val service: GoogleService[Future], val callbackConfig: CallbackConfig) extends OAuth2Api {}
+  class MicrosoftApi(implicit val service: MicrosoftService[Future], val callbackConfig: CallbackConfig)
+      extends OAuth2Api {}
 
   case class CodeAndState(code: String, state: String)
   case class AccessToken(accessToken: String, refreshToken: Option[LongTermToken])

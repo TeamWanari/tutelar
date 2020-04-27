@@ -540,6 +540,55 @@ paths:
       responses:
         default:
           description: Redirect to frontend with user token
+  /microsoft/login:
+    get:
+      description: Login with Microsoft
+      parameters:
+        - name: refresh_token
+          in: query
+          schema:
+            type: string
+      responses:
+        default:
+          description: Redirect to Microsoft login page
+    post:
+      description: Login with Microsoft access token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ["accessToken"]
+              properties:
+                accessToken:
+                  type: string
+                refreshToken:
+                  type: string
+            examples:
+              '0':
+                value: '{"accessToken":"TOKEN"}'
+      responses:
+        '200':
+          description: User tokens
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenData'
+  /microsoft/callback:
+    get:
+      description: Microsoft login callback
+      parameters:
+        - name: code
+          in: query
+          schema:
+            type: string
+        - name: state
+          in: query
+          schema:
+            type: string
+      responses:
+        default:
+          description: Redirect to frontend with user token
   /healthCheck:
     get:
       description: Service status page

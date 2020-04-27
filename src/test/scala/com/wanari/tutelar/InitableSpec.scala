@@ -47,6 +47,7 @@ class InitableSpec extends TestBase {
       override def facebookConfig: OAuth2Service.OAuth2Config                                  = ???
       override def githubConfig: OAuth2Service.OAuth2Config                                    = ???
       override def googleConfig: OAuth2Service.OAuth2Config                                    = ???
+      override def microsoftConfig: OAuth2Service.OAuth2Config                                 = ???
       override def ldapConfig: LdapServiceImpl.LdapConfig                                      = ???
       override def passwordSettings: PasswordDifficultyCheckerImpl.PasswordSettings            = ???
       override def getPostgresConfig: PostgresDatabaseService.PostgresConfig                   = ???

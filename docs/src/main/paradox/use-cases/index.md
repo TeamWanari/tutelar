@@ -27,6 +27,6 @@ Right now we have no implemented 2FA or MFA support, but we are working on it.
 
 
 TODO
- - google/fb/github/ldap
+ - google/fb/github/microsoft/ldap
  - u/p with registration
  - only valid email registration

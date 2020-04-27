@@ -117,6 +117,15 @@ class ConfigServiceSpec extends TestBase {
         Seq("openid", "email", "profile")
       )
     }
+    "#microsoftConfig" in {
+      val service = new ConfigServiceImpl()
+      service.microsoftConfig shouldBe OAuth2Config(
+        "https://lvh.me:9443",
+        "clientId",
+        "clientSecret",
+        Seq("user.read")
+      )
+    }
   }
   "#ldapConfig" in {
     val service = new ConfigServiceImpl()
