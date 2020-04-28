@@ -30,8 +30,8 @@ class TotpServiceSpec extends TestBase {
     val jwtServiceMock = mock[JwtService[Try]]
 
     lazy val service = new TotpServiceImpl[Try]() {
-      protected override def now: Long                  = 0
-      protected override val secureRandom: SecureRandom = random
+      protected override def now: Long                                            = 0
+      override protected def secureRandom(implicit ctx: LogContext): SecureRandom = random
 
       protected override val jwtService = jwtServiceMock
     }

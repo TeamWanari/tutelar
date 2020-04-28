@@ -2,6 +2,7 @@ package com.wanari.tutelar.providers.userpass.token
 
 import java.security.{Key, SecureRandom}
 
+import com.wanari.tutelar.util.LoggerUtil.{LogContext, Logger}
 import org.apache.commons.codec.binary.Base32
 
 import scala.util.Try
@@ -14,6 +15,8 @@ object OTP {
     def digits: Int
     def otpkey: OTPKey
   }
+
+  private val logger = new Logger("OTP")
 
   case class HOTP(algorithm: OTPAlgorithm, digits: Int, otpkey: OTPKey) extends OTPBase {
     import Calculations._
@@ -109,10 +112,16 @@ object OTP {
     def apply(base32: String): OTPKey =
       OTPKey(new javax.crypto.spec.SecretKeySpec((new Base32).decode(base32), "RAW"))
 
-    def defaultPRNG: SecureRandom =
-      SecureRandom.getInstance("NativePRNGNonBlocking", "SUN")
+    def defaultPRNG(implicit ctx: LogContext): SecureRandom = {
+      Try(SecureRandom.getInstance("NativePRNGNonBlocking", "SUN")).getOrElse {
+        logger.warn(
+          "The host OS has no NativePRNGNonBlocking implementation! Please use this only for testing/developement!"
+        )
+        new SecureRandom()
+      }
+    }
 
-    def randomStrong(algorithm: OTPAlgorithm, prng: SecureRandom = defaultPRNG): OTPKey = {
+    def randomStrong(algorithm: OTPAlgorithm, prng: SecureRandom): OTPKey = {
       val gen = javax.crypto.KeyGenerator.getInstance(algorithm.value)
       gen.init(algorithm.strongKeyLength, prng)
       OTPKey(gen.generateKey)
