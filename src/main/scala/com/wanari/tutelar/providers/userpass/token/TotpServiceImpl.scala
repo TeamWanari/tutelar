@@ -24,9 +24,9 @@ class TotpServiceImpl[F[_]: MonadError[*[_], Throwable]](
   import TotpServiceImpl._
   import spray.json._
 
-  protected val authType                   = "TOTP"
-  protected def now: Long                  = System.currentTimeMillis / 1000
-  protected val secureRandom: SecureRandom = OTPKey.defaultPRNG
+  protected val authType                                             = "TOTP"
+  protected def now: Long                                            = System.currentTimeMillis / 1000
+  protected def secureRandom(implicit ctx: LogContext): SecureRandom = OTPKey.defaultPRNG
 
   protected val jwtService: JwtService[F] = new JwtServiceImpl[F](getJwtConfig("totpProvider"))
 
@@ -34,7 +34,7 @@ class TotpServiceImpl[F[_]: MonadError[*[_], Throwable]](
     jwtService.init
   }
 
-  override def qrCodeData: ErrorOr[F, QRData] = {
+  override def qrCodeData(implicit ctx: LogContext): ErrorOr[F, QRData] = {
     for {
       algo <- EitherT.fromOption(OTPAlgorithm.algos.find(_.name == config.algorithm), InvalidAlgo(config.algorithm))
       key      = OTPKey.randomStrong(algo, secureRandom)
