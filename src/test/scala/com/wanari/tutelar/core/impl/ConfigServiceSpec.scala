@@ -7,6 +7,7 @@ import com.wanari.tutelar.core.AmqpService.AmqpQueueConfig
 import com.wanari.tutelar.core.ExpirationService.{ExpirationDisabled, ExpirationInactivity, ExpirationLifetime}
 import com.wanari.tutelar.core.HookService.{BasicAuthConfig, HookConfig}
 import com.wanari.tutelar.core.ServiceAuthDirectives
+import com.wanari.tutelar.core.ServiceAuthDirectives.AccessBlocked
 import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.core.impl.database.DatabaseServiceFactory.DatabaseConfig
 import com.wanari.tutelar.core.impl.database.MongoDatabaseService.MongoConfig
@@ -96,7 +97,7 @@ class ConfigServiceSpec extends TestBase {
         "https://lvh.me:9443",
         "clientId",
         "clientSecret",
-        Seq("public_profile")
+        Seq("public_profile"),
       )
     }
     "#githubConfig" in {
@@ -105,7 +106,7 @@ class ConfigServiceSpec extends TestBase {
         "https://lvh.me:9443",
         "clientId",
         "clientSecret",
-        Seq("read:user")
+        Seq("read:user"),
       )
     }
     "#googleConfig" in {
@@ -114,7 +115,7 @@ class ConfigServiceSpec extends TestBase {
         "https://lvh.me:9443",
         "clientId",
         "clientSecret",
-        Seq("openid", "email", "profile")
+        Seq("openid", "email", "profile"),
       )
     }
     "#microsoftConfig" in {
@@ -123,7 +124,7 @@ class ConfigServiceSpec extends TestBase {
         "https://lvh.me:9443",
         "clientId",
         "clientSecret",
-        Seq("user.read")
+        Seq("user.read"),
       )
     }
   }
@@ -205,6 +206,13 @@ class ConfigServiceSpec extends TestBase {
       service.getServiceAuthConfig("exampleServiceApiJwt") shouldBe ServiceAuthDirectives.JwtAuthConfig(
         service.getJwtConfigByName("example")
       )
+    }
+    "custom_header" in {
+      service.getServiceAuthConfig("exampleServiceApiCustomHeader") shouldBe ServiceAuthDirectives
+        .CustomHeaderAuthConfig(
+          "Custom-Header-Auth",
+          "top secret"
+        )
     }
     "blocked" in {
       service.getServiceAuthConfig("exampleServiceApiBlocked") shouldBe ServiceAuthDirectives.AccessBlocked

@@ -305,6 +305,11 @@ class ConfigServiceImpl() extends ConfigService {
         case "jwt" =>
           val configName = config.getString("jwt.configName")
           JwtAuthConfig(getJwtConfigByName(configName))
+        case "custom_header" =>
+          ServiceAuthDirectives.CustomHeaderAuthConfig(
+            config.getString("customHeader.headername"),
+            readFromFileOrConf(config, "customHeader.secret")
+          )
         case "blocked" =>
           AccessBlocked
         case t => throw new IllegalArgumentException(s"$t unknown service auth type in $path.")

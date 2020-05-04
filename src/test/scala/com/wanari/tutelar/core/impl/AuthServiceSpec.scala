@@ -5,8 +5,8 @@ import com.wanari.tutelar.TestBase
 import com.wanari.tutelar.core.AuthService.TokenData
 import com.wanari.tutelar.core.DatabaseService.{Account, User}
 import com.wanari.tutelar.core.Errors._
-import com.wanari.tutelar.core.impl.database.MemoryDatabaseService
 import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
+import com.wanari.tutelar.core.impl.database.MemoryDatabaseService
 import com.wanari.tutelar.core.{ExpirationService, HookService, JwtService}
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.{DateTimeUtilCounterImpl, IdGeneratorCounterImpl}
@@ -469,6 +469,28 @@ class AuthServiceSpec extends TestBase {
         .thenReturn(EitherT.right(Success(originalTokenData)))
       when(hookService.refreshToken(any[String], any[JsObject])(any[LogContext])).thenReturn(Success(JsObject.empty))
       service.refreshToken("long_term_token") shouldBe EitherT.leftT(LoginExpired())
+    }
+  }
+  "#findProviderCustomDataByUserId" should {
+    "user found" in new TestScope {
+      service.findProviderCustomDataByUserId(savedAccount.userId, savedAccount.authType) shouldEqual OptionT.some(
+        savedAccount.customData
+      )
+    }
+    "the userId should be standardized and lowercased" in new TestScope {
+      val userId      = "SPEC_USER_ID_\u0065\u0301"
+      val standarized = "spec_user_id_\u00e9"
+
+      val savedUser    = User("spec_user_id_\u00e9", 98765)
+      val savedAccount = Account("AUTH_TYPE_S", standarized, savedUser.id, "customData")
+
+      databaseService.saveUser(savedUser)
+      databaseService.saveAccount(savedAccount)
+
+      service.findCustomData(savedAccount.authType, userId) shouldEqual OptionT.some(savedAccount.customData)
+    }
+    "user not found" in new TestScope {
+      service.findCustomData(authType, externalId) shouldEqual OptionT.none
     }
   }
 }

@@ -24,6 +24,15 @@ components:
           "token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTM1Mjk4MjcsImlkIjoiODVhYjE4MjEtODVjYy00NTc5LTg2OWQtZDdkNjU1ODM5ZjhhIn0.TMwADN7addtQPo39KcbF9yVrk-CHv4eSsiA8wNJxfsk",
           "refreshToken":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTM1Mjk4MjcsImlkIjoiODVhYjE4MjEtODVjYy00NTc5LTg2OWQtZDdkNjU1ODM5ZjhhIn0.TMwADN7addtQPo39KcbF9yVrk-CHv4eSsiA8wNJxfsk"
         }
+    AccessToken:
+      type: object
+      properties:
+        accessToken:
+          type: string
+      example:
+        {
+          "accessToken":"MTQ0NjJkZmQ5OTM2NDE1ZTZjNGZmZjI3"
+        }
 paths:
   /core/delete:
     post:
@@ -442,6 +451,21 @@ paths:
       responses:
         default:
           description: Redirect to frontend with user token
+  /github/token:
+    get:
+      description: Get Github access token for userId
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Access token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessToken'
   /facebook/login:
     get:
       description: Login with Facebook
@@ -491,6 +515,21 @@ paths:
       responses:
         default:
           description: Redirect to frontend with user token
+  /facebook/token:
+    get:
+      description: Get Facebook access token for userId
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Access token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessToken'
   /google/login:
     get:
       description: Login with Google
@@ -540,6 +579,21 @@ paths:
       responses:
         default:
           description: Redirect to frontend with user token
+  /google/token:
+    get:
+      description: Get Google access token for userId
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Access token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessToken'
   /microsoft/login:
     get:
       description: Login with Microsoft
@@ -589,6 +643,25 @@ paths:
       responses:
         default:
           description: Redirect to frontend with user token
+  /microsoft/token:
+    get:
+      description: Get Microsoft access token for userId
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Access token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessToken'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Account doesn't exist for given userId
   /healthCheck:
     get:
       description: Service status page

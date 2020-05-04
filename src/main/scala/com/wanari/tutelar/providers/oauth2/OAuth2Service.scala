@@ -1,11 +1,12 @@
 package com.wanari.tutelar.providers.oauth2
 
 import akka.http.scaladsl.model._
-import cats.data.EitherT
 import cats.MonadError
+import cats.data.EitherT
 import com.wanari.tutelar.core.AuthService.{LongTermToken, TokenData}
-import com.wanari.tutelar.core.Errors.{ErrorOr, InvalidProfileDataMissingKey, InvalidProfileDataNotJsonObject}
+import com.wanari.tutelar.core.Errors._
 import com.wanari.tutelar.core.{AuthService, CsrfService}
+import com.wanari.tutelar.providers.oauth2.OAuth2Api.AccessToken
 import com.wanari.tutelar.providers.oauth2.OAuth2Service._
 import com.wanari.tutelar.util.HttpWrapper
 import com.wanari.tutelar.util.LoggerUtil.LogContext
@@ -75,6 +76,15 @@ trait OAuth2Service[F[_]] {
     } yield token
   }
 
+  def getAccessTokenForUser(
+      userId: String
+  )(implicit me: MonadError[F, Throwable], ctx: LogContext): ErrorOr[F, AccessToken] = {
+    authService
+      .findProviderCustomDataByUserId(userId, TYPE)
+      .toRight(AccountNotFound().asInstanceOf[AppError])
+      .map(AccessToken(_, None))
+  }
+
   protected lazy val selfRedirectUri: Uri = {
     val uri = Uri(oAuth2config.rootUrl)
     uri.withPath(uri.path ?/ TYPE.toLowerCase / "callback")
@@ -125,6 +135,6 @@ object OAuth2Service {
       rootUrl: String,
       clientId: String,
       clientSecret: String,
-      scopes: Seq[String]
+      scopes: Seq[String],
   )
 }
