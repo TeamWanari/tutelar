@@ -26,6 +26,9 @@ The first two comes from the pre-config step. The last one is `user.read` by def
 
 Also you should set the `rootUrl` correctly (it is needed for the callbacks). And the `callback.success` and `callback.failure` to handle redirects correctly.
 
+Furthermore, if you'd like to be able to use the token endpoint for retrieving the user's access tokens, you should set the
+`oauth2.microsoft.auth` to the desired authentication method and set the corresponding configurations as well.
+
 #### Example
 Your frontend is on `https://example.com`, your tutelar service is on `https://auth.example.com`.
 
@@ -36,13 +39,8 @@ and the failure like `https://example.com/authenticationError/<<ERROR>>`
 The hooks will contain the user [profile](https://docs.microsoft.com/en-us/graph/api/user-get?view=graph-rest-1.0&tabs=http) from `https://graph.microsoft.com/v1.0/me`.
 
 ### Getting more data from the API
-
-@@@ warning
-
-Currently there is no possible way to get back the auth token from tutelar.
-In the near future probably there will be an api for it.
-
-@@@
+You can get the user's access token for Microsoft account by calling the `https://lvh.me:9443/microsoft/token?userId=<<USER_ID>>`
+endpoint where the `<<USER_ID>>` query param is the id found in the JWT provided by the user.
 
 ### Frontend for registration
 Not needed to differentiate your registration and login frontend.
