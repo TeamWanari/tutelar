@@ -1,16 +1,13 @@
 package com.wanari.tutelar.providers.oauth2
 
 import akka.http.scaladsl.model._
-import cats.data.EitherT
+import cats.data.{EitherT, OptionT}
 import com.wanari.tutelar.TestBase
 import com.wanari.tutelar.core.AuthService.TokenData
-import com.wanari.tutelar.core.{AuthService, CsrfService}
-import com.wanari.tutelar.providers.oauth2.OAuth2Service.{
-  OAuth2Config,
-  ProfileData,
-  TokenRequestHelper,
-  TokenResponseHelper
-}
+import com.wanari.tutelar.core.Errors.AccountNotFound
+import com.wanari.tutelar.core.{AuthService, CsrfService, DatabaseService}
+import com.wanari.tutelar.providers.oauth2.OAuth2Api.AccessToken
+import com.wanari.tutelar.providers.oauth2.OAuth2Service.{OAuth2Config, ProfileData, TokenRequestHelper, TokenResponseHelper}
 import com.wanari.tutelar.util.HttpWrapper
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import org.mockito.ArgumentMatchersSugar._
@@ -83,11 +80,13 @@ class OAuth2ServiceSpec extends TestBase {
     import cats.instances.try_._
 
     trait Scope {
+      implicit val db = mock[DatabaseService[Try]]
       val service = new OAuth2Service[Try] {
-        val oAuth2config = OAuth2Config("https://self.com/test", "clientId", "clientSecret", Seq("a", "b"))
-        val csrfService  = mock[CsrfService[Try]]
-        val http         = mock[HttpWrapper[Try]]
-        val authService  = mock[AuthService[Try]]
+        val oAuth2config =
+          OAuth2Config("https://self.com/test", "clientId", "clientSecret", Seq("a", "b"))
+        val csrfService = mock[CsrfService[Try]]
+        val http        = mock[HttpWrapper[Try]]
+        val authService = mock[AuthService[Try]]
 
         val TYPE: String         = "dummy"
         val redirectUriBase: Uri = Uri("https://example.com")
@@ -127,6 +126,17 @@ class OAuth2ServiceSpec extends TestBase {
           TokenData("ToKeN", "refresh")
         )
       service.authenticateWithAccessToken("token", None) shouldBe EitherT.rightT(TokenData("ToKeN", "refresh"))
+    }
+
+    "getAccessTokenForUser" should {
+      "return access token" in new Scope {
+        when(service.authService.findProviderCustomDataByUserId("id", "dummy")) thenReturn OptionT.some("token")
+        service.getAccessTokenForUser("id") shouldBe EitherT.rightT(AccessToken("token", None))
+      }
+      "return AppError" in new Scope {
+        when(service.authService.findProviderCustomDataByUserId("id", "dummy")) thenReturn OptionT.none
+        service.getAccessTokenForUser("id") shouldBe EitherT.leftT(AccountNotFound())
+      }
     }
   }
 }

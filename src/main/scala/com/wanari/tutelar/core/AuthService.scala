@@ -26,6 +26,7 @@ trait AuthService[F[_]] extends Initable[F] {
   ): ErrorOr[F, (Account, JsObject)]
   def unlink(userId: String, authType: String)(implicit ctx: LogContext): ErrorOr[F, Unit]
   def refreshToken(token: LongTermToken)(implicit ctx: LogContext): ErrorOr[F, TokenData]
+  def findProviderCustomDataByUserId(userId: String, authType: String)(implicit ctx: LogContext): OptionT[F, String]
 }
 
 object AuthService {

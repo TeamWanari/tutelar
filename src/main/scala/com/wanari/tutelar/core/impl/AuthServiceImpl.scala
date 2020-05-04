@@ -6,12 +6,12 @@ import com.wanari.tutelar.core.AuthService.{LongTermToken, ShortTermToken, Token
 import com.wanari.tutelar.core.DatabaseService.{Account, User}
 import com.wanari.tutelar.core.Errors._
 import com.wanari.tutelar.core._
+import com.wanari.tutelar.core.impl.AuthServiceImpl._
 import com.wanari.tutelar.core.impl.JwtServiceImpl.JwtConfig
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.{DateTimeUtil, IdGenerator}
-import spray.json._
 import spray.json.DefaultJsonProtocol._
-import AuthServiceImpl._
+import spray.json._
 
 import scala.util.Try
 
@@ -128,6 +128,16 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
     } yield tokenData
   }
 
+  override def findProviderCustomDataByUserId(userId: String, authType: String)(
+      implicit ctx: LogContext
+  ): OptionT[F, String] = {
+    val standardizedUserId = convertToStandardizedLowercase(userId)
+    for {
+      accs <- OptionT.liftF(databaseService.listAccountsByUserId(standardizedUserId))
+      acc  <- OptionT.fromOption(accs.find(_.authType.toLowerCase.equals(authType.toLowerCase)))
+    } yield acc.customData
+  }
+
   private def createNewRefreshToken(
       data: LongTermTokenData,
       hookData: JsObject
@@ -150,8 +160,8 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
   private def removeExpiredProviders(
       data: LongTermTokenData
   )(implicit ctx: LogContext): ErrorOr[F, LongTermTokenData] = {
-    import cats.syntax.traverse._
     import cats.instances.list._
+    import cats.syntax.traverse._
 
     val providersF = data.providers.toList
       .traverse[F, (Boolean, ProviderData)] { provider: ProviderData =>
