@@ -1,4 +1,4 @@
-addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.7.0")
+addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.7.1")
 addSbtPlugin("au.com.onegeek"   %% "sbt-dotenv"         % "2.1.169")
 addSbtPlugin("org.scalameta"    % "sbt-scalafmt"        % "2.3.4")
 addSbtPlugin("com.typesafe.sbt" % "sbt-git"             % "1.0.0")
