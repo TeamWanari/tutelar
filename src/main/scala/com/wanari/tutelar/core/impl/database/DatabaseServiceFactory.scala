@@ -8,8 +8,8 @@ import reactivemongo.api.AsyncDriver
 import scala.concurrent.{ExecutionContext, Future}
 
 object DatabaseServiceFactory {
-  def create()(
-      implicit config: ConfigService,
+  def create()(implicit
+      config: ConfigService,
       driver: AsyncDriver,
       ev: Applicative[Future],
       ec: ExecutionContext

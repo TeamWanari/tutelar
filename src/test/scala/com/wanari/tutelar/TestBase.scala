@@ -78,8 +78,8 @@ trait TestBase extends AnyWordSpecLike with Matchers with MockitoSugar with Befo
     implicit def dummyConfigFunction(name: String): JwtConfig = null
 
     implicit val expirationService = new ExpirationService[F] {
-      override def isExpired(providerName: String, lastActivityAt: Long, loginAt: Long)(
-          implicit ctx: LogContext
+      override def isExpired(providerName: String, lastActivityAt: Long, loginAt: Long)(implicit
+          ctx: LogContext
       ): F[Boolean] = false.pure[F]
     }
 

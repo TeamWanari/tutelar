@@ -8,8 +8,8 @@ import com.wanari.tutelar.providers.userpass.email.EmailServiceAmqpImpl.TokenMes
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import spray.json.RootJsonFormat
 
-class EmailServiceAmqpImpl[F[_]: Monad](
-    implicit amqpService: AmqpService[F],
+class EmailServiceAmqpImpl[F[_]: Monad](implicit
+    amqpService: AmqpService[F],
     configByName: String => AmqpQueueConfig
 ) extends EmailService[F]
     with Initable[F] {

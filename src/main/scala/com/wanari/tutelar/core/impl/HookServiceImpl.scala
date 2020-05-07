@@ -10,8 +10,8 @@ import com.wanari.tutelar.core.{EscherService, HookService, JwtService}
 import com.wanari.tutelar.util.HttpWrapper
 import com.wanari.tutelar.util.LoggerUtil.{LogContext, Logger}
 
-class HookServiceImpl[F[_]: MonadError[*[_], Throwable]](
-    implicit config: HookConfig,
+class HookServiceImpl[F[_]: MonadError[*[_], Throwable]](implicit
+    config: HookConfig,
     http: HttpWrapper[F],
     escher: EscherService[F],
     getJwtConfig: String => JwtConfig
@@ -33,29 +33,29 @@ class HookServiceImpl[F[_]: MonadError[*[_], Throwable]](
     }
   }
 
-  override def register(id: String, externalId: String, authType: String, data: JsObject)(
-      implicit ctx: LogContext
+  override def register(id: String, externalId: String, authType: String, data: JsObject)(implicit
+      ctx: LogContext
   ): F[JsObject] = {
     val dto = HookUserData(id, externalId, authType, Option(data)).toJson
     sendHookAndParse("/register", dto)
   }
 
-  override def login(id: String, externalId: String, authType: String, data: JsObject)(
-      implicit ctx: LogContext
+  override def login(id: String, externalId: String, authType: String, data: JsObject)(implicit
+      ctx: LogContext
   ): F[JsObject] = {
     val dto = HookUserData(id, externalId, authType, Option(data)).toJson
     sendHookAndParse("/login", dto)
   }
 
-  override def modify(id: String, externalId: String, authType: String, data: JsObject)(
-      implicit ctx: LogContext
+  override def modify(id: String, externalId: String, authType: String, data: JsObject)(implicit
+      ctx: LogContext
   ): F[Unit] = {
     val dto = HookUserData(id, externalId, authType, Option(data)).toJson
     sendHookWithoutResponse("/modify", dto)
   }
 
-  override def link(id: String, externalId: String, authType: String, data: JsObject)(
-      implicit ctx: LogContext
+  override def link(id: String, externalId: String, authType: String, data: JsObject)(implicit
+      ctx: LogContext
   ): F[JsObject] = {
     val dto = HookUserData(id, externalId, authType, Option(data)).toJson
     sendHookAndParse("/link", dto)

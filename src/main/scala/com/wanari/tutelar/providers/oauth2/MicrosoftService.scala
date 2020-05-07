@@ -9,8 +9,7 @@ import com.wanari.tutelar.util.HttpWrapper
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import spray.json.RootJsonReader
 
-class MicrosoftService[F[_]: Monad](val oAuth2config: OAuth2Config)(
-    implicit
+class MicrosoftService[F[_]: Monad](val oAuth2config: OAuth2Config)(implicit
     val authService: AuthService[F],
     val csrfService: CsrfService[F],
     val http: HttpWrapper[F]

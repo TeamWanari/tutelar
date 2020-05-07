@@ -35,9 +35,10 @@ class CsrfServiceJwt[F[_]: MonadError[*[_], Throwable]: DateTimeUtil](implicit c
         JwtSprayJson.decodeJson(token, config.key, Seq(JwtAlgorithm.HS256)).toOption,
         InvalidCsrfToken()
       )
-      _ <- EitherT
-        .rightT[F, AppError](!data.fields.get("auther").contains(JsString(auther)))
-        .ensure(InvalidCsrfToken())(identity)
+      _ <-
+        EitherT
+          .rightT[F, AppError](!data.fields.get("auther").contains(JsString(auther)))
+          .ensure(InvalidCsrfToken())(identity)
     } yield data
   }
 }

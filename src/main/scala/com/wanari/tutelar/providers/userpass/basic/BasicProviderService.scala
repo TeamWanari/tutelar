@@ -7,7 +7,7 @@ import com.wanari.tutelar.util.LoggerUtil.LogContext
 import spray.json.JsObject
 
 trait BasicProviderService[F[_]] extends UserPassService[F] {
-  def register(username: String, password: String, data: Option[JsObject], refreshToken: Option[LongTermToken])(
-      implicit ctx: LogContext
+  def register(username: String, password: String, data: Option[JsObject], refreshToken: Option[LongTermToken])(implicit
+      ctx: LogContext
   ): ErrorOr[F, TokenData]
 }

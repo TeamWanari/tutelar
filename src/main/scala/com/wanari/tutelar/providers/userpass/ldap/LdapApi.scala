@@ -13,8 +13,8 @@ import spray.json._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class LdapApi(
-    implicit val service: LdapService[Future],
+class LdapApi(implicit
+    val service: LdapService[Future],
     val callbackConfig: CallbackConfig,
     val getServiceAuthConfig: String => ServiceAuthConfig,
     val escherConfig: EscherConfig,

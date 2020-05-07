@@ -16,8 +16,8 @@ import spray.json.{JsArray, JsBoolean, JsNull, JsNumber, JsObject, JsString, JsV
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class LdapServiceImpl(
-    implicit ec: ExecutionContext,
+class LdapServiceImpl(implicit
+    ec: ExecutionContext,
     config: LdapConfig,
     authService: AuthService[Future],
     databaseService: DatabaseService[Future]

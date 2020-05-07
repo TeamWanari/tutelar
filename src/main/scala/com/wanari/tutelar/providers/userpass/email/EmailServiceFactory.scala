@@ -9,8 +9,8 @@ import com.wanari.tutelar.providers.userpass.email.EmailServiceSmtpImpl.EmailSer
 object EmailServiceFactory {
   import DatabaseConfig._
 
-  def create[F[_]: MonadError[*[_], Throwable]]()(
-      implicit config: EmailServiceFactoryConfig,
+  def create[F[_]: MonadError[*[_], Throwable]]()(implicit
+      config: EmailServiceFactoryConfig,
       smtpEmailCongif: EmailServiceSmtpConfig,
       configByNameF: String => AmqpQueueConfig,
       amqpService: AmqpService[F]
