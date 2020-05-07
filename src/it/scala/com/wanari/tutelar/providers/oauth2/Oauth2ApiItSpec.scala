@@ -79,7 +79,9 @@ class Oauth2ApiItSpec extends RouteTestBase {
             .getOauthServiceByName(provider)
             .getAccessTokenForUser(any[String])(any[MonadError[Future, Throwable]], any[LogContext])
         ) thenReturn EitherT.rightT(AccessToken("token", None))
-        Get(s"/$provider/token?userId=asd") ~> addCredentials(BasicHttpCredentials("testuser", "testpass")) ~> route ~> check {
+        Get(s"/$provider/token?userId=asd") ~> addCredentials(
+          BasicHttpCredentials("testuser", "testpass")
+        ) ~> route ~> check {
           status shouldEqual StatusCodes.OK
           responseAs[AccessToken] shouldBe AccessToken("token", None)
         }
@@ -92,7 +94,9 @@ class Oauth2ApiItSpec extends RouteTestBase {
             .getOauthServiceByName(provider)
             .getAccessTokenForUser(any[String])(any[MonadError[Future, Throwable]], any[LogContext])
         ) thenReturn EitherT.leftT(AccountNotFound())
-        Get(s"/$provider/token?userId=asd") ~> addCredentials(BasicHttpCredentials("testuser", "testpass")) ~> route ~> check {
+        Get(s"/$provider/token?userId=asd") ~> addCredentials(
+          BasicHttpCredentials("testuser", "testpass")
+        ) ~> route ~> check {
           status shouldEqual StatusCodes.NotFound
           responseAs[ErrorResponse] shouldBe ErrorResponse("Account not found")
         }

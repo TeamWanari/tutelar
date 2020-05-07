@@ -11,8 +11,8 @@ import spray.json.{DefaultJsonProtocol, JsObject, RootJsonFormat}
 
 import scala.concurrent.Future
 
-class TotpApi(
-    implicit val service: TotpService[Future],
+class TotpApi(implicit
+    val service: TotpService[Future],
     val callbackConfig: CallbackConfig
 ) extends UserPassApi {
   override val servicePath: String = "totp"

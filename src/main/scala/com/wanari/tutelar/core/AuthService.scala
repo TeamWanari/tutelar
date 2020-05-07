@@ -16,13 +16,13 @@ trait AuthService[F[_]] extends Initable[F] {
       customData: String,
       providedData: JsObject,
       refreshToken: Option[LongTermToken]
-  )(
-      implicit ctx: LogContext
+  )(implicit
+      ctx: LogContext
   ): ErrorOr[F, TokenData]
   def deleteUser(userId: String)(implicit ctx: LogContext): ErrorOr[F, Unit]
   def findUserIdInShortTermToken(token: ShortTermToken): OptionT[F, String]
-  def link(userId: String, authType: String, externalId: String, customData: String, providedData: JsObject)(
-      implicit ctx: LogContext
+  def link(userId: String, authType: String, externalId: String, customData: String, providedData: JsObject)(implicit
+      ctx: LogContext
   ): ErrorOr[F, (Account, JsObject)]
   def unlink(userId: String, authType: String)(implicit ctx: LogContext): ErrorOr[F, Unit]
   def refreshToken(token: LongTermToken)(implicit ctx: LogContext): ErrorOr[F, TokenData]

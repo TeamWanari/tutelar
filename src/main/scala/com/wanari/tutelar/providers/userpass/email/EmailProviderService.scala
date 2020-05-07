@@ -12,8 +12,8 @@ trait EmailProviderService[F[_]] extends UserPassService[F] with Initable[F] {
       implicit ctx: LogContext
   ): ErrorOr[F, TokenData]
   def sendRegister(email: String)(implicit ctx: LogContext): ErrorOr[F, Unit]
-  def resetPassword(resetPasswordToken: String, password: String, data: Option[JsObject])(
-      implicit ctx: LogContext
+  def resetPassword(resetPasswordToken: String, password: String, data: Option[JsObject])(implicit
+      ctx: LogContext
   ): ErrorOr[F, TokenData]
   def sendResetPassword(email: String)(implicit ctx: LogContext): ErrorOr[F, Unit]
 }

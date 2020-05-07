@@ -11,8 +11,7 @@ import spray.json.RootJsonReader
 
 class FacebookService[F[_]: Monad](
     val oAuth2config: OAuth2Config
-)(
-    implicit
+)(implicit
     val authService: AuthService[F],
     val csrfService: CsrfService[F],
     val http: HttpWrapper[F]

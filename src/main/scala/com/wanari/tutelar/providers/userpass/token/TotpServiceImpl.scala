@@ -16,8 +16,8 @@ import spray.json.RootJsonFormat
 
 import scala.util.Try
 
-class TotpServiceImpl[F[_]: MonadError[*[_], Throwable]](
-    implicit authService: AuthService[F],
+class TotpServiceImpl[F[_]: MonadError[*[_], Throwable]](implicit
+    authService: AuthService[F],
     config: TotpConfig,
     getJwtConfig: String => JwtConfig
 ) extends TotpService[F] {
@@ -53,8 +53,8 @@ class TotpServiceImpl[F[_]: MonadError[*[_], Throwable]](
       password: String,
       data: Option[JsObject],
       refreshToken: Option[LongTermToken]
-  )(
-      implicit ctx: LogContext
+  )(implicit
+      ctx: LogContext
   ): ErrorOr[F, TokenData] = {
     for {
       totpDataAsString <- decodeToken(registerToken)

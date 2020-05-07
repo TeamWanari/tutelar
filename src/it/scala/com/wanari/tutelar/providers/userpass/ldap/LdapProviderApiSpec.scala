@@ -31,7 +31,7 @@ class LdapProviderApiSpec extends RouteTestBase {
       import spray.json.DefaultJsonProtocol._
       import spray.json._
       val serviceResult: Seq[LdapUserListData] = Seq(
-        LdapUserListData(None, Map("a"         -> JsString("b"), "c" -> JsNumber(1))),
+        LdapUserListData(None, Map("a" -> JsString("b"), "c" -> JsNumber(1))),
         LdapUserListData(Some("_id_"), Map("d" -> JsObject("e" -> JsTrue)))
       )
       when(serviceMock.listUsers()(any[LogContext])) thenReturn EitherT.rightT(serviceResult)

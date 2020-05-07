@@ -39,8 +39,8 @@ class AuthServiceSpec extends TestBase {
 
     def expirationServiceIsExpire(providerName: String) = false
     implicit val expirationService = new ExpirationService[Try] {
-      override def isExpired(providerName: String, lastActivityAt: Long, loginAt: Long)(
-          implicit ctx: LogContext
+      override def isExpired(providerName: String, lastActivityAt: Long, loginAt: Long)(implicit
+          ctx: LogContext
       ): Try[Boolean] = Success(expirationServiceIsExpire(providerName))
     }
 
@@ -160,7 +160,13 @@ class AuthServiceSpec extends TestBase {
     }
     "login" should {
       "return the token" in new TestScope {
-        service.authenticatedWith(savedAccount.authType, savedAccount.externalId, customData, providedData, None) shouldEqual EitherT
+        service.authenticatedWith(
+          savedAccount.authType,
+          savedAccount.externalId,
+          customData,
+          providedData,
+          None
+        ) shouldEqual EitherT
           .rightT(
             TokenData("JWT", "JWT_LONG")
           )

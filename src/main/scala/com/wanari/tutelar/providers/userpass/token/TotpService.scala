@@ -15,8 +15,8 @@ trait TotpService[F[_]] extends UserPassService[F] with Initable[F] {
       password: String,
       data: Option[JsObject],
       refreshToken: Option[LongTermToken]
-  )(
-      implicit ctx: LogContext
+  )(implicit
+      ctx: LogContext
   ): ErrorOr[F, TokenData]
   def qrCodeData(implicit ctx: LogContext): ErrorOr[F, QRData]
 }

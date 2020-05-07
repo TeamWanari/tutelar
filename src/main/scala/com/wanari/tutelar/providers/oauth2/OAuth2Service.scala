@@ -96,14 +96,15 @@ object OAuth2Service {
     def jsonEntity: RequestEntity =
       HttpEntity(ContentTypes.`application/json`, tokenRequestHelperFormat.write(this).compactPrint)
 
-    def getAsMap(redirectUri: String): Map[String, String] = Map(
-      "client_id"     -> client_id,
-      "client_secret" -> client_secret,
-      "code"          -> code,
-      "state"         -> state,
-      "grant_type"    -> "authorization_code",
-      "redirect_uri"  -> redirectUri
-    )
+    def getAsMap(redirectUri: String): Map[String, String] =
+      Map(
+        "client_id"     -> client_id,
+        "client_secret" -> client_secret,
+        "code"          -> code,
+        "state"         -> state,
+        "grant_type"    -> "authorization_code",
+        "redirect_uri"  -> redirectUri
+      )
 
     def formEntity(redirectUri: String): RequestEntity =
       FormData(
@@ -135,6 +136,6 @@ object OAuth2Service {
       rootUrl: String,
       clientId: String,
       clientSecret: String,
-      scopes: Seq[String],
+      scopes: Seq[String]
   )
 }

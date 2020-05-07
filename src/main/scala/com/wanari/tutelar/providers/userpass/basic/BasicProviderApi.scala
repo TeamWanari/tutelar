@@ -9,8 +9,8 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 
 import scala.concurrent.Future
 
-class BasicProviderApi(
-    implicit val service: BasicProviderService[Future],
+class BasicProviderApi(implicit
+    val service: BasicProviderService[Future],
     val callbackConfig: CallbackConfig
 ) extends UserPassApi {
   override val servicePath: String = "basic"

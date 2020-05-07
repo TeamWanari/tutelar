@@ -15,8 +15,8 @@ import spray.json._
 
 import scala.util.Try
 
-class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
-    implicit databaseService: DatabaseService[F],
+class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](implicit
+    databaseService: DatabaseService[F],
     hookService: HookService[F],
     idGenerator: IdGenerator[F],
     timeService: DateTimeUtil[F],
@@ -94,13 +94,15 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
     val standardizedExternalId = convertToStandardizedLowercase(externalId)
     val account                = Account(authType, standardizedExternalId, userId, customData)
     for {
-      _ <- EitherT
-        .right(databaseService.findAccountByTypeAndExternalId((authType, standardizedExternalId)))
-        .ensure(AccountUsed())(_.isEmpty)
-      _ <- EitherT
-        .right(databaseService.listAccountsByUserId(userId))
-        .ensure(UserNotFound())(_.nonEmpty)
-        .ensure(UserHadThisAccountType())(_.forall(_.authType != authType))
+      _ <-
+        EitherT
+          .right(databaseService.findAccountByTypeAndExternalId((authType, standardizedExternalId)))
+          .ensure(AccountUsed())(_.isEmpty)
+      _ <-
+        EitherT
+          .right(databaseService.listAccountsByUserId(userId))
+          .ensure(UserNotFound())(_.nonEmpty)
+          .ensure(UserHadThisAccountType())(_.forall(_.authType != authType))
       _    <- EitherT.right(databaseService.saveAccount(account))
       data <- EitherT.right(hookService.link(userId, standardizedExternalId, authType, providedData))
     } yield (account, data)
@@ -108,9 +110,10 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
 
   override def unlink(userId: String, authType: String)(implicit ctx: LogContext): ErrorOr[F, Unit] = {
     for {
-      accounts <- EitherT
-        .right(databaseService.listAccountsByUserId(userId))
-        .ensure(UserLastAccount())(_.size > 1)
+      accounts <-
+        EitherT
+          .right(databaseService.listAccountsByUserId(userId))
+          .ensure(UserLastAccount())(_.size > 1)
       account <- EitherT.fromOption(accounts.find(_.authType == authType), AccountNotFound())
       _       <- EitherT.right(databaseService.deleteAccountByUserAndType(userId, authType))
       _       <- EitherT.right(hookService.unlink(userId, account.externalId, authType))
@@ -128,8 +131,8 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
     } yield tokenData
   }
 
-  override def findProviderCustomDataByUserId(userId: String, authType: String)(
-      implicit ctx: LogContext
+  override def findProviderCustomDataByUserId(userId: String, authType: String)(implicit
+      ctx: LogContext
   ): OptionT[F, String] = {
     val standardizedUserId = convertToStandardizedLowercase(userId)
     for {
@@ -197,8 +200,8 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](
       }
   }
 
-  private def login(account: Account, customData: String, providedData: JsObject)(
-      implicit ctx: LogContext
+  private def login(account: Account, customData: String, providedData: JsObject)(implicit
+      ctx: LogContext
   ): ErrorOr[F, (Account, JsObject)] = {
     val result = for {
       _    <- databaseService.updateCustomData(account.getId, customData)

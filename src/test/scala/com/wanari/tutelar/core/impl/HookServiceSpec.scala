@@ -71,11 +71,12 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
       override def singleRequest(httpRequest: HttpRequest)(implicit ctx: LogContext): Future[HttpResponse] =
         httpMock.singleRequest(httpRequest)(ctx)
     }
-    implicit def config = HookConfig(
-      baseUrl,
-      Seq("register", "login", "modify", "link", "unlink", "delete", "refresh"),
-      BasicAuthConfig("user", "pass")
-    )
+    implicit def config =
+      HookConfig(
+        baseUrl,
+        Seq("register", "login", "modify", "link", "unlink", "delete", "refresh"),
+        BasicAuthConfig("user", "pass")
+      )
     val jwtServiceMock = mock[JwtService[Future]]
 
     implicit def getJwtService(name: String): JwtConfig = ???

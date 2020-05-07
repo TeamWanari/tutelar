@@ -57,39 +57,39 @@ lazy val core = (project in file("."))
     ),
     libraryDependencies ++= {
       Seq(
-        "org.typelevel"        %% "cats-core"                  % "2.1.1",
-        "com.typesafe.akka"    %% "akka-http"                  % "10.1.11",
-        "com.typesafe.akka"    %% "akka-http-spray-json"       % "10.1.11",
-        "com.typesafe.akka"    %% "akka-http-testkit"          % "10.1.11" % "it,test",
-        "com.typesafe.akka"    %% "akka-actor"                 % "2.6.5",
-        "com.typesafe.akka"    %% "akka-stream"                % "2.6.5",
-        "com.typesafe.akka"    %% "akka-slf4j"                 % "2.6.5",
-        "com.typesafe.akka"    %% "akka-testkit"               % "2.6.5" % "it,test",
-        "ch.qos.logback"       % "logback-classic"             % "1.2.3",
-        "net.logstash.logback" % "logstash-logback-encoder"    % "6.3",
-        "org.slf4j"            % "jul-to-slf4j"                % "1.7.30",
-        "com.typesafe.slick"   %% "slick"                      % "3.3.2",
-        "com.typesafe.slick"   %% "slick-hikaricp"             % "3.3.2",
-        "org.postgresql"       % "postgresql"                  % "42.2.12",
-        "com.pauldijou"        %% "jwt-core"                   % "4.3.0",
-        "com.pauldijou"        %% "jwt-spray-json"             % "4.3.0",
-        "org.mindrot"          % "jbcrypt"                     % "0.4",
-        "commons-codec"        % "commons-codec"               % "1.14",
-        "ch.megard"            %% "akka-http-cors"             % "0.4.3",
-        "io.opentracing"       % "opentracing-api"             % "0.33.0",
-        "io.opentracing"       % "opentracing-util"            % "0.33.0",
-        "io.opentracing"       % "opentracing-noop"            % "0.33.0",
-        "io.jaegertracing"     % "jaeger-client"               % "1.2.0",
-        "org.reactivemongo"    %% "reactivemongo"              % "0.20.10",
-        "org.reactivemongo"    %% "reactivemongo-bson-monocle" % "0.20.10",
-        "com.lightbend.akka"   %% "akka-stream-alpakka-amqp"   % "2.0.0",
-        "org.bouncycastle"     % "bcprov-jdk15on"              % "1.65",
-        "com.emarsys"          %% "escher-akka-http"           % "1.1.1",
-        "org.codehaus.janino"  % "janino"                      % "3.1.2",
-        "org.apache.commons"   % "commons-email"               % "1.5",
-        "org.scalatest"        %% "scalatest"                  % "3.1.2" % "it,test",
-        "org.mockito"          % "mockito-core"                % "3.3.3" % "it,test",
-        "org.mockito"          %% "mockito-scala"              % "1.14.1" % "it,test"
+        "org.typelevel"       %% "cats-core"                  % "2.1.1",
+        "com.typesafe.akka"   %% "akka-http"                  % "10.1.11",
+        "com.typesafe.akka"   %% "akka-http-spray-json"       % "10.1.11",
+        "com.typesafe.akka"   %% "akka-http-testkit"          % "10.1.11" % "it,test",
+        "com.typesafe.akka"   %% "akka-actor"                 % "2.6.5",
+        "com.typesafe.akka"   %% "akka-stream"                % "2.6.5",
+        "com.typesafe.akka"   %% "akka-slf4j"                 % "2.6.5",
+        "com.typesafe.akka"   %% "akka-testkit"               % "2.6.5"   % "it,test",
+        "ch.qos.logback"       % "logback-classic"            % "1.2.3",
+        "net.logstash.logback" % "logstash-logback-encoder"   % "6.3",
+        "org.slf4j"            % "jul-to-slf4j"               % "1.7.30",
+        "com.typesafe.slick"  %% "slick"                      % "3.3.2",
+        "com.typesafe.slick"  %% "slick-hikaricp"             % "3.3.2",
+        "org.postgresql"       % "postgresql"                 % "42.2.12",
+        "com.pauldijou"       %% "jwt-core"                   % "4.3.0",
+        "com.pauldijou"       %% "jwt-spray-json"             % "4.3.0",
+        "org.mindrot"          % "jbcrypt"                    % "0.4",
+        "commons-codec"        % "commons-codec"              % "1.14",
+        "ch.megard"           %% "akka-http-cors"             % "0.4.3",
+        "io.opentracing"       % "opentracing-api"            % "0.33.0",
+        "io.opentracing"       % "opentracing-util"           % "0.33.0",
+        "io.opentracing"       % "opentracing-noop"           % "0.33.0",
+        "io.jaegertracing"     % "jaeger-client"              % "1.2.0",
+        "org.reactivemongo"   %% "reactivemongo"              % "0.20.10",
+        "org.reactivemongo"   %% "reactivemongo-bson-monocle" % "0.20.10",
+        "com.lightbend.akka"  %% "akka-stream-alpakka-amqp"   % "2.0.0",
+        "org.bouncycastle"     % "bcprov-jdk15on"             % "1.65",
+        "com.emarsys"         %% "escher-akka-http"           % "1.1.1",
+        "org.codehaus.janino"  % "janino"                     % "3.1.2",
+        "org.apache.commons"   % "commons-email"              % "1.5",
+        "org.scalatest"       %% "scalatest"                  % "3.1.2"   % "it,test",
+        "org.mockito"          % "mockito-core"               % "3.3.3"   % "it,test",
+        "org.mockito"         %% "mockito-scala"              % "1.14.1"  % "it,test"
       )
     }
   )
@@ -101,7 +101,7 @@ enablePlugins(JavaAppPackaging)
 enablePlugins(BuildInfoPlugin)
 
 addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
-addCompilerPlugin("io.tryp"       % "splain"          % "0.5.5" cross CrossVersion.patch)
+addCompilerPlugin("io.tryp"        % "splain"         % "0.5.5" cross CrossVersion.patch)
 
 cancelable in Global := true
 

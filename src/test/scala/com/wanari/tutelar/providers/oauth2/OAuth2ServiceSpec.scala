@@ -7,7 +7,12 @@ import com.wanari.tutelar.core.AuthService.TokenData
 import com.wanari.tutelar.core.Errors.AccountNotFound
 import com.wanari.tutelar.core.{AuthService, CsrfService, DatabaseService}
 import com.wanari.tutelar.providers.oauth2.OAuth2Api.AccessToken
-import com.wanari.tutelar.providers.oauth2.OAuth2Service.{OAuth2Config, ProfileData, TokenRequestHelper, TokenResponseHelper}
+import com.wanari.tutelar.providers.oauth2.OAuth2Service.{
+  OAuth2Config,
+  ProfileData,
+  TokenRequestHelper,
+  TokenResponseHelper
+}
 import com.wanari.tutelar.util.HttpWrapper
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import org.mockito.ArgumentMatchersSugar._
@@ -108,7 +113,9 @@ class OAuth2ServiceSpec extends TestBase {
 
     "authenticateWithCallback correctly" in new Scope {
       when(service.csrfService.checkCsrfToken("dummy", "state")) thenReturn EitherT.rightT(JsObject.empty)
-      when(service.authService.authenticatedWith("dummy", "id", "token", JsObject("raw" -> JsTrue), None)) thenReturn EitherT
+      when(
+        service.authService.authenticatedWith("dummy", "id", "token", JsObject("raw" -> JsTrue), None)
+      ) thenReturn EitherT
         .rightT(
           TokenData("ToKeN", "refresh")
         )
@@ -121,7 +128,9 @@ class OAuth2ServiceSpec extends TestBase {
     }
 
     "authenticateWithAccessToken correctly" in new Scope {
-      when(service.authService.authenticatedWith("dummy", "id", "token", JsObject("raw" -> JsTrue), None)) thenReturn EitherT
+      when(
+        service.authService.authenticatedWith("dummy", "id", "token", JsObject("raw" -> JsTrue), None)
+      ) thenReturn EitherT
         .rightT(
           TokenData("ToKeN", "refresh")
         )

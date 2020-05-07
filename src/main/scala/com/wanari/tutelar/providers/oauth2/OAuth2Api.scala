@@ -16,8 +16,7 @@ import spray.json._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 
-sealed abstract class OAuth2Api(
-    implicit
+sealed abstract class OAuth2Api(implicit
     val getServiceAuthConfig: String => ServiceAuthConfig,
     val escherConfig: EscherConfig
 ) extends ProviderApi
@@ -75,29 +74,29 @@ sealed abstract class OAuth2Api(
 }
 
 object OAuth2Api {
-  class FacebookApi(
-      implicit val service: FacebookService[Future],
+  class FacebookApi(implicit
+      val service: FacebookService[Future],
       val callbackConfig: CallbackConfig,
       val ec: ExecutionContext,
       override val getServiceAuthConfig: String => ServiceAuthConfig,
       override val escherConfig: EscherConfig
   ) extends OAuth2Api {}
-  class GithubApi(
-      implicit val service: GithubService[Future],
+  class GithubApi(implicit
+      val service: GithubService[Future],
       val callbackConfig: CallbackConfig,
       val ec: ExecutionContext,
       override val getServiceAuthConfig: String => ServiceAuthConfig,
       override val escherConfig: EscherConfig
   ) extends OAuth2Api {}
-  class GoogleApi(
-      implicit val service: GoogleService[Future],
+  class GoogleApi(implicit
+      val service: GoogleService[Future],
       val callbackConfig: CallbackConfig,
       val ec: ExecutionContext,
       override val getServiceAuthConfig: String => ServiceAuthConfig,
       override val escherConfig: EscherConfig
   ) extends OAuth2Api {}
-  class MicrosoftApi(
-      implicit val service: MicrosoftService[Future],
+  class MicrosoftApi(implicit
+      val service: MicrosoftService[Future],
       val callbackConfig: CallbackConfig,
       val ec: ExecutionContext,
       override val getServiceAuthConfig: String => ServiceAuthConfig,

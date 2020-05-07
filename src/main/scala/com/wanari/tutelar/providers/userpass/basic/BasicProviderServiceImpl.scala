@@ -9,8 +9,8 @@ import com.wanari.tutelar.util.LoggerUtil.LogContext
 import com.wanari.tutelar.util.PasswordCryptor
 import spray.json.JsObject
 
-class BasicProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
-    implicit authService: AuthService[F],
+class BasicProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](implicit
+    authService: AuthService[F],
     passwordDifficultyChecker: PasswordDifficultyChecker[F]
 ) extends BasicProviderService[F]
     with PasswordCryptor {
@@ -21,8 +21,8 @@ class BasicProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
       password: String,
       data: Option[JsObject],
       refreshToken: Option[LongTermToken]
-  )(
-      implicit ctx: LogContext
+  )(implicit
+      ctx: LogContext
   ): ErrorOr[F, TokenData] = {
     for {
       _ <- EitherT.right(passwordDifficultyChecker.isValid(password)).ensure(WeakPassword())(identity)
@@ -41,10 +41,11 @@ class BasicProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
       implicit ctx: LogContext
   ): ErrorOr[F, TokenData] = {
     for {
-      passwordHash <- authService
-        .findCustomData(authType, username)
-        .toRight[AppError](UserNotFound())
-        .ensure(AuthenticationFailed())(hash => checkPassword(password, hash))
+      passwordHash <-
+        authService
+          .findCustomData(authType, username)
+          .toRight[AppError](UserNotFound())
+          .ensure(AuthenticationFailed())(hash => checkPassword(password, hash))
       token <- authService.authenticatedWith(authType, username, passwordHash, data.getOrElse(JsObject()), refreshToken)
     } yield token
   }

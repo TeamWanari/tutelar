@@ -7,8 +7,8 @@ import com.wanari.tutelar.core.Errors.WrongConfig
 import io.opentracing.noop.NoopTracerFactory
 import io.opentracing.util.GlobalTracer
 
-class TracerService[F[_]: MonadError[*[_], Throwable]](
-    implicit config: TracerServiceConfig,
+class TracerService[F[_]: MonadError[*[_], Throwable]](implicit
+    config: TracerServiceConfig,
     configService: ConfigService
 ) extends Initable[F] {
   import cats.syntax.applicative._

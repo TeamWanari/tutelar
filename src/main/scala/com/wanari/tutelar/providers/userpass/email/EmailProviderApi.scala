@@ -12,8 +12,8 @@ import spray.json.{DefaultJsonProtocol, JsObject, RootJsonFormat}
 
 import scala.concurrent.Future
 
-class EmailProviderApi(
-    implicit val service: EmailProviderService[Future],
+class EmailProviderApi(implicit
+    val service: EmailProviderService[Future],
     val callbackConfig: CallbackConfig
 ) extends ProviderApi {
   override def route(): Route = {

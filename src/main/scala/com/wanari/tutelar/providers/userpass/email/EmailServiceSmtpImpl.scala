@@ -5,8 +5,8 @@ import com.wanari.tutelar.providers.userpass.email.EmailServiceSmtpImpl.EmailSer
 import com.wanari.tutelar.util.LoggerUtil.LogContext
 import org.apache.commons.mail.{DefaultAuthenticator, HtmlEmail}
 
-class EmailServiceSmtpImpl[F[_]: Applicative](
-    implicit config: EmailServiceSmtpConfig
+class EmailServiceSmtpImpl[F[_]: Applicative](implicit
+    config: EmailServiceSmtpConfig
 ) extends EmailService[F] {
   import cats.syntax.applicative._
   override def sendRegisterUrl(email: String, token: String)(implicit ctx: LogContext): F[Unit] = {

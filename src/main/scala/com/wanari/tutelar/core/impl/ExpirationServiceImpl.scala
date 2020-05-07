@@ -8,8 +8,8 @@ import com.wanari.tutelar.util.LoggerUtil.{LogContext, Logger}
 
 import scala.concurrent.duration.Duration
 
-class ExpirationServiceImpl[F[_]: Applicative](
-    implicit providerExpirationConfigs: Map[String, ExpirationConfig],
+class ExpirationServiceImpl[F[_]: Applicative](implicit
+    providerExpirationConfigs: Map[String, ExpirationConfig],
     dateTime: DateTimeUtil[F]
 ) extends ExpirationService[F] {
   import cats.syntax.applicative._
@@ -17,8 +17,8 @@ class ExpirationServiceImpl[F[_]: Applicative](
 
   private val logger = new Logger("ExpirationService")
 
-  override def isExpired(providerName: String, lastActivityAt: Long, loginAt: Long)(
-      implicit ctx: LogContext
+  override def isExpired(providerName: String, lastActivityAt: Long, loginAt: Long)(implicit
+      ctx: LogContext
   ): F[Boolean] = {
     lazy val notFoundConfigFallback = {
       logger.warn(s"Not found expiration config for: $providerName.")

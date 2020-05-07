@@ -15,8 +15,8 @@ import spray.json._
 
 import scala.util.{Success, Try}
 
-class EmailProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
-    implicit emailService: EmailService[F],
+class EmailProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](implicit
+    emailService: EmailService[F],
     authService: AuthService[F],
     passwordDifficultyChecker: PasswordDifficultyChecker[F],
     getJwtConfig: String => JwtConfig
@@ -35,8 +35,8 @@ class EmailProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
       password: String,
       data: Option[JsObject],
       refreshToken: Option[LongTermToken]
-  )(
-      implicit ctx: LogContext
+  )(implicit
+      ctx: LogContext
   ): ErrorOr[F, TokenData] = {
     for {
       email <- decodeToken(registerToken, EmailToken.RegisterType)
@@ -51,8 +51,8 @@ class EmailProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
     } yield result
   }
 
-  override def resetPassword(resetPasswordToken: String, password: String, data: Option[JsObject])(
-      implicit ctx: LogContext
+  override def resetPassword(resetPasswordToken: String, password: String, data: Option[JsObject])(implicit
+      ctx: LogContext
   ): ErrorOr[F, TokenData] = {
     for {
       email <- decodeToken(resetPasswordToken, EmailToken.ResetPasswordType)
@@ -86,8 +86,8 @@ class EmailProviderServiceImpl[F[_]: MonadError[*[_], Throwable]](
     jwtService.encode(EmailToken(email, `type`).toJson.asJsObject)
   }
 
-  private def changePasswordAndLogin(email: String, password: String, data: Option[JsObject])(
-      implicit ctx: LogContext
+  private def changePasswordAndLogin(email: String, password: String, data: Option[JsObject])(implicit
+      ctx: LogContext
   ): ErrorOr[F, TokenData] = {
     for {
       _ <- checkIsExists(email)
