@@ -88,7 +88,7 @@ lazy val core = (project in file("."))
         "org.codehaus.janino"  % "janino"                     % "3.1.2",
         "org.apache.commons"   % "commons-email"              % "1.5",
         "org.scalatest"       %% "scalatest"                  % "3.2.0"   % "it,test",
-        "org.mockito"          % "mockito-core"               % "3.3.3"   % "it,test",
+        "org.mockito"          % "mockito-core"               % "3.4.2"   % "it,test",
         "org.mockito"         %% "mockito-scala"              % "1.14.8"  % "it,test"
       )
     }
