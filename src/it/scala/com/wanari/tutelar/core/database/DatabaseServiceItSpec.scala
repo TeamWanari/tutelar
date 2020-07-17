@@ -22,6 +22,8 @@ class DatabaseServiceItSpec extends AnyWordSpecLike with Matchers with AwaitUtil
   import cats.instances.future._
   import slick.jdbc.PostgresProfile.api.Database
 
+  override implicit val timeout = 15.seconds
+
   private val memoryService = new MemoryDatabaseService[Future]
 
   private val config = ConfigFactory.load()
