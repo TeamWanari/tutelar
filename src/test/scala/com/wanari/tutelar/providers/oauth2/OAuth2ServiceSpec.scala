@@ -33,7 +33,7 @@ class OAuth2ServiceSpec extends TestBase {
     "create map" in {
       val trh = TokenRequestHelper("a", "b", "c", "d")
       val map = trh.getAsMap("uri")
-      map.keys.toList should contain allOf ("client_id", "client_secret", "code", "state", "redirect_uri")
+      map.keys.toList should contain.allOf("client_id", "client_secret", "code", "state", "redirect_uri")
       map.toList should contain("grant_type" -> "authorization_code")
     }
 

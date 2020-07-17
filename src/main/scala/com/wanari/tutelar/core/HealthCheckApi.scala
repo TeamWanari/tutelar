@@ -11,7 +11,7 @@ import scala.concurrent.Future
 import scala.util.Success
 
 class HealthCheckApi(implicit service: HealthCheckService[Future]) extends Api {
-  def route: Route = {
+  def route(): Route = {
     path("healthCheck") {
       get {
         withTrace("HealthCheck") { _ =>

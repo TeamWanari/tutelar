@@ -108,7 +108,7 @@ class PostgresDatabaseService(implicit config: PostgresConfig, ec: ExecutionCont
     def id: Rep[String]      = column[String]("id", O.PrimaryKey)
     def createdAt: Rep[Long] = column[Long]("created_at")
 
-    def * = (id, createdAt) <> ((User.apply _).tupled, User.unapply)
+    def * = (id, createdAt).<>((User.apply _).tupled, User.unapply)
   }
   private class AccountsTable(tag: Tag) extends Table[Account](tag, "accounts") {
     def authType: Rep[String]   = column[String]("auth_type", O.PrimaryKey)
@@ -116,7 +116,7 @@ class PostgresDatabaseService(implicit config: PostgresConfig, ec: ExecutionCont
     def userId: Rep[String]     = column[String]("user_id")
     def customData: Rep[String] = column[String]("custom_data")
 
-    def * = (authType, externalId, userId, customData) <> ((Account.apply _).tupled, Account.unapply)
+    def * = (authType, externalId, userId, customData).<>((Account.apply _).tupled, Account.unapply)
   }
 }
 

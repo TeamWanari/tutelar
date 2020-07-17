@@ -16,7 +16,7 @@ class HealthCheckItSpec extends RouteTestBase {
       import cats.instances.future._
       override def getStatus: ErrorOr[Future, HealthCheckResult] = EitherT.pure[Future, AppError](serviceResult)
     }
-    lazy val route = new HealthCheckApi().route
+    lazy val route = new HealthCheckApi().route()
   }
 
   val basicResult = HealthCheckResult(

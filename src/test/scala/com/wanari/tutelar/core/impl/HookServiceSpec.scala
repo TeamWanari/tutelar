@@ -25,7 +25,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration.Duration
 
 class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestBase {
-  override def afterAll: Unit = {
+  override def afterAll(): Unit = {
     TestKit.shutdownActorSystem(system)
   }
 
