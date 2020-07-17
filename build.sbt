@@ -3,7 +3,7 @@ import org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings
 lazy val ver = version := "1.0.0-SNAPSHOT"
 
 lazy val commonSettings = Seq(
-  scalaVersion := "2.13.1",
+  scalaVersion := "2.13.3",
   organization := "com.wanari",
   scalafmtOnCompile := true,
   ver
@@ -88,7 +88,6 @@ lazy val core = (project in file("."))
         "org.codehaus.janino"  % "janino"                     % "3.1.2",
         "org.apache.commons"   % "commons-email"              % "1.5",
         "org.scalatest"       %% "scalatest"                  % "3.2.0"   % "it,test",
-        "org.mockito"          % "mockito-core"               % "3.3.3"   % "it,test",
         "org.mockito"         %% "mockito-scala"              % "1.14.8"  % "it,test"
       )
     }
