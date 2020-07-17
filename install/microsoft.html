@@ -30,7 +30,7 @@
 <span class="home-icon">⌂</span>Tutelar
 </a>
 <div class="version-number">
-1.0.0-alpha-11
+1.0.0-alpha-12
 </div>
 </div>
 <div class="nav-toc">
@@ -82,7 +82,7 @@ C16.952,7,17,6.553,17,6c0-0.553-0.048-1-0.6-1H3.6C3.048,5,3,5.447,3,6C3,6.553,3.
 <span class="home-icon">⌂</span>Tutelar
 </a>
 <div class="version-number">
-1.0.0-alpha-11
+1.0.0-alpha-12
 </div>
 </div>
 <div class="nav-toc">
@@ -137,13 +137,14 @@ C16.952,7,17,6.553,17,6c0-0.553-0.048-1-0.6-1H3.6C3.048,5,3,5.447,3,6C3,6.553,3.
 <h3><a href="#configuration" name="configuration" class="anchor"><span class="anchor-link"></span></a>Configuration</h3>
 <p>You should set the <code>oauth2.microsoft.clientId</code>, <code>oauth2.microsoft.clientSecret</code> and <code>oauth2.microsoft.scopes</code> variables. The first two comes from the pre-config step. The last one is <code>user.read</code> by default, but you can use anything from the <a href="https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-permissions-and-consent">official list</a>. (If you use multiple scopes, you need to separate them with <code>,</code> like <code>a,b,c</code>.)</p>
 <p>Also you should set the <code>rootUrl</code> correctly (it is needed for the callbacks). And the <code>callback.success</code> and <code>callback.failure</code> to handle redirects correctly.</p>
+<p>Furthermore, if you&rsquo;d like to be able to use the token endpoint for retrieving the user&rsquo;s access tokens, you should set the <code>oauth2.microsoft.auth</code> to the desired authentication method and set the corresponding configurations as well.</p>
 <h4><a href="#example" name="example" class="anchor"><span class="anchor-link"></span></a>Example</h4>
 <p>Your frontend is on <code>https://example.com</code>, your tutelar service is on <code>https://auth.example.com</code>.</p>
 <p>The rootUrl should be <code>https://auth.example.com</code>. The success url is something like <code>https://example.com/authentication?token=&lt;&lt;TOKEN&gt;&gt;</code> and the failure like <code>https://example.com/authenticationError/&lt;&lt;ERROR&gt;&gt;</code> </p>
 <h3><a href="#hooks-data" name="hooks-data" class="anchor"><span class="anchor-link"></span></a>Hooks data</h3>
 <p>The hooks will contain the user <a href="https://docs.microsoft.com/en-us/graph/api/user-get?view=graph-rest-1.0&tabs=http">profile</a> from <code>https://graph.microsoft.com/v1.0/me</code>.</p>
-<h3><a href="#getting-more-data-from-the-api" name="getting-more-data-from-the-api" class="anchor"><span class="anchor-link"></span></a>Getting more data from the API</h3><div class="callout warning "><div class="callout-title">Warning</div>
-<p>Currently there is no possible way to get back the auth token from tutelar. In the near future probably there will be an api for it.</p></div>
+<h3><a href="#getting-more-data-from-the-api" name="getting-more-data-from-the-api" class="anchor"><span class="anchor-link"></span></a>Getting more data from the API</h3>
+<p>You can get the user&rsquo;s access token for Microsoft account by calling the <code>https://lvh.me:9443/microsoft/token?userId=&lt;&lt;USER_ID&gt;&gt;</code> endpoint where the <code>&lt;&lt;USER_ID&gt;&gt;</code> query param is the id found in the JWT provided by the user.</p>
 <h3><a href="#frontend-for-registration" name="frontend-for-registration" class="anchor"><span class="anchor-link"></span></a>Frontend for registration</h3>
 <p>Not needed to differentiate your registration and login frontend.</p>
 <h3><a href="#frontend-for-login" name="frontend-for-login" class="anchor"><span class="anchor-link"></span></a>Frontend for login</h3>
@@ -158,7 +159,7 @@ C16.952,7,17,6.553,17,6c0-0.553-0.048-1-0.6-1H3.6C3.048,5,3,5.447,3,6C3,6.553,3.
 <h3><a href="#mobile-implementation" name="mobile-implementation" class="anchor"><span class="anchor-link"></span></a>Mobile implementation</h3><div class="callout warning "><div class="callout-title">Warning</div>
 <p>The correct mobile implementation is not yet designed.</p></div>
 <div class="source-github">
-The source code for this page can be found <a href="https://github.com/TeamWanari/tutelar/tree/v1.0.0-alpha-11/docs/src/main/paradox/install/microsoft.md">here</a>.
+The source code for this page can be found <a href="https://github.com/TeamWanari/tutelar/tree/v1.0.0-alpha-12/docs/src/main/paradox/install/microsoft.md">here</a>.
 </div>
 
 <div class="nav-next">
@@ -247,7 +248,7 @@ The source code for this page can be found <a href="https://github.com/TeamWanar
 <script type="text/javascript" src="../lib/prettify/prettify.js"></script>
 <script type="text/javascript" src="../lib/prettify/lang-scala.js"></script>
 <script type="text/javascript">jQuery(function(){window.prettyPrint && prettyPrint()});</script>
-<script type="text/javascript">jQuery(function(jq){initOldVersionWarnings(jq, '1.0.0-alpha-11', '')});</script>
+<script type="text/javascript">jQuery(function(jq){initOldVersionWarnings(jq, '1.0.0-alpha-12', '')});</script>
 
 
 </html>
