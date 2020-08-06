@@ -62,7 +62,7 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
 
     implicit val dummyEscher = new EscherService[Future] {
       override def signRequest(service: String, request: HttpRequest): Future[HttpRequest] = {
-        Future.successful(request.copy(headers = request.headers :+ RawHeader("ESCHER", service)))
+        Future.successful(request.withHeaders(request.headers :+ RawHeader("ESCHER", service)))
       }
       override def init: Future[Unit] = ???
     }

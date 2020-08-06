@@ -18,7 +18,7 @@ trait HttpWrapper[F[_]] {
 
 class AkkaHttpWrapper(implicit actorSystem: ActorSystem) extends HttpWrapper[Future] {
   override def singleRequest(httpRequest: HttpRequest)(implicit ctx: LogContext): Future[HttpResponse] = {
-    val requestWithTrace = httpRequest.copy(headers = httpRequest.headers ++ ctx.getInjectHeaders)
+    val requestWithTrace = httpRequest.withHeaders(httpRequest.headers ++ ctx.getInjectHeaders)
     Http().singleRequest(requestWithTrace)
   }
 

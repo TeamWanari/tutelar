@@ -28,7 +28,7 @@ object Main extends App {
     services <- Future(new RealServices())
     _        <- services.init()
     route = Api.createApi(services)
-    server <- Http().bindAndHandle(route, "0.0.0.0", 9000)
+    server <- Http().newServerAt("0.0.0.0", 9000).bindFlow(route)
   } yield {
     setupShutdownHook(server)
   }
