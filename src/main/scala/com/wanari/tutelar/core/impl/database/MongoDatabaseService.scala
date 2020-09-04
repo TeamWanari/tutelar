@@ -15,7 +15,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class MongoDatabaseService(implicit config: MongoConfig, ec: ExecutionContext, driver: AsyncDriver)
     extends DatabaseService[Future] {
   import MongoDatabaseService._
-  import cats.instances.future._
 
   private lazy val usersCollection: Future[BSONCollection] = {
     val result: EitherT[Future, Throwable, BSONCollection] = for {

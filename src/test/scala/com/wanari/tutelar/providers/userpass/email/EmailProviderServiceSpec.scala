@@ -15,7 +15,6 @@ import scala.concurrent.duration.Duration
 import scala.util.{Failure, Success, Try}
 
 class EmailProviderServiceSpec extends TestBase {
-  import cats.instances.try_._
   implicit val e: MonadError[Try, Throwable] = implicitly
 
   class TestScope extends ProviderTestScope[Try] {

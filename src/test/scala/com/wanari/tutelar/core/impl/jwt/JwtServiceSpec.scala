@@ -12,7 +12,6 @@ import scala.concurrent.duration._
 import scala.util.{Success, Try}
 
 class JwtServiceSpec extends TestBase {
-  import cats.instances.try_._
 
   def createServiceWithConf(implicit config: JwtConfig): JwtService[Try] = {
     val service = new JwtServiceImpl[Try](config)

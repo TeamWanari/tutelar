@@ -8,7 +8,6 @@ import scala.util.{Success, Try}
 
 class PasswordDifficultyCheckerImplSpec extends AnyWordSpecLike with Matchers {
   trait TestScope {
-    import cats.instances.try_._
     lazy val patternConfig                     = ""
     implicit lazy val config: PasswordSettings = PasswordSettings(patternConfig)
     lazy val service                           = new PasswordDifficultyCheckerImpl[Try]

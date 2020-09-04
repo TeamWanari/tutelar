@@ -12,7 +12,6 @@ import org.scalatest.BeforeAndAfterEach
 import scala.concurrent.Future
 
 class AuthDirectivesSpec extends TestBase with ScalatestRouteTest with BeforeAndAfterEach {
-  import cats.instances.future._
 
   val authServiceMock = mock[AuthService[Future]]
 

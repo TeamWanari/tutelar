@@ -21,7 +21,6 @@ sealed abstract class OAuth2Api(implicit
     val escherConfig: EscherConfig
 ) extends ProviderApi
     with ServiceAuthDirectives {
-  import cats.instances.future._
   val service: OAuth2Service[Future]
 
   override protected def authConfig: ServiceAuthConfig = getServiceAuthConfig("oauth2.oauth2Api")

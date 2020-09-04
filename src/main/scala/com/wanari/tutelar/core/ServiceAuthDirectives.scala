@@ -36,7 +36,6 @@ trait ServiceAuthDirectives extends EscherDirectives {
       case EscherAuthConfig(trustedServices) =>
         escherAuthenticate(trustedServices)
       case JwtAuthConfig(jwtConfig) =>
-        import cats.instances.future._
         val service = new JwtServiceImpl[Future](jwtConfig)
         val authenticator: AsyncAuthenticator[Unit] = {
           case Provided(token) =>

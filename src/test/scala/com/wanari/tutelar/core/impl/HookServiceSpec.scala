@@ -54,7 +54,6 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
   )
 
   trait TestScope {
-    import cats.instances.future._
     import system.dispatcher
 
     val httpMock = mock[HttpWrapper[Future]]
