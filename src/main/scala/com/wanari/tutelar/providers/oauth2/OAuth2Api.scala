@@ -56,10 +56,9 @@ sealed abstract class OAuth2Api(implicit
             authenticateService {
               parameters(Symbol("userId").as[String]) { userId =>
                 withTrace(s"Token_${service.TYPE.toLowerCase}") { implicit ctx =>
-                  val customHandler: ErrorHandler = {
-                    case appError: AppError =>
-                      logger.info(appError.message)
-                      complete((StatusCodes.NotFound, ErrorResponse(appError.message)))
+                  val customHandler: ErrorHandler = { case appError: AppError =>
+                    logger.info(appError.message)
+                    complete((StatusCodes.NotFound, ErrorResponse(appError.message)))
                   }
 
                   service.getAccessTokenForUser(userId).toComplete(customHandler)

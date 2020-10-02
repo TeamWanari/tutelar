@@ -169,8 +169,8 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](implicit
       .traverse[F, (Boolean, ProviderData)] { provider: ProviderData =>
         expirationService.isExpired(provider.name, data.createdAt, provider.loginAt).map(_ -> provider)
       }
-      .map(_.collect {
-        case (false, provider) => provider
+      .map(_.collect { case (false, provider) =>
+        provider
       })
 
     for {

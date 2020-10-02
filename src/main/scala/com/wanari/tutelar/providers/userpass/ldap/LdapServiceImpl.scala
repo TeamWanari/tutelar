@@ -54,8 +54,8 @@ class LdapServiceImpl(implicit
       val attributes = attributesConvertToMap(user.getAttributes)
       Right(attributes)
     }
-    result.recover {
-      case _ => Left(AuthenticationFailed())
+    result.recover { case _ =>
+      Left(AuthenticationFailed())
     }
   }
 
