@@ -58,19 +58,19 @@ lazy val core = (project in file("."))
     libraryDependencies ++= {
       Seq(
         "org.typelevel"       %% "cats-core"                  % "2.1.1",
-        "com.typesafe.akka"   %% "akka-http"                  % "10.2.0",
-        "com.typesafe.akka"   %% "akka-http-spray-json"       % "10.2.0",
-        "com.typesafe.akka"   %% "akka-http-testkit"          % "10.2.0" % "it,test",
-        "com.typesafe.akka"   %% "akka-actor"                 % "2.6.9",
-        "com.typesafe.akka"   %% "akka-stream"                % "2.6.9",
-        "com.typesafe.akka"   %% "akka-slf4j"                 % "2.6.9",
-        "com.typesafe.akka"   %% "akka-testkit"               % "2.6.9"  % "it,test",
+        "com.typesafe.akka"   %% "akka-http"                  % "10.2.1",
+        "com.typesafe.akka"   %% "akka-http-spray-json"       % "10.2.1",
+        "com.typesafe.akka"   %% "akka-http-testkit"          % "10.2.1" % "it,test",
+        "com.typesafe.akka"   %% "akka-actor"                 % "2.6.10",
+        "com.typesafe.akka"   %% "akka-stream"                % "2.6.10",
+        "com.typesafe.akka"   %% "akka-slf4j"                 % "2.6.10",
+        "com.typesafe.akka"   %% "akka-testkit"               % "2.6.10"  % "it,test",
         "ch.qos.logback"       % "logback-classic"            % "1.2.3",
         "net.logstash.logback" % "logstash-logback-encoder"   % "6.4",
         "org.slf4j"            % "jul-to-slf4j"               % "1.7.30",
         "com.typesafe.slick"  %% "slick"                      % "3.3.3",
         "com.typesafe.slick"  %% "slick-hikaricp"             % "3.3.3",
-        "org.postgresql"       % "postgresql"                 % "42.2.16",
+        "org.postgresql"       % "postgresql"                 % "42.2.18",
         "com.pauldijou"       %% "jwt-core"                   % "4.3.0",
         "com.pauldijou"       %% "jwt-spray-json"             % "4.3.0",
         "org.mindrot"          % "jbcrypt"                    % "0.4",
@@ -81,14 +81,14 @@ lazy val core = (project in file("."))
         "io.opentracing"       % "opentracing-noop"           % "0.33.0",
         "io.jaegertracing"     % "jaeger-client"              % "1.4.0",
         "org.reactivemongo"   %% "reactivemongo"              % "0.20.12-fix1",
-        "org.reactivemongo"   %% "reactivemongo-bson-monocle" % "1.0.0",
+        "org.reactivemongo"   %% "reactivemongo-bson-monocle" % "0.20.13",
         "com.lightbend.akka"  %% "akka-stream-alpakka-amqp"   % "2.0.2",
-        "org.bouncycastle"     % "bcprov-jdk15on"             % "1.66",
-        "com.emarsys"         %% "escher-akka-http"           % "1.3.1",
+        "org.bouncycastle"     % "bcprov-jdk15on"             % "1.67",
+        "com.emarsys"         %% "escher-akka-http"           % "1.3.2",
         "org.codehaus.janino"  % "janino"                     % "3.1.2",
         "org.apache.commons"   % "commons-email"              % "1.5",
         "org.scalatest"       %% "scalatest"                  % "3.2.2"  % "it,test",
-        "org.mockito"         %% "mockito-scala"              % "1.15.0" % "it,test"
+        "org.mockito"         %% "mockito-scala"              % "1.16.0" % "it,test"
       )
     }
   )
