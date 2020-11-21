@@ -81,7 +81,7 @@ lazy val core = (project in file("."))
         "io.opentracing"       % "opentracing-noop"           % "0.33.0",
         "io.jaegertracing"     % "jaeger-client"              % "1.5.0",
         "org.reactivemongo"   %% "reactivemongo"              % "0.20.12-fix1",
-        "org.reactivemongo"   %% "reactivemongo-bson-monocle" % "0.20.13",
+        "org.reactivemongo"   %% "reactivemongo-bson-monocle" % "1.0.1",
         "com.lightbend.akka"  %% "akka-stream-alpakka-amqp"   % "2.0.2",
         "org.bouncycastle"     % "bcprov-jdk15on"             % "1.67",
         "com.emarsys"         %% "escher-akka-http"           % "1.3.3",
