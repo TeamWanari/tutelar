@@ -17,8 +17,7 @@ import spray.json.{JsArray, JsNumber, JsObject, JsString}
 import scala.concurrent.duration.Duration
 import scala.util.{Success, Try}
 
-class AuthServiceSpec extends TestBase {
-  import cats.instances.try_._
+class AuthServiceSpec extends TestBase {
 
   val authType             = "AUTH_TYPE"
   val externalId           = "ext_id"

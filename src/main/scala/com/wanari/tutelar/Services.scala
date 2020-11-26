@@ -63,7 +63,6 @@ trait Services[F[_]] {
 
 class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, override val configService: ConfigService)
     extends Services[Future] {
-  import cats.instances.future._
 
   import configService._
 

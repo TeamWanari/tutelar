@@ -54,7 +54,6 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
   )
 
   trait TestScope {
-    import cats.instances.future._
     import system.dispatcher
 
     val httpMock = mock[HttpWrapper[Future]]
@@ -104,44 +103,43 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
     "register" -> ((s: HookService[Future]) => s.register),
     "login"    -> ((s: HookService[Future]) => s.login),
     "link"     -> ((s: HookService[Future]) => s.link)
-  ).foreach {
-    case (name, getFunc) =>
-      s"#$name" when {
-        "call the backend" should {
-          "add auth header - basic" in new TestScope {
-            await(getFunc(service)(userId, externalId, authType, userInfo))
-            validateBasicAuth(httpMock)
-          }
+  ).foreach { case (name, getFunc) =>
+    s"#$name" when {
+      "call the backend" should {
+        "add auth header - basic" in new TestScope {
+          await(getFunc(service)(userId, externalId, authType, userInfo))
+          validateBasicAuth(httpMock)
+        }
 
-          "add custom header - custom header" in new CustomHeaderTestScope {
-            await(getFunc(service)(userId, externalId, authType, userInfo))
-            validateCustomHeaderAuth(httpMock)
-          }
+        "add custom header - custom header" in new CustomHeaderTestScope {
+          await(getFunc(service)(userId, externalId, authType, userInfo))
+          validateCustomHeaderAuth(httpMock)
+        }
 
-          "sign request - escher" in new EscherTestScope {
-            await(getFunc(service)(userId, externalId, authType, userInfo))
-            validateEscherAuth(httpMock)
-          }
+        "sign request - escher" in new EscherTestScope {
+          await(getFunc(service)(userId, externalId, authType, userInfo))
+          validateEscherAuth(httpMock)
+        }
 
-          "add auth header - jwt" in new JwtTestScope {
-            await(getFunc(service)(userId, externalId, authType, userInfo))
-            validateJwtAuth(httpMock)
-          }
+        "add auth header - jwt" in new JwtTestScope {
+          await(getFunc(service)(userId, externalId, authType, userInfo))
+          validateJwtAuth(httpMock)
+        }
 
-          "send the user data and return the response" in new TestScope {
-            await(getFunc(service)(userId, externalId, authType, userInfo)) shouldEqual responseData
-            validateRequest(httpMock)(
-              expectedUrl = s"$baseUrl/$name",
-              expectedRequest = JsObject(
-                "id"         -> JsString(userId),
-                "externalId" -> JsString(externalId),
-                "authType"   -> JsString(authType),
-                "data"       -> userInfo
-              )
+        "send the user data and return the response" in new TestScope {
+          await(getFunc(service)(userId, externalId, authType, userInfo)) shouldEqual responseData
+          validateRequest(httpMock)(
+            expectedUrl = s"$baseUrl/$name",
+            expectedRequest = JsObject(
+              "id"         -> JsString(userId),
+              "externalId" -> JsString(externalId),
+              "authType"   -> JsString(authType),
+              "data"       -> userInfo
             )
-          }
+          )
         }
       }
+    }
   }
 
   "#modify" when {
@@ -290,18 +288,17 @@ class HookServiceSpec extends TestKit(ActorSystem("HookServiceSpec")) with TestB
     TestCaseWrapper("unlink", s => s.unlink(userId, "", ""), ()),
     TestCaseWrapper("delete", s => s.delete(userId), ()),
     TestCaseWrapper("refreshToken", s => s.refreshToken(userId, JsObject.empty), JsObject.empty)
-  ).foreach {
-    case TestCaseWrapper(name, func, ret) =>
-      s"$name works if no baseUrl" in new TestScope {
-        override lazy val config: HookConfig = noUrlConfig
-        await(func(service)) shouldBe ret
-        validateNoRequest(httpMock)
-      }
-      s"$name works if modulesDisabled" in new TestScope {
-        override lazy val config: HookConfig = noModulConfig
-        await(func(service)) shouldBe ret
-        validateNoRequest(httpMock)
-      }
+  ).foreach { case TestCaseWrapper(name, func, ret) =>
+    s"$name works if no baseUrl" in new TestScope {
+      override lazy val config: HookConfig = noUrlConfig
+      await(func(service)) shouldBe ret
+      validateNoRequest(httpMock)
+    }
+    s"$name works if modulesDisabled" in new TestScope {
+      override lazy val config: HookConfig = noModulConfig
+      await(func(service)) shouldBe ret
+      validateNoRequest(httpMock)
+    }
   }
 
   def validateBasicAuth(httpMock: HttpWrapper[Future]): Unit = {

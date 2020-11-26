@@ -22,7 +22,6 @@ object Main extends App {
 
   private implicit lazy val system           = ActorSystem("tutelar-system", config.getConfigForAkka)
   private implicit lazy val executionContext = system.dispatcher
-  import cats.instances.future._
 
   private val starting = for {
     services <- Future(new RealServices())

@@ -37,11 +37,10 @@ class ExpirationServiceSpec extends TestBase {
           service.isExpired("missingProviderName", lastActivityAt = time, loginAt = time) shouldBe false
         }
       }
-      Seq(0 -> true, 500 -> true, 1000 -> false, 1500 -> false, 2000 -> false).foreach {
-        case (time, expected) =>
-          s"ExpirationInactivity lastActivityAt $time - $expected" in new TestScope {
-            service.isExpired("provider_inactivity_500ms", lastActivityAt = time, loginAt = now) shouldBe expected
-          }
+      Seq(0 -> true, 500 -> true, 1000 -> false, 1500 -> false, 2000 -> false).foreach { case (time, expected) =>
+        s"ExpirationInactivity lastActivityAt $time - $expected" in new TestScope {
+          service.isExpired("provider_inactivity_500ms", lastActivityAt = time, loginAt = now) shouldBe expected
+        }
       }
       "Use lowercase provider name. (ExpirationInactivity lastActivityAt 0 - true)" in new TestScope {
         service.isExpired("provider_inactivity_500ms", lastActivityAt = 0, loginAt = now) shouldBe true
@@ -52,11 +51,10 @@ class ExpirationServiceSpec extends TestBase {
           service.isExpired("provider_inactivity_500ms", lastActivityAt = now, loginAt = time) shouldBe false
         }
       }
-      Seq(0 -> true, 500 -> true, 1000 -> false, 1500 -> false, 2000 -> false).foreach {
-        case (time, expected) =>
-          s"ExpirationLifetime loginAt $time - $expected" in new TestScope {
-            service.isExpired("provider_lifetime_500ms", lastActivityAt = now, loginAt = time) shouldBe expected
-          }
+      Seq(0 -> true, 500 -> true, 1000 -> false, 1500 -> false, 2000 -> false).foreach { case (time, expected) =>
+        s"ExpirationLifetime loginAt $time - $expected" in new TestScope {
+          service.isExpired("provider_lifetime_500ms", lastActivityAt = now, loginAt = time) shouldBe expected
+        }
       }
       times.foreach { time =>
         s"ExpirationLifetime lastActivityAt do not matter $time" in new TestScope {

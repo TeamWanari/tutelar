@@ -21,7 +21,6 @@ sealed abstract class OAuth2Api(implicit
     val escherConfig: EscherConfig
 ) extends ProviderApi
     with ServiceAuthDirectives {
-  import cats.instances.future._
   val service: OAuth2Service[Future]
 
   override protected def authConfig: ServiceAuthConfig = getServiceAuthConfig("oauth2.oauth2Api")
@@ -57,10 +56,9 @@ sealed abstract class OAuth2Api(implicit
             authenticateService {
               parameters(Symbol("userId").as[String]) { userId =>
                 withTrace(s"Token_${service.TYPE.toLowerCase}") { implicit ctx =>
-                  val customHandler: ErrorHandler = {
-                    case appError: AppError =>
-                      logger.info(appError.message)
-                      complete((StatusCodes.NotFound, ErrorResponse(appError.message)))
+                  val customHandler: ErrorHandler = { case appError: AppError =>
+                    logger.info(appError.message)
+                    complete((StatusCodes.NotFound, ErrorResponse(appError.message)))
                   }
 
                   service.getAccessTokenForUser(userId).toComplete(customHandler)

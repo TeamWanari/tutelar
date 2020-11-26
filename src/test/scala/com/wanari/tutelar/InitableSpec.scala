@@ -59,7 +59,6 @@ class InitableSpec extends TestBase {
       override def getConfigForAkka: Config                                                    = ???
     }
   }
-  import cats.instances.try_._
 
   "Initiable" should {
     "#initializeIfEnabled" should {
