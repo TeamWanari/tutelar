@@ -57,16 +57,16 @@ lazy val core = (project in file("."))
     ),
     libraryDependencies ++= {
       Seq(
-        "org.typelevel"       %% "cats-core"                  % "2.3.0",
-        "com.typesafe.akka"   %% "akka-http"                  % "10.2.1",
-        "com.typesafe.akka"   %% "akka-http-spray-json"       % "10.2.1",
-        "com.typesafe.akka"   %% "akka-http-testkit"          % "10.2.1" % "it,test",
+        "org.typelevel"       %% "cats-core"                  % "2.1.1",
+        "com.typesafe.akka"   %% "akka-http"                  % "10.2.2",
+        "com.typesafe.akka"   %% "akka-http-spray-json"       % "10.2.2",
+        "com.typesafe.akka"   %% "akka-http-testkit"          % "10.2.2" % "it,test",
         "com.typesafe.akka"   %% "akka-actor"                 % "2.6.10",
         "com.typesafe.akka"   %% "akka-stream"                % "2.6.10",
         "com.typesafe.akka"   %% "akka-slf4j"                 % "2.6.10",
         "com.typesafe.akka"   %% "akka-testkit"               % "2.6.10"  % "it,test",
         "ch.qos.logback"       % "logback-classic"            % "1.2.3",
-        "net.logstash.logback" % "logstash-logback-encoder"   % "6.4",
+        "net.logstash.logback" % "logstash-logback-encoder"   % "6.5",
         "org.slf4j"            % "jul-to-slf4j"               % "1.7.30",
         "com.typesafe.slick"  %% "slick"                      % "3.3.3",
         "com.typesafe.slick"  %% "slick-hikaricp"             % "3.3.3",
@@ -99,7 +99,7 @@ addCommandAlias("testAll", "test it:test")
 enablePlugins(JavaAppPackaging)
 enablePlugins(BuildInfoPlugin)
 
-addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.1" cross CrossVersion.full)
+addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.2" cross CrossVersion.full)
 addCompilerPlugin("io.tryp"        % "splain"         % "0.5.7" cross CrossVersion.patch)
 
 cancelable in Global := true
