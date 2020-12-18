@@ -16,7 +16,6 @@ import scala.concurrent.duration.Duration
 import scala.util.{Success, Try}
 
 class TotpServiceSpec extends TestBase {
-  import cats.instances.try_._
   implicit val e: MonadError[Try, Throwable] = implicitly
 
   class TestScope extends ProviderTestScope[Try] {

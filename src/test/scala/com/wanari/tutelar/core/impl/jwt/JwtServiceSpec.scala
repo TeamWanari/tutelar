@@ -12,7 +12,6 @@ import scala.concurrent.duration._
 import scala.util.{Success, Try}
 
 class JwtServiceSpec extends TestBase {
-  import cats.instances.try_._
 
   def createServiceWithConf(implicit config: JwtConfig): JwtService[Try] = {
     val service = new JwtServiceImpl[Try](config)
@@ -50,47 +49,46 @@ class JwtServiceSpec extends TestBase {
   val data = JsObject("hello" -> JsString("JWT"))
 
   (symmetric ++ asymmetricRSA ++ asymmetricES)
-    .foreach {
-      case (algo, service, service2) =>
-        algo should {
-          "encode-validateAndDecode" in {
-            val result = for {
-              encoded <- EitherT.right(service.encode(data))
-              decoded <- service.validateAndDecode(encoded)
-            } yield {
-              decoded.getFields("hello")
-            }
-            result shouldEqual EitherT.rightT(Seq(JsString("JWT")))
+    .foreach { case (algo, service, service2) =>
+      algo should {
+        "encode-validateAndDecode" in {
+          val result = for {
+            encoded <- EitherT.right(service.encode(data))
+            decoded <- service.validateAndDecode(encoded)
+          } yield {
+            decoded.getFields("hello")
           }
-          "validateAndDecode fail - wrong secret" in {
-            val result = for {
-              encoded <- EitherT.right(service2.encode(data))
-              res     <- service.validateAndDecode(encoded)
-            } yield res
-            result shouldBe EitherT.leftT(InvalidJwt())
-          }
-          "validateAndDecode fail" in {
-            val result = service.validateAndDecode("wrongtoken")
-            result shouldBe EitherT.leftT(InvalidJwt())
-          }
-          "validate" in {
-            val result = for {
-              encoded <- service.encode(data)
-              result  <- service.validate(encoded)
-            } yield result
-            result shouldEqual Success(true)
-          }
-          "validate fail - wrong secret" in {
-            val result = for {
-              encoded <- service2.encode(data)
-              result  <- service.validate(encoded)
-            } yield result
-            result shouldEqual Success(false)
-          }
-          "validate fail" in {
-            service.validate("wrongtoken") shouldEqual Success(false)
-          }
+          result shouldEqual EitherT.rightT(Seq(JsString("JWT")))
         }
+        "validateAndDecode fail - wrong secret" in {
+          val result = for {
+            encoded <- EitherT.right(service2.encode(data))
+            res     <- service.validateAndDecode(encoded)
+          } yield res
+          result shouldBe EitherT.leftT(InvalidJwt())
+        }
+        "validateAndDecode fail" in {
+          val result = service.validateAndDecode("wrongtoken")
+          result shouldBe EitherT.leftT(InvalidJwt())
+        }
+        "validate" in {
+          val result = for {
+            encoded <- service.encode(data)
+            result  <- service.validate(encoded)
+          } yield result
+          result shouldEqual Success(true)
+        }
+        "validate fail - wrong secret" in {
+          val result = for {
+            encoded <- service2.encode(data)
+            result  <- service.validate(encoded)
+          } yield result
+          result shouldEqual Success(false)
+        }
+        "validate fail" in {
+          service.validate("wrongtoken") shouldEqual Success(false)
+        }
+      }
     }
 }
 

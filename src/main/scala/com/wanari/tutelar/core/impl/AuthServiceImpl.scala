@@ -163,15 +163,14 @@ class AuthServiceImpl[F[_]: MonadError[*[_], Throwable]](implicit
   private def removeExpiredProviders(
       data: LongTermTokenData
   )(implicit ctx: LogContext): ErrorOr[F, LongTermTokenData] = {
-    import cats.instances.list._
     import cats.syntax.traverse._
 
     val providersF = data.providers.toList
       .traverse[F, (Boolean, ProviderData)] { provider: ProviderData =>
         expirationService.isExpired(provider.name, data.createdAt, provider.loginAt).map(_ -> provider)
       }
-      .map(_.collect {
-        case (false, provider) => provider
+      .map(_.collect { case (false, provider) =>
+        provider
       })
 
     for {

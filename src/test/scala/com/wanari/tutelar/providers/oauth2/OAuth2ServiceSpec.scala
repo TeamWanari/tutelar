@@ -82,7 +82,6 @@ class OAuth2ServiceSpec extends TestBase {
   }
 
   "OAuth2Service" should {
-    import cats.instances.try_._
 
     trait Scope {
       implicit val db = mock[DatabaseService[Try]]

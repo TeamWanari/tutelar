@@ -12,7 +12,6 @@ import spray.json.{JsObject, JsTrue}
 import scala.util.Try
 
 class BasicProviderServiceSpec extends TestBase {
-  import cats.instances.try_._
 
   implicit val e: MonadError[Try, Throwable] = implicitly
 

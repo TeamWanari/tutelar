@@ -36,26 +36,26 @@ class EmailProviderApi(implicit
             }
           }
         } ~ path("send-register") {
-        post {
-          entity(as[EmailData]) { data =>
-            withTrace("SendRegister_email") { implicit ctx => service.sendRegister(data.email).toComplete }
+          post {
+            entity(as[EmailData]) { data =>
+              withTrace("SendRegister_email") { implicit ctx => service.sendRegister(data.email).toComplete }
+            }
           }
-        }
-      } ~ path("reset-password") {
-        post {
-          entity(as[RegisterData]) { data =>
-            withTrace("ResetPassword_email") { implicit ctx =>
-              completeLoginFlowWithJson(service.resetPassword(data.token, data.password, data.data))
+        } ~ path("reset-password") {
+          post {
+            entity(as[RegisterData]) { data =>
+              withTrace("ResetPassword_email") { implicit ctx =>
+                completeLoginFlowWithJson(service.resetPassword(data.token, data.password, data.data))
+              }
+            }
+          }
+        } ~ path("send-reset-password") {
+          post {
+            entity(as[EmailData]) { data =>
+              withTrace("SendResetPassword_email") { implicit ctx => service.sendResetPassword(data.email).toComplete }
             }
           }
         }
-      } ~ path("send-reset-password") {
-        post {
-          entity(as[EmailData]) { data =>
-            withTrace("SendResetPassword_email") { implicit ctx => service.sendResetPassword(data.email).toComplete }
-          }
-        }
-      }
     }
   }
 }

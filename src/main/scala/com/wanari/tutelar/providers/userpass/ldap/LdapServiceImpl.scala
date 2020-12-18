@@ -22,7 +22,6 @@ class LdapServiceImpl(implicit
     authService: AuthService[Future],
     databaseService: DatabaseService[Future]
 ) extends LdapService[Future] {
-  import cats.instances.future._
 
   private val authType     = "LDAP"
   private lazy val context = getUserInitialDirContext(config.readonlyUserWithNameSpace, config.readonlyUserPassword)
@@ -55,8 +54,8 @@ class LdapServiceImpl(implicit
       val attributes = attributesConvertToMap(user.getAttributes)
       Right(attributes)
     }
-    result.recover {
-      case _ => Left(AuthenticationFailed())
+    result.recover { case _ =>
+      Left(AuthenticationFailed())
     }
   }
 
