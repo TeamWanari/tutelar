@@ -3,7 +3,7 @@ import org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings
 lazy val ver = version := "1.0.0-SNAPSHOT"
 
 lazy val commonSettings = Seq(
-  scalaVersion := "2.13.3",
+  scalaVersion := "2.13.4",
   organization := "com.wanari",
   scalafmtOnCompile := true,
   ver
@@ -11,10 +11,6 @@ lazy val commonSettings = Seq(
 
 lazy val ItTest         = config("it") extend Test
 lazy val itTestSettings = Defaults.itSettings ++ scalafmtConfigSettings
-
-lazy val root = project
-  .in(file("."))
-  .aggregate(core)
 
 lazy val remoteRepo = sys.env
   .get("GITHUB_TOKEN")
@@ -36,7 +32,7 @@ lazy val docs = (project in file("docs"))
   .enablePlugins(ParadoxSitePlugin)
   .enablePlugins(GhpagesPlugin)
 
-lazy val core = (project in file("."))
+lazy val root = (project in file("."))
   .configs(ItTest)
   .settings(inConfig(ItTest)(itTestSettings): _*)
   .settings(commonSettings: _*)

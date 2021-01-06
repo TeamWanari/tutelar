@@ -66,156 +66,155 @@ class DatabaseServiceItSpec extends AnyWordSpecLike with Matchers with AwaitUtil
     "postgres slick instance" -> postgresService,
     "memory instance"         -> memoryService,
     "mongodb instance"        -> mongoService
-  ).foreach {
-    case (name, service) =>
-      name when {
-        "CheckStatus" in {
-          await(service.checkStatus()) shouldEqual true
-        }
+  ).foreach { case (name, service) =>
+    name when {
+      "CheckStatus" in {
+        await(service.checkStatus()) shouldEqual true
+      }
 
-        "Users" should {
-          "save and find" in {
-            val user1 = User("id1", 1)
-            val user2 = User("id2", 2)
+      "Users" should {
+        "save and find" in {
+          val user1 = User("id1", 1)
+          val user2 = User("id2", 2)
 
-            await(service.findUserById(user1.id)) shouldEqual None
-            await(service.findUserById(user2.id)) shouldEqual None
+          await(service.findUserById(user1.id)) shouldEqual None
+          await(service.findUserById(user2.id)) shouldEqual None
 
-            await(service.saveUser(user1))
-            await(service.saveUser(user2))
+          await(service.saveUser(user1))
+          await(service.saveUser(user2))
 
-            await(service.findUserById(user1.id)) shouldEqual Some(user1)
-            await(service.findUserById(user2.id)) shouldEqual Some(user2)
-          }
-        }
-
-        "Accounts" should {
-          "save and find by external id and auth type" in {
-            val user = User("user1", 1)
-            await(service.saveUser(user))
-
-            val account1 = Account("type1", "ext1", user.id, "XXX1")
-            val account2 = Account("type2", "ext1", user.id, "XXX2")
-
-            await(service.findAccountByTypeAndExternalId(account1.getId)) shouldEqual None
-            await(service.findAccountByTypeAndExternalId(account2.getId)) shouldEqual None
-
-            await(service.saveAccount(account1))
-            await(service.saveAccount(account2))
-
-            await(service.findAccountByTypeAndExternalId(account1.getId)) shouldEqual Some(account1)
-            await(service.findAccountByTypeAndExternalId(account2.getId)) shouldEqual Some(account2)
-          }
-
-          "save and list by user" in {
-            val user1 = User("user2", 1)
-            val user2 = User("user3", 2)
-
-            await(service.saveUser(user1))
-            await(service.saveUser(user2))
-
-            await(service.listAccountsByUserId(user1.id)) shouldEqual Seq()
-            await(service.listAccountsByUserId(user2.id)) shouldEqual Seq()
-
-            val account1 = Account("type3", "ext1", user1.id, "XXX4")
-            val account2 = Account("type4", "ext1", user1.id, "XXX5")
-            val account3 = Account("type3", "ext2", user2.id, "XXX6")
-
-            await(service.saveAccount(account1))
-            await(service.saveAccount(account2))
-            await(service.saveAccount(account3))
-
-            await(service.listAccountsByUserId(user1.id)) shouldEqual Seq(account1, account2)
-            await(service.listAccountsByUserId(user2.id)) shouldEqual Seq(account3)
-          }
-
-          "updateCustomData" in {
-            val user     = User("user4", 1)
-            val account1 = Account("type5", "ext1", user.id, "XXX")
-            val account2 = Account("type6", "ext1", user.id, "XXX")
-
-            await(service.saveUser(user))
-            await(service.saveAccount(account1))
-            await(service.saveAccount(account2))
-
-            await(service.updateCustomData(account1.getId, "ZZZ"))
-
-            await(service.findAccountByTypeAndExternalId(account1.getId)) shouldEqual Some(
-              account1.copy(customData = "ZZZ")
-            )
-            await(service.findAccountByTypeAndExternalId(account2.getId)) shouldEqual Some(
-              account2
-            )
-          }
-
-          "deleteUserWithAccountsById" in {
-            val user1    = User("id3", 1)
-            val user2    = User("id4", 2)
-            val account1 = Account("type6", "ext2", user1.id, "XXX4")
-            val account2 = Account("type7", "ext1", user1.id, "XXX5")
-            val account3 = Account("type6", "ext3", user2.id, "XXX6")
-
-            await(service.saveUser(user1))
-            await(service.saveUser(user2))
-            await(service.saveAccount(account1))
-            await(service.saveAccount(account2))
-            await(service.saveAccount(account3))
-
-            await(service.deleteUserWithAccountsById(user1.id))
-
-            await(service.listAccountsByUserId(user1.id)) shouldEqual Seq.empty
-            await(service.listAccountsByUserId(user2.id)) shouldEqual Seq(account3)
-
-            await(service.findUserById(user1.id)) shouldEqual None
-            await(service.findUserById(user2.id)) shouldEqual Some(user2)
-          }
-
-          "deleteAccountByUserAndType" in {
-            val user1    = User("id5", 1)
-            val user2    = User("id6", 2)
-            val account1 = Account("type10", "ext1", user1.id, "XXX4")
-            val account2 = Account("type11", "ext1", user1.id, "XXX5")
-            val account3 = Account("type11", "ext2", user2.id, "XXX6")
-
-            await(service.saveUser(user1))
-            await(service.saveUser(user2))
-            await(service.saveAccount(account1))
-            await(service.saveAccount(account2))
-            await(service.saveAccount(account3))
-
-            await(service.deleteAccountByUserAndType(user1.id, account2.authType))
-
-            await(service.listAccountsByUserId(user1.id)) shouldEqual Seq(account1)
-            await(service.listAccountsByUserId(user2.id)) shouldEqual Seq(account3)
-          }
-          "listUserIdsByAuthType" in {
-            val user1    = User("id7", 1)
-            val user2    = User("id8", 2)
-            val user3    = User("id9", 3)
-            val account1 = Account("type20", "ext1", user1.id, "XXX4")
-            val account2 = Account("type21", "ext1", user1.id, "XXX5")
-            val account3 = Account("type21", "ext2", user2.id, "XXX6")
-            val account4 = Account("type21", "ext3", user3.id, "XXX7")
-
-            await(service.saveUser(user1))
-            await(service.saveUser(user2))
-            await(service.saveUser(user3))
-            await(service.saveAccount(account1))
-            await(service.saveAccount(account2))
-            await(service.saveAccount(account3))
-            await(service.saveAccount(account4))
-
-            await(service.listUserIdsByAuthType("type20")).toSet shouldEqual Set(
-              UserIdWithExternalId(user1.id, account1.externalId)
-            )
-            await(service.listUserIdsByAuthType("type21")).toSet shouldEqual Set(
-              UserIdWithExternalId(user1.id, account2.externalId),
-              UserIdWithExternalId(user2.id, account3.externalId),
-              UserIdWithExternalId(user3.id, account4.externalId)
-            )
-            await(service.listUserIdsByAuthType("typeXX")).toSet shouldEqual Set()
-          }
+          await(service.findUserById(user1.id)) shouldEqual Some(user1)
+          await(service.findUserById(user2.id)) shouldEqual Some(user2)
         }
       }
+
+      "Accounts" should {
+        "save and find by external id and auth type" in {
+          val user = User("user1", 1)
+          await(service.saveUser(user))
+
+          val account1 = Account("type1", "ext1", user.id, "XXX1")
+          val account2 = Account("type2", "ext1", user.id, "XXX2")
+
+          await(service.findAccountByTypeAndExternalId(account1.getId)) shouldEqual None
+          await(service.findAccountByTypeAndExternalId(account2.getId)) shouldEqual None
+
+          await(service.saveAccount(account1))
+          await(service.saveAccount(account2))
+
+          await(service.findAccountByTypeAndExternalId(account1.getId)) shouldEqual Some(account1)
+          await(service.findAccountByTypeAndExternalId(account2.getId)) shouldEqual Some(account2)
+        }
+
+        "save and list by user" in {
+          val user1 = User("user2", 1)
+          val user2 = User("user3", 2)
+
+          await(service.saveUser(user1))
+          await(service.saveUser(user2))
+
+          await(service.listAccountsByUserId(user1.id)) shouldEqual Seq()
+          await(service.listAccountsByUserId(user2.id)) shouldEqual Seq()
+
+          val account1 = Account("type3", "ext1", user1.id, "XXX4")
+          val account2 = Account("type4", "ext1", user1.id, "XXX5")
+          val account3 = Account("type3", "ext2", user2.id, "XXX6")
+
+          await(service.saveAccount(account1))
+          await(service.saveAccount(account2))
+          await(service.saveAccount(account3))
+
+          await(service.listAccountsByUserId(user1.id)) shouldEqual Seq(account1, account2)
+          await(service.listAccountsByUserId(user2.id)) shouldEqual Seq(account3)
+        }
+
+        "updateCustomData" in {
+          val user     = User("user4", 1)
+          val account1 = Account("type5", "ext1", user.id, "XXX")
+          val account2 = Account("type6", "ext1", user.id, "XXX")
+
+          await(service.saveUser(user))
+          await(service.saveAccount(account1))
+          await(service.saveAccount(account2))
+
+          await(service.updateCustomData(account1.getId, "ZZZ"))
+
+          await(service.findAccountByTypeAndExternalId(account1.getId)) shouldEqual Some(
+            account1.copy(customData = "ZZZ")
+          )
+          await(service.findAccountByTypeAndExternalId(account2.getId)) shouldEqual Some(
+            account2
+          )
+        }
+
+        "deleteUserWithAccountsById" in {
+          val user1    = User("id3", 1)
+          val user2    = User("id4", 2)
+          val account1 = Account("type6", "ext2", user1.id, "XXX4")
+          val account2 = Account("type7", "ext1", user1.id, "XXX5")
+          val account3 = Account("type6", "ext3", user2.id, "XXX6")
+
+          await(service.saveUser(user1))
+          await(service.saveUser(user2))
+          await(service.saveAccount(account1))
+          await(service.saveAccount(account2))
+          await(service.saveAccount(account3))
+
+          await(service.deleteUserWithAccountsById(user1.id))
+
+          await(service.listAccountsByUserId(user1.id)) shouldEqual Seq.empty
+          await(service.listAccountsByUserId(user2.id)) shouldEqual Seq(account3)
+
+          await(service.findUserById(user1.id)) shouldEqual None
+          await(service.findUserById(user2.id)) shouldEqual Some(user2)
+        }
+
+        "deleteAccountByUserAndType" in {
+          val user1    = User("id5", 1)
+          val user2    = User("id6", 2)
+          val account1 = Account("type10", "ext1", user1.id, "XXX4")
+          val account2 = Account("type11", "ext1", user1.id, "XXX5")
+          val account3 = Account("type11", "ext2", user2.id, "XXX6")
+
+          await(service.saveUser(user1))
+          await(service.saveUser(user2))
+          await(service.saveAccount(account1))
+          await(service.saveAccount(account2))
+          await(service.saveAccount(account3))
+
+          await(service.deleteAccountByUserAndType(user1.id, account2.authType))
+
+          await(service.listAccountsByUserId(user1.id)) shouldEqual Seq(account1)
+          await(service.listAccountsByUserId(user2.id)) shouldEqual Seq(account3)
+        }
+        "listUserIdsByAuthType" in {
+          val user1    = User("id7", 1)
+          val user2    = User("id8", 2)
+          val user3    = User("id9", 3)
+          val account1 = Account("type20", "ext1", user1.id, "XXX4")
+          val account2 = Account("type21", "ext1", user1.id, "XXX5")
+          val account3 = Account("type21", "ext2", user2.id, "XXX6")
+          val account4 = Account("type21", "ext3", user3.id, "XXX7")
+
+          await(service.saveUser(user1))
+          await(service.saveUser(user2))
+          await(service.saveUser(user3))
+          await(service.saveAccount(account1))
+          await(service.saveAccount(account2))
+          await(service.saveAccount(account3))
+          await(service.saveAccount(account4))
+
+          await(service.listUserIdsByAuthType("type20")).toSet shouldEqual Set(
+            UserIdWithExternalId(user1.id, account1.externalId)
+          )
+          await(service.listUserIdsByAuthType("type21")).toSet shouldEqual Set(
+            UserIdWithExternalId(user1.id, account2.externalId),
+            UserIdWithExternalId(user2.id, account3.externalId),
+            UserIdWithExternalId(user3.id, account4.externalId)
+          )
+          await(service.listUserIdsByAuthType("typeXX")).toSet shouldEqual Set()
+        }
+      }
+    }
   }
 }

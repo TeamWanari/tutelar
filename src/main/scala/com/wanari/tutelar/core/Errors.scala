@@ -65,10 +65,9 @@ object Errors {
     private def toComplete(
         mbHandler: Option[ErrorHandler]
     )(implicit w: RootJsonWriter[T], ctx: LogContext, logger: Logger) = {
-      val defaultHandler: ErrorHandler = {
-        case appError: AppError =>
-          logger.info(appError.message)
-          complete((StatusCodes.Unauthorized, ErrorResponse(appError.message)))
+      val defaultHandler: ErrorHandler = { case appError: AppError =>
+        logger.info(appError.message)
+        complete((StatusCodes.Unauthorized, ErrorResponse(appError.message)))
       }
       val errorHandler = mbHandler.map(_.orElse(defaultHandler)).getOrElse(defaultHandler)
 

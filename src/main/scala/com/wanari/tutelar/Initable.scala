@@ -16,8 +16,8 @@ object Initable {
       logger: Logger
   ): F[Unit] = {
     logger.debug(s"Init $name")
-    initable.init.onError {
-      case ex => logger.error(s"Init $name failed", ex).pure[F]
+    initable.init.onError { case ex =>
+      logger.error(s"Init $name failed", ex).pure[F]
     }
   }
 

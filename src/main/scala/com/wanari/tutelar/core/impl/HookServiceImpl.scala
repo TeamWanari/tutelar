@@ -79,16 +79,15 @@ class HookServiceImpl[F[_]: MonadError[*[_], Throwable]](implicit
   private def sendHookWithoutResponse(endpoint: String, dto: JsValue)(implicit ctx: LogContext): F[Unit] = {
     sendHook(endpoint, dto)
       .map(_ => {})
-      .recover {
-        case HookDisabled() =>
+      .recover { case HookDisabled() =>
       }
   }
 
   private def sendHookAndParse(endpoint: String, dto: JsValue)(implicit ctx: LogContext): F[JsObject] = {
     sendHook(endpoint, dto)
       .flatMap(http.unmarshalEntityTo[JsObject])
-      .recover {
-        case HookDisabled() => JsObject()
+      .recover { case HookDisabled() =>
+        JsObject()
       }
   }
 
