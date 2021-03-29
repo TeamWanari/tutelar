@@ -53,7 +53,7 @@ lazy val root = (project in file("."))
     ),
     libraryDependencies ++= {
       Seq(
-        "org.typelevel"       %% "cats-core"                  % "2.4.2",
+        "org.typelevel"       %% "cats-core"                  % "2.5.0",
         "com.typesafe.akka"   %% "akka-http"                  % "10.2.4",
         "com.typesafe.akka"   %% "akka-http-spray-json"       % "10.2.4",
         "com.typesafe.akka"   %% "akka-http-testkit"          % "10.2.4" % "it,test",
