@@ -75,7 +75,7 @@ lazy val root = (project in file("."))
         "io.opentracing"       % "opentracing-api"            % "0.33.0",
         "io.opentracing"       % "opentracing-util"           % "0.33.0",
         "io.opentracing"       % "opentracing-noop"           % "0.33.0",
-        "io.jaegertracing"     % "jaeger-client"              % "1.5.0",
+        "io.jaegertracing"     % "jaeger-client"              % "1.6.0",
         "org.reactivemongo"   %% "reactivemongo"              % "1.0.3",
         "org.reactivemongo"   %% "reactivemongo-bson-monocle" % "1.0.3",
         "com.lightbend.akka"  %% "akka-stream-alpakka-amqp"   % "2.0.2",
