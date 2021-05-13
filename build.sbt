@@ -95,7 +95,7 @@ addCommandAlias("testAll", "test it:test")
 enablePlugins(JavaAppPackaging)
 enablePlugins(BuildInfoPlugin)
 
-addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.3" cross CrossVersion.full)
+addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.12.0" cross CrossVersion.full)
 addCompilerPlugin("io.tryp"        % "splain"         % "0.5.8" cross CrossVersion.patch)
 
 cancelable in Global := true
