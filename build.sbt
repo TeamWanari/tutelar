@@ -78,7 +78,7 @@ lazy val root = (project in file("."))
         "io.jaegertracing"      % "jaeger-client"              % "1.6.0",
         "org.reactivemongo"    %% "reactivemongo"              % "1.0.4",
         "org.reactivemongo"    %% "reactivemongo-bson-monocle" % "1.0.4",
-        "com.lightbend.akka"   %% "akka-stream-alpakka-amqp"   % "3.0.1",
+        "com.lightbend.akka"   %% "akka-stream-alpakka-amqp"   % "3.0.2",
         "org.bouncycastle"      % "bcprov-jdk15on"             % "1.69",
         "com.emarsys"          %% "escher-akka-http"           % "1.3.6",
         "org.codehaus.janino"   % "janino"                     % "3.1.4",
