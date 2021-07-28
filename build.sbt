@@ -81,7 +81,7 @@ lazy val root = (project in file("."))
         "com.lightbend.akka"   %% "akka-stream-alpakka-amqp"   % "3.0.2",
         "org.bouncycastle"      % "bcprov-jdk15on"             % "1.69",
         "com.emarsys"          %% "escher-akka-http"           % "1.3.7",
-        "org.codehaus.janino"   % "janino"                     % "3.1.4",
+        "org.codehaus.janino"   % "janino"                     % "3.1.6",
         "org.apache.commons"    % "commons-email"              % "1.5",
         "org.scalatest"        %% "scalatest"                  % "3.2.9"   % "it,test",
         "org.mockito"          %% "mockito-scala"              % "1.16.37" % "it,test"
