@@ -34,7 +34,7 @@ object Errors {
   sealed abstract class Oauth2Error(val message: String) extends Throwable with AppError
   case class InvalidCsrfToken()                          extends Oauth2Error("Wrong csrf token")
   case class InvalidProfileDataMissingKey(key: String)   extends Oauth2Error(s"Invalid profile data, missing key: $key")
-  case class InvalidProfileDataNotJsonObject()           extends Oauth2Error("Invalid profile data, is not a JSON object")
+  case class InvalidProfileDataNotJsonObject() extends Oauth2Error("Invalid profile data, is not a JSON object")
 
   sealed abstract class JwtError(val message: String) extends AppError
   case class InvalidJwt()                             extends JwtError("Invalid JWT")

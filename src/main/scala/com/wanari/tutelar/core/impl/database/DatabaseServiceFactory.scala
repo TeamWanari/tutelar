@@ -19,7 +19,7 @@ object DatabaseServiceFactory {
       case DatabaseConfig.MEMORY   => new MemoryDatabaseService[Future]
       case DatabaseConfig.POSTGRES => new PostgresDatabaseService
       case DatabaseConfig.MONGO    => new MongoDatabaseService
-      case _                       => throw WrongConfig(s"Unsupported database type: ${config.getDatabaseConfig.`type`}")
+      case _ => throw WrongConfig(s"Unsupported database type: ${config.getDatabaseConfig.`type`}")
     }
   }
 

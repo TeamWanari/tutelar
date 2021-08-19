@@ -3,8 +3,8 @@ import org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings
 lazy val ver = version := "1.0.0-SNAPSHOT"
 
 lazy val commonSettings = Seq(
-  scalaVersion := "2.13.5",
-  organization := "com.wanari",
+  scalaVersion      := "2.13.5",
+  organization      := "com.wanari",
   scalafmtOnCompile := true,
   ver
 )
@@ -19,8 +19,8 @@ lazy val remoteRepo = sys.env
   )
 lazy val docs = (project in file("docs"))
   .settings(
-    name := "paradox-docs",
-    paradoxTheme := Some(builtinParadoxTheme("generic")),
+    name                       := "paradox-docs",
+    paradoxTheme               := Some(builtinParadoxTheme("generic")),
     sourceDirectory in Paradox := sourceDirectory.value / "main" / "paradox",
     scmInfo := Some(
       ScmInfo(url("https://github.com/TeamWanari/tutelar"), "scm:git:git@github.com:TeamWanari/tutelar.git")

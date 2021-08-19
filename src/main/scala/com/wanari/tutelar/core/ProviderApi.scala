@@ -27,8 +27,8 @@ trait ProviderApi extends Api {
   def completeLoginFlowWithJson(token: ErrorOr[Future, TokenData]): Route = {
     onComplete(token.value) {
       case Success(Right(t)) => complete(t)
-      case Success(Left(_))  => complete((StatusCodes.Unauthorized, ErrorData(ProviderApi.Errors.AUTHENTICATION_FAILED)))
-      case Failure(_)        => complete((StatusCodes.Unauthorized, ErrorData(ProviderApi.Errors.AUTHENTICATION_FAILED)))
+      case Success(Left(_)) => complete((StatusCodes.Unauthorized, ErrorData(ProviderApi.Errors.AUTHENTICATION_FAILED)))
+      case Failure(_)       => complete((StatusCodes.Unauthorized, ErrorData(ProviderApi.Errors.AUTHENTICATION_FAILED)))
     }
   }
 

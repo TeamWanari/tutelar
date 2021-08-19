@@ -215,8 +215,8 @@ object OTP {
       issuer: Option[String],
       params: Map[String, String]
   ): String = {
-    val label            = issuer.map(i => s"$i:$account").getOrElse(s"$account")
-    val parameters       = params + ("secret" -> otpkey.toBase32) ++ issuer.map(i => Set("issuer" -> i)).getOrElse(Set())
+    val label      = issuer.map(i => s"$i:$account").getOrElse(s"$account")
+    val parameters = params + ("secret" -> otpkey.toBase32) ++ issuer.map(i => Set("issuer" -> i)).getOrElse(Set())
     val parametersString = parameters.map(p => p._1 + "=" + p._2).mkString("&")
     s"otpauth://$protocol/$label?$parametersString"
   }

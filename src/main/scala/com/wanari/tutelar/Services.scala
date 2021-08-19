@@ -72,9 +72,9 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, over
   implicit lazy val databaseService: DatabaseService[Future]       = DatabaseServiceFactory.create()
   implicit lazy val httpWrapper: HttpWrapper[Future]               = new AkkaHttpWrapper()
   implicit lazy val csrfService: CsrfService[Future]               = new CsrfServiceNotChecked[Future]
-  implicit lazy val facebookService: FacebookService[Future]       = new FacebookService[Future](configService.facebookConfig)
-  implicit lazy val githubService: GithubService[Future]           = new GithubService[Future](configService.githubConfig)
-  implicit lazy val googleService: GoogleService[Future]           = new GoogleService[Future](configService.googleConfig)
+  implicit lazy val facebookService: FacebookService[Future] = new FacebookService[Future](configService.facebookConfig)
+  implicit lazy val githubService: GithubService[Future]     = new GithubService[Future](configService.githubConfig)
+  implicit lazy val googleService: GoogleService[Future]     = new GoogleService[Future](configService.googleConfig)
   implicit lazy val microsoftService: MicrosoftService[Future] =
     new MicrosoftService[Future](configService.microsoftConfig)
   implicit lazy val idGenerator: IdGenerator[Future]                = new IdGeneratorImpl[Future]
