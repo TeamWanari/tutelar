@@ -3,8 +3,8 @@ import org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings
 lazy val ver = version := "1.0.0-SNAPSHOT"
 
 lazy val commonSettings = Seq(
-  scalaVersion := "2.13.6",
-  organization := "com.wanari",
+  scalaVersion      := "2.13.5",
+  organization      := "com.wanari",
   scalafmtOnCompile := true,
   ver
 )
@@ -19,8 +19,8 @@ lazy val remoteRepo = sys.env
   )
 lazy val docs = (project in file("docs"))
   .settings(
-    name := "paradox-docs",
-    paradoxTheme := Some(builtinParadoxTheme("generic")),
+    name                       := "paradox-docs",
+    paradoxTheme               := Some(builtinParadoxTheme("generic")),
     sourceDirectory in Paradox := sourceDirectory.value / "main" / "paradox",
     scmInfo := Some(
       ScmInfo(url("https://github.com/TeamWanari/tutelar"), "scm:git:git@github.com:TeamWanari/tutelar.git")
@@ -54,34 +54,34 @@ lazy val root = (project in file("."))
     libraryDependencies ++= {
       Seq(
         "org.typelevel"        %% "cats-core"                  % "2.6.1",
-        "com.typesafe.akka"    %% "akka-http"                  % "10.2.4",
-        "com.typesafe.akka"    %% "akka-http-spray-json"       % "10.2.4",
-        "com.typesafe.akka"    %% "akka-http-testkit"          % "10.2.4"  % "it,test",
-        "com.typesafe.akka"    %% "akka-actor"                 % "2.6.14",
-        "com.typesafe.akka"    %% "akka-stream"                % "2.6.14",
-        "com.typesafe.akka"    %% "akka-slf4j"                 % "2.6.14",
-        "com.typesafe.akka"    %% "akka-testkit"               % "2.6.14"  % "it,test",
-        "ch.qos.logback"        % "logback-classic"            % "1.2.3",
+        "com.typesafe.akka"    %% "akka-http"                  % "10.2.6",
+        "com.typesafe.akka"    %% "akka-http-spray-json"       % "10.2.6",
+        "com.typesafe.akka"    %% "akka-http-testkit"          % "10.2.6"  % "it,test",
+        "com.typesafe.akka"    %% "akka-actor"                 % "2.6.15",
+        "com.typesafe.akka"    %% "akka-stream"                % "2.6.15",
+        "com.typesafe.akka"    %% "akka-slf4j"                 % "2.6.15",
+        "com.typesafe.akka"    %% "akka-testkit"               % "2.6.15"  % "it,test",
+        "ch.qos.logback"        % "logback-classic"            % "1.2.5",
         "net.logstash.logback"  % "logstash-logback-encoder"   % "6.6",
-        "org.slf4j"             % "jul-to-slf4j"               % "1.7.30",
+        "org.slf4j"             % "jul-to-slf4j"               % "1.7.32",
         "com.typesafe.slick"   %% "slick"                      % "3.3.3",
         "com.typesafe.slick"   %% "slick-hikaricp"             % "3.3.3",
-        "org.postgresql"        % "postgresql"                 % "42.2.20",
-        "com.github.jwt-scala" %% "jwt-core"                   % "7.1.4",
-        "com.github.jwt-scala" %% "jwt-spray-json"             % "7.1.4",
+        "org.postgresql"        % "postgresql"                 % "42.2.23",
+        "com.github.jwt-scala" %% "jwt-core"                   % "9.0.0",
+        "com.github.jwt-scala" %% "jwt-spray-json"             % "9.0.0",
         "org.mindrot"           % "jbcrypt"                    % "0.4",
         "commons-codec"         % "commons-codec"              % "1.15",
-        "ch.megard"            %% "akka-http-cors"             % "1.1.1",
+        "ch.megard"            %% "akka-http-cors"             % "1.1.2",
         "io.opentracing"        % "opentracing-api"            % "0.33.0",
         "io.opentracing"        % "opentracing-util"           % "0.33.0",
         "io.opentracing"        % "opentracing-noop"           % "0.33.0",
         "io.jaegertracing"      % "jaeger-client"              % "1.6.0",
-        "org.reactivemongo"    %% "reactivemongo"              % "1.0.4",
-        "org.reactivemongo"    %% "reactivemongo-bson-monocle" % "1.0.4",
-        "com.lightbend.akka"   %% "akka-stream-alpakka-amqp"   % "3.0.0",
-        "org.bouncycastle"      % "bcprov-jdk15on"             % "1.68",
-        "com.emarsys"          %% "escher-akka-http"           % "1.3.5",
-        "org.codehaus.janino"   % "janino"                     % "3.1.4",
+        "org.reactivemongo"    %% "reactivemongo"              % "1.0.6",
+        "org.reactivemongo"    %% "reactivemongo-bson-monocle" % "1.0.6",
+        "com.lightbend.akka"   %% "akka-stream-alpakka-amqp"   % "3.0.3",
+        "org.bouncycastle"      % "bcprov-jdk15on"             % "1.69",
+        "com.emarsys"          %% "escher-akka-http"           % "1.3.8",
+        "org.codehaus.janino"   % "janino"                     % "3.1.6",
         "org.apache.commons"    % "commons-email"              % "1.5",
         "org.scalatest"        %% "scalatest"                  % "3.2.9"   % "it,test",
         "org.mockito"          %% "mockito-scala"              % "1.16.37" % "it,test"

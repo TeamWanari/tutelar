@@ -76,7 +76,7 @@ class TotpServiceImpl[F[_]: MonadError[*[_], Throwable]](implicit
     for {
       savedData <- authService.findCustomData(authType, username).toRight(UserNotFound())
       _         <- checkPassword(savedData, password, config.window)
-      token     <- authService.authenticatedWith(authType, username, savedData, data.getOrElse(JsObject()), refreshToken)
+      token <- authService.authenticatedWith(authType, username, savedData, data.getOrElse(JsObject()), refreshToken)
     } yield token
   }
 

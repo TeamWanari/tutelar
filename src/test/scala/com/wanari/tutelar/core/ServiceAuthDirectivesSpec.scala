@@ -49,7 +49,7 @@ class ServiceAuthDirectivesSpec extends TestBase with ScalatestRouteTest with Sc
   trait EscherTestScope extends ServiceAuthDirectives {
     implicit val ec: ExecutionContext                       = implicitly
     val authConfig: ServiceAuthDirectives.ServiceAuthConfig = EscherAuthConfig(List("test-service"))
-    lazy val escherConfig: EscherConfig                     = new EscherConfig(ConfigFactory.load().getConfig("escher-test"))
+    lazy val escherConfig: EscherConfig = new EscherConfig(ConfigFactory.load().getConfig("escher-test"))
 
     def signed(r: HttpRequest, intervalMillis: Int = 15): HttpRequest = {
       signRequest("test-service")(executor, materializer)(r)
