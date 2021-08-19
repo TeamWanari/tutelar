@@ -62,7 +62,7 @@ trait OAuth2Service[F[_]] {
       response      <- EitherT.right(getToken(oAuth2config.clientId, oAuth2config.clientSecret, selfRedirectUri))
       tokenResponse <- EitherT.right(http.unmarshalEntityTo[TokenResponseHelper](response))
       profile       <- EitherT.right(getProfile(tokenResponse))
-      token         <- authService.authenticatedWith(TYPE, profile.id, tokenResponse.access_token, profile.data, refreshToken)
+      token <- authService.authenticatedWith(TYPE, profile.id, tokenResponse.access_token, profile.data, refreshToken)
     } yield token
   }
 

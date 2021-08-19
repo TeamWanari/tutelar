@@ -122,7 +122,7 @@ object JwtServiceSpec {
                          |g5bg7jJ4icreDHPNf1aQOCZzKZbezjO+Zja/oVS+A37OpjhjL/V1
                          |-----END RSA PRIVATE KEY-----
                          |""".stripMargin
-  val publicRSAKey1  = """-----BEGIN PUBLIC KEY-----
+  val publicRSAKey1 = """-----BEGIN PUBLIC KEY-----
                          |MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmQvOH62P7yhmckw1csTf
                          |17JQPtKSklHkAiNG6Gxdvf7ZKMzhbvnOzymYJigaGL6TLblR5v1C8nUchQhA1auC
                          |Z94xi7DIvl/XCJPjbyohCgoBOLDhg1R4V/AtPepEi/gaOvQKEKZX5HV08PIspPTW
@@ -161,7 +161,7 @@ object JwtServiceSpec {
                          |PFM4Dl9nfirsZZzsmLRGXKxn
                          |-----END RSA PRIVATE KEY-----
                          |""".stripMargin
-  val publicRSAKey2  = """-----BEGIN PUBLIC KEY-----
+  val publicRSAKey2 = """-----BEGIN PUBLIC KEY-----
                          |MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApaWVh4ylLasmj5nQUlzL
                          |CWKnWf8GvxPRJERGv83EMUgLRQRoEa/D21e+cZTipzS9GNrC0+vwBiwZSOsHpHFe
                          |FXOUq9MmfSof2TRuvC8qNDMQ796W9PHJJsQLioc+DoCNGsfyLlsasi8U4ewnYAsn
@@ -181,7 +181,7 @@ object JwtServiceSpec {
                         |u3Gdhy1jh3trLQ==
                         |-----END EC PRIVATE KEY-----
                         |""".stripMargin
-  val publicECKey1  = """-----BEGIN PUBLIC KEY-----
+  val publicECKey1 = """-----BEGIN PUBLIC KEY-----
                         |MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQBSz36nGK9vqoCYOj+1UnXM/YWiB4y
                         |PI/mpeJ2lnsw+BZcX7rk7f3YgphLvrjLeDWGhZfzDVp51xWtIp+gceysHyYAQTYB
                         |g/YLEEGPTjIwzYhxXEarEk43X+bZ6Ar+qev6TXhq+mqjOfaBjJgLVgDQ4WkmffOW
@@ -197,7 +197,7 @@ object JwtServiceSpec {
                         |tYtS/BdcniSagg==
                         |-----END EC PRIVATE KEY-----
                         |""".stripMargin
-  val publicECKey2  = """-----BEGIN PUBLIC KEY-----
+  val publicECKey2 = """-----BEGIN PUBLIC KEY-----
                         |MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQBsjgiae4dxsNujyYpSDkXFTRVkMg0
                         |OolmnyNZkeZCLKb/jMz/6Zp6klftnAi75qTY+60G90ArjGmwooSfq8/cbv8BwDkW
                         |N75pZxAoHuZyUvIHfaRwOpuooTE7x7H/DJTgRn1imdJxu5sZvWN7bfxrAy1ObKLq
