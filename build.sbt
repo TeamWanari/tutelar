@@ -83,7 +83,7 @@ lazy val root = (project in file("."))
         "com.emarsys"          %% "escher-akka-http"           % "1.3.9",
         "org.codehaus.janino"   % "janino"                     % "3.1.6",
         "org.apache.commons"    % "commons-email"              % "1.5",
-        "org.scalatest"        %% "scalatest"                  % "3.2.9"   % "it,test",
+        "org.scalatest"        %% "scalatest"                  % "3.2.10"   % "it,test",
         "org.mockito"          %% "mockito-scala"              % "1.16.42" % "it,test"
       )
     }
