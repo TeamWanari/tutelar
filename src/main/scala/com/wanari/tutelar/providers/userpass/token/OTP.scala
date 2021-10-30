@@ -46,7 +46,7 @@ object OTP {
     }
   }
 
-  //period and other ts-es should be in the same magnitude (s, or ms)
+  // period and other ts-es should be in the same magnitude (s, or ms)
   case class TOTP(algorithm: OTPAlgorithm, digits: Int, period: Int, initialTimestamp: Long, otpkey: OTPKey)
       extends OTPBase {
     import Calculations._
