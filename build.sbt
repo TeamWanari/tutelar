@@ -79,7 +79,7 @@ lazy val root = (project in file("."))
         "org.reactivemongo"    %% "reactivemongo"              % "1.0.7",
         "org.reactivemongo"    %% "reactivemongo-bson-monocle" % "1.0.7",
         "com.lightbend.akka"   %% "akka-stream-alpakka-amqp"   % "3.0.4",
-        "org.bouncycastle"      % "bcprov-jdk15on"             % "1.69",
+        "org.bouncycastle"      % "bcprov-jdk15on"             % "1.70",
         "com.emarsys"          %% "escher-akka-http"           % "1.3.11",
         "org.codehaus.janino"   % "janino"                     % "3.1.6",
         "org.apache.commons"    % "commons-email"              % "1.5",
