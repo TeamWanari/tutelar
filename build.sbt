@@ -67,7 +67,7 @@ lazy val root = (project in file("."))
         "com.typesafe.slick"   %% "slick"                      % "3.3.3",
         "com.typesafe.slick"   %% "slick-hikaricp"             % "3.3.3",
         "org.postgresql"        % "postgresql"                 % "42.3.1",
-        "com.github.jwt-scala" %% "jwt-core"                   % "9.0.2",
+        "com.github.jwt-scala" %% "jwt-core"                   % "9.0.3",
         "com.github.jwt-scala" %% "jwt-spray-json"             % "9.0.2",
         "org.mindrot"           % "jbcrypt"                    % "0.4",
         "commons-codec"         % "commons-codec"              % "1.15",
