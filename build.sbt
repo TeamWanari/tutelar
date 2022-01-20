@@ -56,11 +56,11 @@ lazy val root = (project in file("."))
         "org.typelevel"        %% "cats-core"                  % "2.7.0",
         "com.typesafe.akka"    %% "akka-http"                  % "10.2.7",
         "com.typesafe.akka"    %% "akka-http-spray-json"       % "10.2.7",
-        "com.typesafe.akka"    %% "akka-http-testkit"          % "10.2.7"  % "it,test",
+        "com.typesafe.akka"    %% "akka-http-testkit"          % "10.2.7" % "it,test",
         "com.typesafe.akka"    %% "akka-actor"                 % "2.6.18",
         "com.typesafe.akka"    %% "akka-stream"                % "2.6.18",
         "com.typesafe.akka"    %% "akka-slf4j"                 % "2.6.18",
-        "com.typesafe.akka"    %% "akka-testkit"               % "2.6.18"  % "it,test",
+        "com.typesafe.akka"    %% "akka-testkit"               % "2.6.18" % "it,test",
         "ch.qos.logback"        % "logback-classic"            % "1.2.10",
         "net.logstash.logback"  % "logstash-logback-encoder"   % "7.0.1",
         "org.slf4j"             % "jul-to-slf4j"               % "1.7.33",
@@ -83,8 +83,8 @@ lazy val root = (project in file("."))
         "com.emarsys"          %% "escher-akka-http"           % "1.3.11",
         "org.codehaus.janino"   % "janino"                     % "3.1.6",
         "org.apache.commons"    % "commons-email"              % "1.5",
-        "org.scalatest"        %% "scalatest"                  % "3.2.10"  % "it,test",
-        "org.mockito"          %% "mockito-scala"              % "1.16.55" % "it,test"
+        "org.scalatest"        %% "scalatest"                  % "3.2.10" % "it,test",
+        "org.mockito"          %% "mockito-scala"              % "1.17.0" % "it,test"
       )
     }
   )
