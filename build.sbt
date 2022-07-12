@@ -53,7 +53,7 @@ lazy val root = (project in file("."))
     ),
     libraryDependencies ++= {
       Seq(
-        "org.typelevel"        %% "cats-core"                  % "2.7.0",
+        "org.typelevel"        %% "cats-core"                  % "2.8.0",
         "com.typesafe.akka"    %% "akka-http"                  % "10.2.9",
         "com.typesafe.akka"    %% "akka-http-spray-json"       % "10.2.9",
         "com.typesafe.akka"    %% "akka-http-testkit"          % "10.2.9" % "it,test",
@@ -66,7 +66,7 @@ lazy val root = (project in file("."))
         "org.slf4j"             % "jul-to-slf4j"               % "1.7.36",
         "com.typesafe.slick"   %% "slick"                      % "3.3.3",
         "com.typesafe.slick"   %% "slick-hikaricp"             % "3.3.3",
-        "org.postgresql"        % "postgresql"                 % "42.3.6",
+        "org.postgresql"        % "postgresql"                 % "42.4.0",
         "com.github.jwt-scala" %% "jwt-core"                   % "9.0.5",
         "com.github.jwt-scala" %% "jwt-spray-json"             % "9.0.2",
         "org.mindrot"           % "jbcrypt"                    % "0.4",
@@ -75,16 +75,16 @@ lazy val root = (project in file("."))
         "io.opentracing"        % "opentracing-api"            % "0.33.0",
         "io.opentracing"        % "opentracing-util"           % "0.33.0",
         "io.opentracing"        % "opentracing-noop"           % "0.33.0",
-        "io.jaegertracing"      % "jaeger-client"              % "1.8.0",
+        "io.jaegertracing"      % "jaeger-client"              % "1.8.1",
         "org.reactivemongo"    %% "reactivemongo"              % "1.0.10",
         "org.reactivemongo"    %% "reactivemongo-bson-monocle" % "1.0.10",
         "com.lightbend.akka"   %% "akka-stream-alpakka-amqp"   % "3.0.4",
         "org.bouncycastle"      % "bcprov-jdk15on"             % "1.70",
-        "com.emarsys"          %% "escher-akka-http"           % "1.3.21",
+        "com.emarsys"          %% "escher-akka-http"           % "1.3.23",
         "org.codehaus.janino"   % "janino"                     % "3.1.7",
         "org.apache.commons"    % "commons-email"              % "1.5",
         "org.scalatest"        %% "scalatest"                  % "3.2.12" % "it,test",
-        "org.mockito"          %% "mockito-scala"              % "1.17.5" % "it,test"
+        "org.mockito"          %% "mockito-scala"              % "1.17.7" % "it,test"
       )
     }
   )
