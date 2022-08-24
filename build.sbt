@@ -66,7 +66,7 @@ lazy val root = (project in file("."))
         "org.slf4j"             % "jul-to-slf4j"               % "2.0.0",
         "com.typesafe.slick"   %% "slick"                      % "3.3.3",
         "com.typesafe.slick"   %% "slick-hikaricp"             % "3.3.3",
-        "org.postgresql"        % "postgresql"                 % "42.4.2",
+        "org.postgresql"        % "postgresql"                 % "42.5.0",
         "com.github.jwt-scala" %% "jwt-core"                   % "9.1.0",
         "com.github.jwt-scala" %% "jwt-spray-json"             % "9.0.2",
         "org.mindrot"           % "jbcrypt"                    % "0.4",
