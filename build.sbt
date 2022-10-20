@@ -63,7 +63,7 @@ lazy val root = (project in file("."))
         "com.typesafe.akka"    %% "akka-testkit"               % "2.6.20"  % "it,test",
         "ch.qos.logback"        % "logback-classic"            % "1.2.11",
         "net.logstash.logback"  % "logstash-logback-encoder"   % "7.2",
-        "org.slf4j"             % "jul-to-slf4j"               % "2.0.0",
+        "org.slf4j"             % "jul-to-slf4j"               % "2.0.3",
         "com.typesafe.slick"   %% "slick"                      % "3.4.0",
         "com.typesafe.slick"   %% "slick-hikaricp"             % "3.4.0",
         "org.postgresql"        % "postgresql"                 % "42.5.0",
