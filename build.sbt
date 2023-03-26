@@ -61,12 +61,12 @@ lazy val root = (project in file("."))
         "com.typesafe.akka"    %% "akka-stream"                % "2.6.20",
         "com.typesafe.akka"    %% "akka-slf4j"                 % "2.6.20",
         "com.typesafe.akka"    %% "akka-testkit"               % "2.6.20"  % "it,test",
-        "ch.qos.logback"        % "logback-classic"            % "1.2.11",
+        "ch.qos.logback"        % "logback-classic"            % "1.2.12",
         "net.logstash.logback"  % "logstash-logback-encoder"   % "7.3",
-        "org.slf4j"             % "jul-to-slf4j"               % "2.0.6",
+        "org.slf4j"             % "jul-to-slf4j"               % "2.0.7",
         "com.typesafe.slick"   %% "slick"                      % "3.4.1",
         "com.typesafe.slick"   %% "slick-hikaricp"             % "3.4.1",
-        "org.postgresql"        % "postgresql"                 % "42.5.4",
+        "org.postgresql"        % "postgresql"                 % "42.6.0",
         "com.github.jwt-scala" %% "jwt-core"                   % "9.2.0",
         "com.github.jwt-scala" %% "jwt-spray-json"             % "9.0.2",
         "org.mindrot"           % "jbcrypt"                    % "0.4",
@@ -84,7 +84,7 @@ lazy val root = (project in file("."))
         "org.codehaus.janino"   % "janino"                     % "3.1.9",
         "org.apache.commons"    % "commons-email"              % "1.5",
         "org.scalatest"        %% "scalatest"                  % "3.2.15"  % "it,test",
-        "org.mockito"          %% "mockito-scala"              % "1.17.12" % "it,test"
+        "org.mockito"          %% "mockito-scala"              % "1.17.14" % "it,test"
       )
     }
   )
