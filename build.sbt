@@ -63,11 +63,11 @@ lazy val root = (project in file("."))
         "com.typesafe.akka"    %% "akka-testkit"               % "2.6.20"  % "it,test",
         "ch.qos.logback"        % "logback-classic"            % "1.2.12",
         "net.logstash.logback"  % "logstash-logback-encoder"   % "7.4",
-        "org.slf4j"             % "jul-to-slf4j"               % "2.0.7",
+        "org.slf4j"             % "jul-to-slf4j"               % "2.0.9",
         "com.typesafe.slick"   %% "slick"                      % "3.4.1",
         "com.typesafe.slick"   %% "slick-hikaricp"             % "3.4.1",
         "org.postgresql"        % "postgresql"                 % "42.6.0",
-        "com.github.jwt-scala" %% "jwt-core"                   % "9.4.3",
+        "com.github.jwt-scala" %% "jwt-core"                   % "9.4.4",
         "com.github.jwt-scala" %% "jwt-spray-json"             % "9.0.2",
         "org.mindrot"           % "jbcrypt"                    % "0.4",
         "commons-codec"         % "commons-codec"              % "1.16.0",
@@ -84,7 +84,7 @@ lazy val root = (project in file("."))
         "org.codehaus.janino"   % "janino"                     % "3.1.10",
         "org.apache.commons"    % "commons-email"              % "1.5",
         "org.scalatest"        %% "scalatest"                  % "3.2.16"  % "it,test",
-        "org.mockito"          %% "mockito-scala"              % "1.17.14" % "it,test"
+        "org.mockito"          %% "mockito-scala"              % "1.17.22" % "it,test"
       )
     }
   )
