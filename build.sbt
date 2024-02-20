@@ -70,7 +70,7 @@ lazy val root = (project in file("."))
         "com.github.jwt-scala" %% "jwt-core"                   % "9.4.6",
         "com.github.jwt-scala" %% "jwt-spray-json"             % "9.0.2",
         "org.mindrot"           % "jbcrypt"                    % "0.4",
-        "commons-codec"         % "commons-codec"              % "1.16.0",
+        "commons-codec"         % "commons-codec"              % "1.16.1",
         "ch.megard"            %% "akka-http-cors"             % "1.2.0",
         "io.opentracing"        % "opentracing-api"            % "0.33.0",
         "io.opentracing"        % "opentracing-util"           % "0.33.0",
